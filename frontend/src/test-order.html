@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Order Creation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .result {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>🛋 Test Order Creation</h1>
+    
+    <div>
+        <button class="btn" onclick="testConnection()">Test API Connection</button>
+        <button class="btn" onclick="testAuth()">Test Authentication</button>
+        <button class="btn" onclick="testCart()">Test Cart Items</button>
+        <button class="btn" onclick="createTestOrder()">Create Test Order</button>
+    </div>
+    
+    <div id="results"></div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api';
+        let token = localStorage.getItem('token');
+
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}:</strong><br>${message}`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+
+        async function testConnection() {
+            try {
+                log('Testing API connection...');
+                const response = await fetch(`${API_BASE}/test-order`);
+                const data = await response.json();
+                log(`✅ API Connection Success: ${data.message}`, 'success');
+            } catch (error) {
+                log(`❌ API Connection Failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAuth() {
+            try {
+                log('Testing authentication...');
+                if (!token) {
+                    log('❌ No token found. Please login first.', 'error');
+                    return;
+                }
+                
+                const response = await fetch(`${API_BASE}/user`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const user = await response.json();
+                    log(`✅ Authentication Success: Welcome ${user.name || user.email}`, 'success');
+                } else {
+                    log(`❌ Authentication Failed: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Auth Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCart() {
+            try {
+                log('Testing cart items...');
+                if (!token) {
+                    log('❌ No token found. Please login first.', 'error');
+                    return;
+                }
+                
+                const response = await fetch(`${API_BASE}/cart`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const cart = await response.json();
+                    log(`✅ Cart Items: ${cart.length} items found`, 'success');
+                    if (cart.length > 0) {
+                        cart.forEach((item, index) => {
+                            log(`  Item ${index + 1}: ${item.product_name} - Qty: ${item.quantity} - $${item.price}`, 'info');
+                        });
+                    }
+                } else {
+                    log(`❌ Cart Error: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Cart Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function createTestOrder() {
+            try {
+                log('Creating test order...');
+                if (!token) {
+                    log('❌ No token found. Please login first.', 'error');
+                    return;
+                }
+                
+                const orderData = {
+                    shipping_address: {
+                        address: "123 Test Street",
+                        city: "Test City",
+                        state: "Test State",
+                        postal_code: "12345",
+                        country: "Test Country"
+                    },
+                    billing_address: {
+                        address: "123 Test Street",
+                        city: "Test City",
+                        state: "Test State",
+                        postal_code: "12345",
+                        country: "Test Country"
+                    },
+                    payment_method: "credit_card",
+                    notes: "Test order created from test page"
+                };
+                
+                log('Sending order data...');
+                log(JSON.stringify(orderData, null, 2), 'info');
+                
+                const response = await fetch(`${API_BASE}/orders`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(orderData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log(`✅ Order Created Successfully!`, 'success');
+                    log(`Order ID: ${data.id}`, 'success');
+                    log(`Order Number: ${data.order_number}`, 'success');
+                    log(`Total Amount: $${data.total_amount}`, 'success');
+                    log(`Status: ${data.status}`, 'success');
+                } else {
+                    log(`❌ Order Creation Failed: ${response.status}`, 'error');
+                    log(`Error: ${data.message || 'Unknown error'}`, 'error');
+                    if (data.errors) {
+                        Object.entries(data.errors).forEach(([field, errors]) => {
+                            log(`${field}: ${errors.join(', ')}`, 'error');
+                        });
+                    }
+                }
+            } catch (error) {
+                log(`❌ Order Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-test connection on load
+        window.onload = () => {
+            log('🚀 Test Order Creation Tool Loaded');
+            log('Current token: ' + (token ? 'Found' : 'Not found'));
+        };
+    </script>
+</body>
+</html>
