@@ -1,0 +1,48 @@
+{
+  "css.validate": false,
+  "css.lint.unknownAtRules": "ignore",
+  "css.lint.unknownProperties": "ignore",
+  "css.lint.validProperties": [],
+  "css.lint.ieHack": "ignore",
+  "css.lint.vendorPrefix": "ignore",
+  "css.lint.compatibleVendorPrefixes": "ignore",
+  "css.lint.duplicateProperties": "ignore",
+  "css.lint.emptyRules": "ignore",
+  "css.lint.selectorFormat": "ignore",
+  "css.lint.zeroUnits": "ignore",
+  "css.lint.universalSelector": "ignore",
+  "css.lint.importStatement": "ignore",
+  "css.lint.fontFaceProperties": "ignore",
+  "css.lint.hexColorLength": "ignore",
+  "css.lint.argumentsInColorFunction": "ignore",
+  "css.lint.unknownVendorSpecificProperties": "ignore",
+  "css.lint.propertyIgnoredDueToDisplay": "ignore",
+  "css.lint.important": "ignore",
+  "css.lint.float": "ignore",
+  "css.lint.idSelector": "ignore",
+  "css.lint.unqualifiedAttributes": "ignore",
+  "tailwindCSS.includeLanguages": {
+    "css": "css",
+    "html": "html",
+    "javascript": "javascript",
+    "javascriptreact": "javascriptreact",
+    "typescript": "typescript",
+    "typescriptreact": "typescriptreact"
+  },
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+  ],
+  "tailwindCSS.experimental.configFile": "./tailwind.config.js",
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact",
+    "typescript": "typescriptreact"
+  },
+  "stylelint.enable": false,
+  "css.codeActionsOnSave": {
+    "removeUnknowns": false
+  }
+}
