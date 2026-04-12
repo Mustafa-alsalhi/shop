@@ -1,0 +1,28 @@
+[runtime]
+version = "V2"
+
+[build]
+builder = "RAILPACK"
+
+[[build.buildpacks]]
+uri = "heroku/php"
+
+[deploy]
+numReplicas = 1
+startCommand = "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT"
+sleepApplication = false
+useLegacyStacker = false
+ipv6EgressEnabled = false
+
+[deploy.healthcheck]
+path = "/api/health"
+timeout = 100
+interval = 15
+
+[deploy.restartPolicy]
+type = "ON_FAILURE"
+maxRetries = 10
+
+[[deploy.regions]]
+name = "europe-west4-drams3a"
+numReplicas = 1
