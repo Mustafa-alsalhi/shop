@@ -5,11 +5,13 @@ import Footer from './Footer'
 import InfoCards from './InfoCards'
 import SearchOverlay from './SearchOverlay'
 import CartSidebar from './CartSidebar'
+import MobileMenu from './MobileMenu'
 import Notifications from '../UI/Notifications'
 import { useSelector, useDispatch } from 'react-redux'
 import {
   selectIsSearchOpen,
   selectCartIsOpen,
+  selectIsMobileMenuOpen,
   closeSearch,
 } from '../../store/slices/uiSlice'
 
@@ -17,6 +19,7 @@ const Layout = () => {
   const dispatch = useDispatch()
   const isSearchOpen = useSelector(selectIsSearchOpen)
   const isCartOpen = useSelector(selectCartIsOpen)
+  const isMobileMenuOpen = useSelector(selectIsMobileMenuOpen)
 
   // Close overlays when clicking outside
   React.useEffect(() => {
@@ -41,8 +44,11 @@ const Layout = () => {
       {/* Cart Sidebar */}
       <CartSidebar isOpen={isCartOpen} />
 
+      {/* Mobile Menu */}
+      <MobileMenu isOpen={isMobileMenuOpen} />
+
       {/* Main Content */}
-      <main className="flex-grow">
+      <main className="flex-1 pt-20 sm:pt-24">
         <Outlet />
       </main>
 

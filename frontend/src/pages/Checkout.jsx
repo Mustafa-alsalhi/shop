@@ -146,24 +146,24 @@ const Checkout = () => {
     const newErrors = {}
 
     // Personal Information
-    if (!formData.first_name.trim()) newErrors.first_name = 'First name is required'
-    if (!formData.last_name.trim()) newErrors.last_name = 'Last name is required'
-    if (!formData.email.trim()) newErrors.email = 'Email is required'
-    if (!formData.phone.trim()) newErrors.phone = 'Phone number is required'
+    if (!formData.first_name.trim()) newErrors.first_name = 'الاسم الأول مطلوب'
+    if (!formData.last_name.trim()) newErrors.last_name = 'الاسم الأخير مطلوب'
+    if (!formData.email.trim()) newErrors.email = 'البريد الإلكتروني مطلوب'
+    if (!formData.phone.trim()) newErrors.phone = 'رقم الهاتف مطلوب'
 
     // Shipping Information
-    if (!formData.address.trim()) newErrors.address = 'Address is required'
-    if (!formData.city.trim()) newErrors.city = 'City is required'
-    if (!formData.state.trim()) newErrors.state = 'State is required'
-    if (!formData.postal_code.trim()) newErrors.postal_code = 'Postal code is required'
-    if (!formData.country.trim()) newErrors.country = 'Country is required'
+    if (!formData.address.trim()) newErrors.address = 'العنوان مطلوب'
+    if (!formData.city.trim()) newErrors.city = 'المدينة مطلوبة'
+    if (!formData.state.trim()) newErrors.state = 'الولاية مطلوبة'
+    if (!formData.postal_code.trim()) newErrors.postal_code = 'الرمز البريدي مطلوب'
+    if (!formData.country.trim()) newErrors.country = 'البلد مطلوب'
 
     // Payment Information
     if (formData.payment_method === 'credit_card') {
-      if (!formData.card_number.trim()) newErrors.card_number = 'Card number is required'
-      if (!formData.card_name.trim()) newErrors.card_name = 'Name on card is required'
-      if (!formData.card_expiry.trim()) newErrors.card_expiry = 'Expiry date is required'
-      if (!formData.card_cvv.trim()) newErrors.card_cvv = 'CVV is required'
+      if (!formData.card_number.trim()) newErrors.card_number = 'رقم البطاقة مطلوب'
+      if (!formData.card_name.trim()) newErrors.card_name = 'الاسم على البطاقة مطلوب'
+      if (!formData.card_expiry.trim()) newErrors.card_expiry = 'تاريخ الانتهاء مطلوب'
+      if (!formData.card_cvv.trim()) newErrors.card_cvv = 'رمز CVV مطلوب'
     }
 
     setErrors(newErrors)
@@ -250,20 +250,20 @@ const Checkout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gray-50 py-12" dir="rtl">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white shadow-lg rounded-lg">
           <div className="px-4 py-6 sm:p-6 lg:p-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-8">الدفع</h1>
 
             <form onSubmit={handleSubmit} className="space-y-8">
               {/* Personal Information */}
               <div className="bg-gray-50 p-6 rounded-lg">
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">Personal Information</h2>
+                <h2 className="text-xl font-semibold text-gray-900 mb-6">المعلومات الشخصية</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      First Name
+                      الاسم الأول
                     </label>
                     <input
                       type="text"
@@ -273,7 +273,7 @@ const Checkout = () => {
                       className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
                         errors.first_name ? 'border-red-500' : 'border-gray-300'
                       }`}
-                      placeholder="John"
+                      placeholder="محمد"
                     />
                     {errors.first_name && (
                       <p className="mt-1 text-sm text-red-600">{errors.first_name}</p>
@@ -282,7 +282,7 @@ const Checkout = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Last Name
+                      الاسم الأخير
                     </label>
                     <input
                       type="text"
@@ -292,7 +292,7 @@ const Checkout = () => {
                       className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
                         errors.last_name ? 'border-red-500' : 'border-gray-300'
                       }`}
-                      placeholder="Doe"
+                      placeholder="أحمد"
                     />
                     {errors.last_name && (
                       <p className="mt-1 text-sm text-red-600">{errors.last_name}</p>
@@ -301,7 +301,7 @@ const Checkout = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email Address
+                      عنوان البريد الإلكتروني
                     </label>
                     <input
                       type="email"
@@ -320,7 +320,7 @@ const Checkout = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Phone Number
+                      رقم الهاتف
                     </label>
                     <input
                       type="tel"
@@ -343,12 +343,12 @@ const Checkout = () => {
               <div className="bg-gray-50 p-6 rounded-lg">
                 <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
                   <MapPinIcon className="h-5 w-5 mr-2" />
-                  Shipping Information
+                  معلومات الشحن
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Street Address
+                      عنوان الشارع
                     </label>
                     <input
                       type="text"
@@ -358,7 +358,7 @@ const Checkout = () => {
                       className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
                         errors.address ? 'border-red-500' : 'border-gray-300'
                       }`}
-                      placeholder="123 Main St"
+                      placeholder="123 الشارع الرئيسي"
                     />
                     {errors.address && (
                       <p className="mt-1 text-sm text-red-600">{errors.address}</p>
@@ -367,7 +367,7 @@ const Checkout = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      City
+                      المدينة
                     </label>
                     <input
                       type="text"
@@ -377,7 +377,7 @@ const Checkout = () => {
                       className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
                         errors.city ? 'border-red-500' : 'border-gray-300'
                       }`}
-                      placeholder="New York"
+                      placeholder="الرياض"
                     />
                     {errors.city && (
                       <p className="mt-1 text-sm text-red-600">{errors.city}</p>
@@ -386,7 +386,7 @@ const Checkout = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      State
+                      الولاية
                     </label>
                     <input
                       type="text"
@@ -396,7 +396,7 @@ const Checkout = () => {
                       className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
                         errors.state ? 'border-red-500' : 'border-gray-300'
                       }`}
-                      placeholder="NY"
+                      placeholder="الرياض"
                     />
                     {errors.state && (
                       <p className="mt-1 text-sm text-red-600">{errors.state}</p>
@@ -405,7 +405,7 @@ const Checkout = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Postal Code
+                      الرمز البريدي
                     </label>
                     <input
                       type="text"
@@ -424,7 +424,7 @@ const Checkout = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Country
+                      البلد
                     </label>
                     <input
                       type="text"
@@ -434,7 +434,7 @@ const Checkout = () => {
                       className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
                         errors.country ? 'border-red-500' : 'border-gray-300'
                       }`}
-                      placeholder="United States"
+                      placeholder="المملكة العربية السعودية"
                     />
                     {errors.country && (
                       <p className="mt-1 text-sm text-red-600">{errors.country}</p>
@@ -447,12 +447,12 @@ const Checkout = () => {
               <div className="bg-gray-50 p-6 rounded-lg">
                 <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
                   <CreditCardIcon className="h-5 w-5 mr-2" />
-                  Payment Information
+                  معلومات الدفع
                 </h2>
                 <div className="space-y-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Payment Method
+                      طريقة الدفع
                     </label>
                     <select
                       name="payment_method"
@@ -460,10 +460,10 @@ const Checkout = () => {
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                     >
-                      <option value="credit_card">Credit Card</option>
-                      <option value="debit_card">Debit Card</option>
-                      <option value="paypal">PayPal</option>
-                      <option value="cash_on_delivery">Cash on Delivery</option>
+                      <option value="credit_card">بطاقة الائتمان</option>
+                      <option value="debit_card">بطاقة الخصم</option>
+                      <option value="paypal">باي بال</option>
+                      <option value="cash_on_delivery">الدفع عند الاستلام</option>
                     </select>
                   </div>
 
@@ -471,7 +471,7 @@ const Checkout = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Card Number
+                          رقم البطاقة
                         </label>
                         <input
                           type="text"
@@ -490,7 +490,7 @@ const Checkout = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Name on Card
+                          الاسم على البطاقة
                         </label>
                         <input
                           type="text"
@@ -500,7 +500,7 @@ const Checkout = () => {
                           className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
                             errors.card_name ? 'border-red-500' : 'border-gray-300'
                           }`}
-                          placeholder="John Doe"
+                          placeholder="محمد أحمد"
                         />
                         {errors.card_name && (
                           <p className="mt-1 text-sm text-red-600">{errors.card_name}</p>
@@ -509,7 +509,7 @@ const Checkout = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Expiry Date
+                          تاريخ الانتهاء
                         </label>
                         <input
                           type="text"
@@ -528,7 +528,7 @@ const Checkout = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          CVV
+                          رمز CVV
                         </label>
                         <input
                           type="text"
@@ -553,7 +553,7 @@ const Checkout = () => {
               <div className="bg-gray-50 p-6 rounded-lg">
                 <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
                   <ShoppingCartIcon className="h-5 w-5 mr-2" />
-                  Order Summary
+                  ملخص الطلب
                 </h2>
                 <div className="space-y-4">
                   {cartItems.map((item, index) => (
@@ -570,8 +570,8 @@ const Checkout = () => {
                         />
                         <div>
                           <h4 className="font-medium text-gray-900">{item.product_name}</h4>
-                          <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
-                          <p className="text-sm text-gray-600">Price: ${parseFloat(item.price || 0).toFixed(2)}</p>
+                          <p className="text-sm text-gray-600">الكمية: {item.quantity}</p>
+                          <p className="text-sm text-gray-600">السعر: ${parseFloat(item.price || 0).toFixed(2)}</p>
                         </div>
                       </div>
                       <div className="text-right">
@@ -585,7 +585,7 @@ const Checkout = () => {
 
                 <div className="mt-6 pt-6 border-t border-gray-200">
                   <div className="flex justify-between text-lg font-bold">
-                    <span>Total Amount:</span>
+                    <span>المبلغ الإجمالي:</span>
                     <span className="text-green-600">${cartTotal.toFixed(2)}</span>
                   </div>
                 </div>
@@ -594,7 +594,7 @@ const Checkout = () => {
               {/* Order Notes */}
               <div className="bg-gray-50 p-6 rounded-lg">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Order Notes (Optional)
+                  ملاحظات الطلب (اختياري)
                 </label>
                 <textarea
                   name="order_notes"
@@ -602,7 +602,7 @@ const Checkout = () => {
                   onChange={handleInputChange}
                   rows={4}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  placeholder="Special instructions for your order..."
+                  placeholder="تعليمات خاصة لطلبك..."
                 />
               </div>
 
@@ -615,15 +615,15 @@ const Checkout = () => {
                 {isProcessing ? (
                   <div className="flex items-center justify-center">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Processing...
+                    جاري المعالجة...
                   </div>
                 ) : (
-                  'Place Order'
+                  'تأكيد الطلب'
                 )}
               </button>
 
               <p className="text-xs text-gray-500 text-center mt-4">
-                By placing this order, you agree to our Terms of Service and Privacy Policy.
+                بالضغط على هذا الطلب، أنت توافق على شروط الخدمة وسياسة الخصوصية.
               </p>
             </form>
           </div>
@@ -636,7 +636,7 @@ const Checkout = () => {
           <div className="bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-green-600">Order Placed Successfully!</h2>
+                <h2 className="text-2xl font-bold text-green-600">تم تقديم الطلب بنجاح!</h2>
                 <button
                   onClick={() => {
                     setShowSuccessModal(false)
@@ -651,17 +651,17 @@ const Checkout = () => {
               <div className="mb-6">
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                   <h3 className="text-lg font-semibold text-green-800 mb-2">
-                    Order #{createdOrder.id} - {createdOrder.order_number}
+                    طلب #{createdOrder.id} - {createdOrder.order_number}
                   </h3>
                   <p className="text-green-700">
-                    Thank you for your order! Your order has been successfully placed and is being processed.
+                    شكراً لطلبك! تم تقديم طلبك بنجاح وهو قيد المعالجة.
                   </p>
                 </div>
               </div>
 
               {/* Order Items with Images */}
               <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-4">Order Summary</h3>
+                <h3 className="text-lg font-semibold mb-4">ملخص الطلب</h3>
                 <div className="bg-gray-50 rounded-lg overflow-hidden">
                   {createdOrder.order_items?.map((item, index) => (
                     <div key={index} className="flex items-center p-4 border-b border-gray-200 last:border-b-0">
@@ -676,8 +676,8 @@ const Checkout = () => {
                       />
                       <div className="flex-1">
                         <h4 className="font-medium text-gray-900">{item.product_name}</h4>
-                        <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
-                        <p className="text-sm text-gray-600">Price: ${parseFloat(item.price || 0).toFixed(2)}</p>
+                        <p className="text-sm text-gray-600">الكمية: {item.quantity}</p>
+                        <p className="text-sm text-gray-600">السعر: ${parseFloat(item.price || 0).toFixed(2)}</p>
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-gray-900">
@@ -693,7 +693,7 @@ const Checkout = () => {
               <div className="mb-6">
                 <div className="bg-gray-100 rounded-lg p-4">
                   <div className="flex justify-between text-lg font-bold">
-                    <span>Total Amount:</span>
+                    <span>المبلغ الإجمالي:</span>
                     <span className="text-green-600">
                       ${parseFloat(createdOrder.total_amount || 0).toFixed(2)}
                     </span>
@@ -710,7 +710,7 @@ const Checkout = () => {
                   }}
                   className="px-6 py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                 >
-                  View All Orders
+                  عرض جميع الطلبات
                 </button>
                 <button
                   onClick={() => {
@@ -719,7 +719,7 @@ const Checkout = () => {
                   }}
                   className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700"
                 >
-                  Continue Shopping
+                  متابعة التسوق
                 </button>
               </div>
             </div>

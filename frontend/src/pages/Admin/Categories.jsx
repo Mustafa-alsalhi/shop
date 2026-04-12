@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../../services/api'
-import { PhotoIcon } from '@heroicons/react/24/outline'
+import { PhotoIcon, PlusIcon, PencilIcon, TrashIcon, FolderIcon } from '@heroicons/react/24/outline'
 
 const AdminCategories = () => {
   const navigate = useNavigate()
@@ -23,7 +23,7 @@ const AdminCategories = () => {
       setCategories(response.data || [])
       setLoading(false)
     } catch (err) {
-      setError('Failed to fetch categories: ' + err.message)
+      setError('فشل في جلب الفئات: ' + err.message)
       setLoading(false)
     }
   }
@@ -82,7 +82,7 @@ const AdminCategories = () => {
             'Content-Type': 'multipart/form-data'
           }
         })
-        alert('Category updated successfully!')
+        alert('تم تحديث الفئة بنجاح!')
         setEditingCategory(null)
       } else {
         await api.post('/admin/categories', submitData, {
@@ -90,7 +90,7 @@ const AdminCategories = () => {
             'Content-Type': 'multipart/form-data'
           }
         })
-        alert('Category added successfully!')
+        alert('تم إضافة الفئة بنجاح!')
       }
 
       setNewCategory({ name: '', description: '', image_url: '', image_file: null })
@@ -100,7 +100,7 @@ const AdminCategories = () => {
     } catch (err) {
       console.error('Submission error:', err)
       const errorMessage = err.response?.data?.message || err.response?.data?.errors || err.message
-      setError(`Failed to ${editingCategory ? 'update' : 'create'} category: ${errorMessage}`)
+      setError(`فشل في ${editingCategory ? 'تحديث' : 'إنشاء'} الفئة: ${errorMessage}`)
     } finally {
       setLoading(false)
     }
@@ -124,13 +124,13 @@ const AdminCategories = () => {
   }
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this category?')) {
+    if (window.confirm('هل أنت متأكد من أنك تريد حذف هذه الفئة؟')) {
       try {
         await api.delete(`/admin/categories/${id}`)
         fetchCategories() // Refresh categories list
-        alert('Category deleted successfully!')
+        alert('تم حذف الفئة بنجاح!')
       } catch (err) {
-        setError('Failed to delete category: ' + err.message)
+        setError('فشل في حذف الفئة: ' + err.message)
       }
     }
   }
@@ -169,85 +169,106 @@ const AdminCategories = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
       <div className="max-w-7xl mx-auto py-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Manage Categories</h1>
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            Add New Category
-          </button>
+        {/* Header */}
+        <div className="bg-white shadow-xl rounded-2xl border border-gray-100 p-6 mb-6">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-reverse space-x-3">
+              <div className="p-3 bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl">
+                <FolderIcon className="h-6 w-6 text-white" />
+              </div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                إدارة الفئات
+              </h1>
+            </div>
+            <button
+              onClick={() => setShowAddForm(true)}
+              className="flex items-center px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105"
+            >
+              <PlusIcon className="h-5 w-5 ml-2" />
+              إضافة فئة جديدة
+            </button>
+          </div>
         </div>
 
+        {/* Error Alert */}
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
+          <div className="bg-red-50 border border-red-200 text-red-800 px-6 py-4 rounded-xl mb-6 shadow-lg">
+            <div className="flex items-center space-x-reverse space-x-3">
+              <div className="p-2 bg-red-100 rounded-lg">
+                <FolderIcon className="h-5 w-5 text-red-600" />
+              </div>
+              <span className="font-medium">{error}</span>
+            </div>
           </div>
         )}
 
         {/* Add/Edit Category Form */}
         {showAddForm && (
-          <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <h3 className="text-lg font-semibold mb-4">
-              {editingCategory ? 'Edit Category' : 'Add New Category'}
-            </h3>
+          <div className="bg-white shadow-xl rounded-2xl border border-gray-100 p-6 mb-6">
+            <div className="flex items-center space-x-reverse space-x-3 mb-4">
+              <div className="p-2 bg-gradient-to-r from-amber-500 to-orange-600 rounded-lg">
+                <PlusIcon className="h-5 w-5 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">
+                {editingCategory ? 'تعديل الفئة' : 'إضافة فئة جديدة'}
+              </h3>
+            </div>
             <form onSubmit={handleSubmit}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category Name *
+                    اسم الفئة *
                   </label>
                   <input
                     type="text"
                     value={newCategory.name}
                     onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Enter category name"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-50"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Description
+                    وصف الفئة
                   </label>
                   <textarea
                     value={newCategory.description}
                     onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Enter category description"
+                    rows="3"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-50"
                   />
                 </div>
               </div>
-              
-              {/* Image Upload */}
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Category Image
-                </label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors">
-                      <div className="space-y-1 text-center">
-                        {previewImage ? (
-                          <div className="mb-4">
-                            <img
-                              src={previewImage}
-                              alt="Category preview"
-                              className="mx-auto h-32 w-32 object-cover rounded-lg"
-                            />
-                          </div>
-                        ) : (
-                          <PhotoIcon className="mx-auto h-12 w-12 text-gray-400" />
-                        )}
-                        <div className="flex text-sm text-gray-600">
-                          <label
-                            htmlFor="category-image-upload"
-                            className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
-                          >
-                            <span>Upload a file</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    صورة الفئة
+                  </label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-gray-400 transition-colors">
+                        <div className="space-y-1 text-center">
+                          {previewImage ? (
+                            <div className="mb-4">
+                              <img
+                                src={previewImage}
+                                alt="معاينة الفئة"
+                                className="mx-auto h-32 w-32 object-cover rounded-xl shadow-lg"
+                              />
+                            </div>
+                          ) : (
+                            <PhotoIcon className="mx-auto h-12 w-12 text-gray-400" />
+                          )}
+                          <div className="flex text-sm text-gray-600">
+                            <label
+                              htmlFor="category-image-upload"
+                              className="relative cursor-pointer bg-white rounded-xl font-medium text-amber-600 hover:text-amber-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-amber-500 px-4 py-2"
+                            >
+                              <PhotoIcon className="h-4 w-4 ml-2" />
+                              <span>رفع ملف</span>
+                            </label>
                             <input
                               id="category-image-upload"
                               name="image_file"
@@ -256,48 +277,45 @@ const AdminCategories = () => {
                               onChange={handleImageChange}
                               className="sr-only"
                             />
-                          </label>
-                          <p className="pl-1">or drag and drop</p>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-2">
+                            PNG, JPG, GIF, WebP حتى 2MB
+                          </p>
                         </div>
-                        <p className="text-xs text-gray-500">
-                          PNG, JPG, GIF, WebP up to 2MB
-                        </p>
                       </div>
                     </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      OR enter Image URL
-                    </label>
-                    <input
-                      type="url"
-                      name="image_url"
-                      value={newCategory.image_url}
-                      onChange={handleUrlChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="https://example.com/image.jpg"
-                    />
-                    <p className="mt-1 text-xs text-gray-500">
-                      Use this option if you prefer to link to an external image
-                    </p>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        أو أدخل رابط الصورة
+                      </label>
+                      <input
+                        type="url"
+                        name="image_url"
+                        value={newCategory.image_url}
+                        onChange={handleUrlChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-50"
+                      />
+                      <p className="mt-1 text-xs text-gray-500">
+                        استخدم هذا الخيار إذا كنت تفضل ربط صورة خارجية
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-              
-              <div className="mt-6 flex justify-end space-x-3">
+              <div className="mt-6 flex justify-end space-x-reverse space-x-3">
                 <button
                   type="button"
                   onClick={handleCancel}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  className="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
                 >
-                  Cancel
+                  إلغاء
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                  className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50"
                 >
-                  {loading ? 'Saving...' : (editingCategory ? 'Update Category' : 'Add Category')}
+                  {loading ? 'جاري الحفظ...' : (editingCategory ? 'تحديث الفئة' : 'إضافة الفئة')}
                 </button>
               </div>
             </form>
@@ -305,59 +323,56 @@ const AdminCategories = () => {
         )}
 
         {/* Categories Grid */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b">
-            <h2 className="text-lg font-semibold">Categories ({categories.length})</h2>
+        <div className="bg-white shadow-xl rounded-2xl border border-gray-100">
+          <div className="px-6 py-5 border-b border-gray-100">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-gray-900">
+                الفئات ({categories.length})
+              </h2>
+              <div className="flex items-center space-x-reverse space-x-2">
+                <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                <span className="text-sm text-gray-600">متصل بقاعدة البيانات</span>
+              </div>
+            </div>
           </div>
           <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {categories.map((category) => (
-                <div key={category.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-lg font-medium text-gray-900">{category.name}</h3>
-                    <div className="flex space-x-2">
+                <div key={category.id} className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:scale-105">
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-lg font-bold text-gray-900">{category.name}</h3>
+                    <div className="flex space-x-reverse space-x-2">
                       <button
                         onClick={() => handleEdit(category)}
-                        className="text-green-600 hover:text-green-900"
-                        title="Edit"
+                        className="p-2 bg-amber-100 text-amber-600 rounded-lg hover:bg-amber-200 transition-colors"
+                        title="تعديل الفئة"
                       >
-                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
+                        <PencilIcon className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(category.id)}
-                        className="text-red-600 hover:text-red-900"
-                        title="Delete"
+                        className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+                        title="حذف الفئة"
                       >
-                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
+                        <TrashIcon className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
+                  {category.description && (
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">{category.description}</p>
+                  )}
                   {category.image_url && (
-                    <div className="mb-3">
+                    <div className="flex justify-center">
                       <img
                         src={getImageUrl(category.image_url, 'image_url')}
                         alt={category.name}
-                        className="w-full h-32 object-cover rounded-lg"
+                        className="h-24 w-24 object-cover rounded-xl shadow-md"
                         onError={(e) => {
-                          console.log('Image failed to load:', category.image_url)
-                          e.target.src = `https://picsum.photos/seed/${category.name.replace(/\s+/g, '')}/200/200.jpg`
+                          e.target.src = `https://picsum.photos/seed/category${category.id}/200/200.jpg`
                         }}
                       />
                     </div>
                   )}
-                  <p className="text-gray-600 text-sm">
-                    {category.description || 'No description available'}
-                  </p>
-                  <div className="mt-3 flex items-center text-sm text-gray-500">
-                    <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                    </svg>
-                    Category ID: {category.id}
-                  </div>
                 </div>
               ))}
             </div>

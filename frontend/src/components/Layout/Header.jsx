@@ -22,6 +22,7 @@ import {
   InformationCircleIcon,
   ChevronRightIcon,
   BellIcon,
+  PhoneIcon,
 } from '@heroicons/react/24/outline'
 import {
   HeartIcon as HeartIconSolid,
@@ -47,8 +48,14 @@ import { selectCartTotalItems as selectCartItemsCount } from '../../store/slices
 import { selectCategories, fetchCategories } from '../../store/slices/productsSlice'
 import cartService from '../../services/cartService'
 import { fetchCart } from '../../store/slices/cartSlice'
+import { LOGO_URL, LOGO_SIZE, STORE_NAME } from '../../config/logo'
 
 const Header = () => {
+  // Logo URL - يمكنك تغيير هذا الرابط في ملف src/config/logo.js
+  const logoUrl = LOGO_URL;
+  const logoSize = LOGO_SIZE;
+  const storeName = STORE_NAME;
+  
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const location = useLocation()
@@ -168,7 +175,7 @@ const Header = () => {
         }, 100)
         
         // Show notification with source info
-        dispatch(showSuccessNotification(`Welcome back! Your cart has been restored from ${source} (${cartData.length} items)`))
+        dispatch(showSuccessNotification(`مرحباً بعودتك! تم استعادة سلتك من ${source} (${cartData.length} عناصر)`))
         
         // Update all cart keys to maintain consistency
         localStorage.setItem(cartKey, savedCart)
@@ -176,13 +183,13 @@ const Header = () => {
         localStorage.setItem('last_cart_backup', savedCart)
         
       } else {
-        dispatch(showSuccessNotification('Welcome back! Starting with an empty cart'))
+        dispatch(showSuccessNotification('مرحباً بعودتك! البدء بسلة فارغة'))
         // Load empty cart from database
         await dispatch(fetchCart())
       }
     } catch (error) {
       console.error('❌ Error restoring cart:', error)
-      dispatch(showErrorNotification('Failed to restore your cart'))
+      dispatch(showErrorNotification('فشل في استعادة سلتك'))
       await dispatch(fetchCart())
     }
   }
@@ -246,7 +253,7 @@ const Header = () => {
     localStorage.removeItem('token')
     
     // Show notification with item count
-    dispatch(showSuccessNotification(`Logged out! Your cart (${reduxCart.length} items) is saved!`))
+    dispatch(showSuccessNotification(`تم تسجيل الخروج! سلتك (${reduxCart.length} عناصر) محفوظة!`))
     
     // Redirect to login
     navigate('/login')
@@ -286,31 +293,61 @@ const Header = () => {
   }
 
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
-        isScrolled
-          ? 'bg-white shadow-md border-b border-gray-200'
-          : 'bg-white/95 backdrop-blur-sm border-b border-gray-100'
-      }`}
-    >
+    <>
+      {/* Top Bar */}
+      <div className="fixed top-0 left-0 right-0 bg-gradient-to-r from-indigo-700 via-purple-700 to-pink-700 text-white py-2 px-4 z-50" dir="rtl">
+        <div className="container-custom">
+          <div className="flex justify-between items-center">
+            {/* Store Name */}
+            <div className="flex items-center space-x-reverse space-x-2">
+              <ShoppingBagIcon className="h-4 w-4 text-yellow-300" />
+              <span className="text-sm font-semibold text-yellow-300">متجر أصالة</span>
+            </div>
+            
+            {/* Phone Number */}
+            <a 
+              href="tel:+9667776780551" 
+              className="flex items-center space-x-reverse space-x-2 hover:text-yellow-300 transition-colors duration-300 group"
+            >
+              <PhoneIcon className="h-4 w-4 group-hover:scale-110 transition-transform duration-300" />
+              <span className="text-sm font-medium">00967776780551</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Header */}
+      <header
+        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
+          isScrolled
+            ? 'bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 shadow-lg border-b border-amber-200/20'
+            : 'bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700/95 backdrop-blur-md border-b border-amber-200/10'
+        }`}
+        style={{ top: '32px' }}
+      >
       <div className="container-custom">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-16" dir="rtl">
           {/* Logo */}
           <Link
             to="/"
-            className="flex items-center space-x-2 text-2xl font-bold text-primary-600 hover:text-primary-700 transition-colors"
+            className="flex items-center space-x-2 text-2xl font-bold text-white hover:text-amber-200 transition-all duration-300 transform hover:scale-105 drop-shadow-lg"
           >
-            <ShoppingCartIcon className="h-6 w-6" />
-            <span className="hidden sm:inline">ShopHub</span>
+            <img 
+              src={logoUrl} 
+              alt={storeName} 
+              className="filter drop-shadow-md rounded-lg"
+              style={{ width: `${logoSize.width}px`, height: `${logoSize.height}px` }}
+            />
+            <span className="hidden sm:inline font-bold tracking-wide">{storeName}</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-8">
+          <nav className="hidden lg:flex items-center space-x-reverse space-x-8">
             <Link
               to="/"
-              className="text-gray-700 hover:text-primary-600 font-medium transition-colors"
+              className="text-white/90 hover:text-amber-200 font-semibold transition-all duration-300 hover:scale-105 drop-shadow-sm"
             >
-              Home
+              الرئيسية
             </Link>
             
             {/* Categories Dropdown */}
@@ -318,9 +355,9 @@ const Header = () => {
               <button
                 onMouseEnter={() => setCategoriesOpen(true)}
                 onMouseLeave={() => setCategoriesOpen(false)}
-                className="text-gray-700 hover:text-primary-600 font-medium transition-colors flex items-center space-x-1"
+                className="text-white/90 hover:text-amber-200 font-semibold transition-all duration-300 hover:scale-105 flex items-center space-x-1 drop-shadow-sm"
               >
-                <span>Categories</span>
+                <span>الفئات</span>
                 <svg
                   className="h-4 w-4"
                   fill="none"
@@ -341,32 +378,32 @@ const Header = () => {
                 <div
                   onMouseEnter={() => setCategoriesOpen(true)}
                   onMouseLeave={() => setCategoriesOpen(false)}
-                  className="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 max-h-96 overflow-y-auto"
+                  className="absolute top-full right-0 mt-2 w-64 bg-white/95 backdrop-blur-md rounded-xl shadow-2xl border border-purple-200/30 py-2 max-h-96 overflow-y-auto"
                 >
                   {categories && categories.length > 0 ? (
                     categories.map((category) => (
                       <Link
                         key={category.id}
                         to={`/products?category=${category.slug}`}
-                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-primary-600 transition-colors"
+                        className="block px-4 py-2 text-gray-700 hover:bg-purple-100 hover:text-purple-700 transition-all duration-200 font-medium"
                       >
                         {category.name}
                       </Link>
                     ))
                   ) : (
                     <div className="px-4 py-2 text-gray-500 text-sm">
-                      No categories available
+                      لا توجد فئات متاحة
                     </div>
                   )}
-                  <div className="border-t border-gray-200 mt-2 pt-2">
+                  <div className="border-t border-purple-200/30 mt-2 pt-2">
                     <button
                       onClick={() => {
                         console.log('View All Categories clicked!')
                         window.location.href = '/categories'
                       }}
-                      className="block w-full text-left px-4 py-2 text-primary-600 hover:bg-primary-50 transition-colors font-medium"
+                      className="block w-full text-left px-4 py-2 text-purple-700 hover:bg-purple-100 transition-all duration-200 font-semibold"
                     >
-                      View All Categories
+                      عرض جميع الفئات
                     </button>
                   </div>
                 </div>
@@ -375,25 +412,25 @@ const Header = () => {
 
             <Link
               to="/products?featured=true"
-              className="text-gray-700 hover:text-primary-600 font-medium transition-colors"
+              className="text-white/90 hover:text-yellow-300 font-semibold transition-all duration-300 hover:scale-105 drop-shadow-sm"
             >
-              Featured
+              المميزة
             </Link>
             
             <Link
               to="/products"
-              className="text-gray-700 hover:text-primary-600 font-medium transition-colors"
+              className="text-white/90 hover:text-yellow-300 font-semibold transition-all duration-300 hover:scale-105 drop-shadow-sm"
             >
-              All Products
+              جميع المنتجات
             </Link>
           </nav>
 
           {/* Right Side Actions */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-reverse space-x-4">
             {/* Search */}
             <button
               onClick={() => dispatch(toggleSearch())}
-              className="p-2 text-gray-600 hover:text-primary-600 transition-colors"
+              className="p-2 text-white/80 hover:text-yellow-300 hover:bg-white/20 rounded-lg transition-all duration-300 hover:scale-110"
               aria-label="Search"
             >
               <MagnifyingGlassIcon className="h-5 w-5" />
@@ -403,12 +440,12 @@ const Header = () => {
             <div className="relative notification-dropdown">
               <button
                 onClick={handleNotificationClick}
-                className="p-2 text-gray-600 hover:text-primary-600 transition-colors relative"
+                className="p-2 text-white/80 hover:text-yellow-300 hover:bg-white/20 rounded-lg transition-all duration-300 hover:scale-110 relative"
                 aria-label="Notifications"
               >
                 <BellIcon className="h-5 w-5" />
                 {notifications && notifications.filter(n => !n.read).length > 0 && (
-                  <span className="absolute top-1 right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                  <span className="absolute top-1 right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center animate-pulse">
                     {notifications.filter(n => !n.read).length > 99 ? '99+' : notifications.filter(n => !n.read).length}
                   </span>
                 )}
@@ -416,16 +453,16 @@ const Header = () => {
 
               {/* Notification Dropdown */}
               {isNotificationDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50 notification-dropdown">
-                  <div className="p-4 border-b border-gray-200">
+                <div className="absolute left-0 mt-2 w-80 bg-white/95 backdrop-blur-md rounded-xl shadow-2xl border border-purple-200/30 z-50 notification-dropdown">
+                  <div className="p-4 border-b border-purple-200/30">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
+                      <h3 className="text-sm font-bold text-gray-900">الإشعارات</h3>
                       {notifications && notifications.filter(n => !n.read).length > 0 && (
                         <button
                           onClick={markNotificationsAsRead}
-                          className="text-xs text-primary-600 hover:text-primary-700 font-medium"
+                          className="text-xs text-purple-600 hover:text-purple-700 font-bold"
                         >
-                          Mark all as read
+                          تحديد الكل كمقروء
                         </button>
                       )}
                     </div>
@@ -439,8 +476,8 @@ const Header = () => {
                         .map((notification) => (
                           <div
                             key={notification.id}
-                            className={`p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer ${
-                              !notification.read ? 'bg-blue-50' : ''
+                            className={`p-4 border-b border-purple-100/30 hover:bg-purple-50/50 transition-all duration-200 cursor-pointer ${
+                              !notification.read ? 'bg-purple-50/80' : ''
                             }`}
                             onClick={() => {
                               // Mark as read when clicked
@@ -465,13 +502,13 @@ const Header = () => {
                                   </div>
                                 )}
                                 {notification.type === 'info' && (
-                                  <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                    <span className="text-blue-600 text-sm">i</span>
+                                  <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                    <span className="text-purple-600 text-sm">i</span>
                                   </div>
                                 )}
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm text-gray-900 font-medium">
+                                <p className="text-sm text-gray-900 font-bold">
                                   {notification.title || 'Notification'}
                                 </p>
                                 <p className="text-sm text-gray-600 mt-1">
@@ -483,7 +520,7 @@ const Header = () => {
                               </div>
                               {!notification.read && (
                                 <div className="flex-shrink-0">
-                                  <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
+                                  <div className="h-2 w-2 bg-purple-500 rounded-full animate-pulse"></div>
                                 </div>
                               )}
                             </div>
@@ -492,18 +529,18 @@ const Header = () => {
                     ) : (
                       <div className="p-8 text-center">
                         <BellIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-600">No notifications yet</p>
+                        <p className="text-gray-600">لا توجد إشعارات بعد</p>
                       </div>
                     )}
                   </div>
                   
                   {notifications && notifications.length > 0 && (
-                    <div className="p-4 border-t border-gray-200">
+                    <div className="p-4 border-t border-purple-200/30">
                       <button
                         onClick={() => navigate('/notifications')}
-                        className="w-full text-center text-sm text-primary-600 hover:text-primary-700 font-medium"
+                        className="w-full text-center text-sm text-purple-600 hover:text-purple-700 font-bold"
                       >
-                        View all notifications
+                        عرض جميع الإشعارات
                       </button>
                     </div>
                   )}
@@ -514,12 +551,12 @@ const Header = () => {
             {/* Wishlist */}
             <button
               onClick={handleWishlistClick}
-              className="p-2 text-gray-600 hover:text-primary-600 transition-colors relative"
+              className="p-2 text-white/80 hover:text-amber-200 hover:bg-white/20 rounded-lg transition-all duration-300 hover:scale-110 relative"
               aria-label="Wishlist"
             >
               <HeartIcon className="h-5 w-5" />
               {wishlistCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-bounce">
                   {wishlistCount > 99 ? '99+' : wishlistCount}
                 </span>
               )}
@@ -528,11 +565,11 @@ const Header = () => {
             {/* Cart */}
             <button
               onClick={handleCartClick}
-              className="p-2 text-gray-600 hover:text-primary-600 transition-colors relative"
+              className="p-2 text-white/80 hover:text-amber-200 hover:bg-white/20 rounded-lg transition-all duration-300 hover:scale-110 relative"
               aria-label="Shopping cart"
             >
               <ShoppingCartIcon className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-bounce">
                 {cartTotalItems > 0 ? (cartTotalItems > 99 ? '99+' : cartTotalItems) : '0'}
               </span>
             </button>
@@ -541,24 +578,25 @@ const Header = () => {
             <div className="hidden md:block">
               {isAuthenticated ? (
                 <div className="relative group">
-                  <button className="flex items-center space-x-2 p-2 text-gray-600 hover:text-primary-600 transition-colors">
+                  <button className="flex items-center space-x-2 p-2 text-white/80 hover:text-amber-200 hover:bg-white/20 rounded-lg transition-all duration-300 hover:scale-105">
                     <UserIcon className="h-5 w-5" />
-                    <span className="text-sm font-medium">{user?.first_name}</span>
+                    <span className="text-sm font-bold">{user?.first_name}</span>
                   </button>
                   
                   {/* User Dropdown */}
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                  <div className="absolute left-0 mt-2 w-56 bg-white/95 backdrop-blur-md rounded-xl shadow-2xl border border-amber-200/30 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                     {user?.role === 'admin' && (
                       <Link
                         to="/admin/dashboard"
-                        className="block px-4 py-2 text-purple-700 hover:bg-purple-50 transition-colors font-medium"
+                        className="flex items-center space-x-reverse space-x-3 px-4 py-3 text-amber-700 hover:bg-gradient-to-r hover:from-amber-50 hover:to-amber-100 transition-all duration-200 font-bold rounded-lg"
                       >
-                        🛡️ Admin Dashboard
+                        <CubeIcon className="h-5 w-5 text-amber-600" />
+                        <span>لوحة التحكم</span>
                       </Link>
                     )}
                     <Link
                       to="/account"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
+                      className="flex items-center space-x-reverse space-x-3 px-4 py-3 text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 transition-all duration-200 rounded-lg"
                       onClick={(e) => {
                         // Force navigation if needed
                         if (isAuthenticated) {
@@ -567,26 +605,30 @@ const Header = () => {
                         }
                       }}
                     >
-                      My Account
+                      <UserCircleIcon className="h-5 w-5 text-blue-600" />
+                      <span>حسابي</span>
                     </Link>
                     <Link
                       to="/orders"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
+                      className="flex items-center space-x-reverse space-x-3 px-4 py-3 text-gray-700 hover:bg-gradient-to-r hover:from-green-50 hover:to-green-100 transition-all duration-200 rounded-lg"
                     >
-                      My Orders
+                      <ClipboardDocumentListIcon className="h-5 w-5 text-green-600" />
+                      <span>طلباتي</span>
                     </Link>
                     <Link
                       to="/wishlist"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
+                      className="flex items-center space-x-reverse space-x-3 px-4 py-3 text-gray-700 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 transition-all duration-200 rounded-lg"
                     >
-                      Wishlist
+                      <HeartIcon className="h-5 w-5 text-red-600" />
+                      <span>قائمة الرغبات</span>
                     </Link>
-                    <div className="border-t border-gray-200 mt-2 pt-2">
+                    <div className="border-t border-gray-200/30 mt-2 pt-2">
                       <button
                         onClick={handleLogout}
-                        className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
+                        className="flex items-center space-x-reverse space-x-3 w-full text-right px-4 py-3 text-gray-700 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 transition-all duration-200 rounded-lg"
                       >
-                        Logout
+                        <ArrowRightOnRectangleIcon className="h-5 w-5 text-red-600" />
+                        <span>تسجيل الخروج</span>
                       </button>
                     </div>
                   </div>
@@ -594,10 +636,10 @@ const Header = () => {
               ) : (
                 <Link
                   to="/login"
-                  className="flex items-center space-x-2 p-2 text-gray-600 hover:text-primary-600 transition-colors"
+                  className="flex items-center space-x-2 p-2 text-white/80 hover:text-yellow-300 hover:bg-white/20 rounded-lg transition-all duration-300 hover:scale-105"
                 >
                   <UserIcon className="h-5 w-5" />
-                  <span className="text-sm font-medium">Login</span>
+                  <span className="text-sm font-bold">تسجيل الدخول</span>
                 </Link>
               )}
             </div>
@@ -605,7 +647,7 @@ const Header = () => {
             {/* Mobile Menu Toggle */}
             <button
               onClick={handleMobileMenuClick}
-              className="lg:hidden p-2 text-gray-600 hover:text-primary-600 transition-colors"
+              className="lg:hidden p-2 text-white/80 hover:text-yellow-300 hover:bg-white/20 rounded-lg transition-all duration-300 hover:scale-110"
               aria-label="Toggle mobile menu"
             >
               {isMobileMenuOpen ? (
@@ -618,223 +660,8 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 bg-white z-[9999] shadow-xl">
-          <div className="h-full overflow-y-auto py-4">
-            <div className="container-custom px-4">
-              {/* Close button at top */}
-              <div className="flex justify-end mb-4">
-                <button
-                  onClick={() => dispatch(closeMobileMenu())}
-                  className="p-2 text-gray-600 hover:text-primary-600 transition-colors"
-                  aria-label="Close mobile menu"
-                >
-                  <XMarkIcon className="h-6 w-6" />
-                </button>
-              </div>
-              
-              {/* Navigation Links */}
-              <nav className="space-y-3">
-                <Link
-                  to="/"
-                  className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-primary-600 rounded-lg transition-colors font-medium"
-                  onClick={() => dispatch(closeMobileMenu())}
-                >
-                  <HomeIcon className="h-5 w-5" />
-                  <span>Home</span>
-                </Link>
-                
-                {/* Categories */}
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-3 px-4 py-2 text-gray-700 font-semibold">
-                    <TagIcon className="h-5 w-5" />
-                    <span>Categories</span>
-                  </div>
-                  <div className="pl-4 space-y-2">
-                    {categories && categories.length > 0 ? (
-                      categories.map((category) => (
-                        <Link
-                          key={category.id}
-                          to={`/products?category=${category.slug}`}
-                          className="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 hover:text-primary-600 rounded-lg transition-colors"
-                          onClick={() => dispatch(closeMobileMenu())}
-                        >
-                          <CubeIcon className="h-5 w-5" />
-                          <span>{category.name}</span>
-                        </Link>
-                      ))
-                    ) : (
-                      <div className="px-4 py-3 text-gray-500 text-sm">
-                        No categories available
-                      </div>
-                    )}
-                    <button
-                      onClick={() => {
-                        console.log('Mobile View All Categories clicked!')
-                        window.location.href = '/categories'
-                        dispatch(closeMobileMenu())
-                      }}
-                      className="flex items-center space-x-3 px-4 py-3 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors font-medium"
-                    >
-                      <TagIcon className="h-5 w-5" />
-                      <span>View All Categories</span>
-                    </button>
-                  </div>
-                </div>
-
-                <Link
-                  to="/products?featured=true"
-                  className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-primary-600 rounded-lg transition-colors font-medium"
-                  onClick={() => dispatch(closeMobileMenu())}
-                >
-                  <GiftIcon className="h-5 w-5" />
-                  <span>Featured</span>
-                </Link>
-                
-                <Link
-                  to="/products"
-                  className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-primary-600 rounded-lg transition-colors font-medium"
-                  onClick={() => dispatch(closeMobileMenu())}
-                >
-                  <ShoppingBagIcon className="h-5 w-5" />
-                  <span>All Products</span>
-                </Link>
-              </nav>
-
-              {/* User Actions */}
-              <div className="border-t border-gray-200 mt-4 pt-4">
-                {isAuthenticated ? (
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-3 px-4 py-2 text-gray-700 font-semibold">
-                      <UserCircleIcon className="h-5 w-5" />
-                      <span>Welcome, {user?.first_name || user?.name || 'User'}!</span>
-                    </div>
-                    
-                    <Link
-                      to="/account"
-                      className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-primary-600 rounded-lg transition-colors"
-                      onClick={() => dispatch(closeMobileMenu())}
-                    >
-                      <UserCircleIcon className="h-5 w-5" />
-                      <span>My Account</span>
-                    </Link>
-                    
-                    <Link
-                      to="/orders"
-                      className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-primary-600 rounded-lg transition-colors"
-                      onClick={() => dispatch(closeMobileMenu())}
-                    >
-                      <ClipboardDocumentListIcon className="h-5 w-5" />
-                      <span>My Orders</span>
-                    </Link>
-                    
-                    <Link
-                      to="/wishlist"
-                      className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-primary-600 rounded-lg transition-colors"
-                      onClick={() => dispatch(closeMobileMenu())}
-                    >
-                      <HeartIcon className="h-5 w-5" />
-                      <span>Wishlist ({wishlistCount > 0 ? wishlistCount : 0})</span>
-                    </Link>
-                    
-                    {user?.role === 'admin' && (
-                      <Link
-                        to="/admin/dashboard"
-                        className="flex items-center space-x-3 px-4 py-3 text-purple-700 hover:bg-purple-50 rounded-lg transition-colors font-medium"
-                        onClick={() => dispatch(closeMobileMenu())}
-                      >
-                        <CogIcon className="h-5 w-5" />
-                        <span>Admin Dashboard</span>
-                      </Link>
-                    )}
-                    
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center space-x-3 w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium"
-                    >
-                      <ArrowRightOnRectangleIcon className="h-5 w-5" />
-                      <span>Logout</span>
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-3 px-4 py-2 text-gray-700 font-semibold">
-                      <UserIcon className="h-5 w-5" />
-                      <span>Guest User</span>
-                    </div>
-                    
-                    <Link
-                      to="/login"
-                      className="flex items-center justify-center space-x-3 px-4 py-3 bg-primary-600 text-white hover:bg-primary-700 rounded-lg transition-colors font-medium"
-                      onClick={() => dispatch(closeMobileMenu())}
-                    >
-                      <ArrowRightOnRectangleIcon className="h-5 w-5" />
-                      <span>Login</span>
-                    </Link>
-                    
-                    <Link
-                      to="/register"
-                      className="flex items-center justify-center space-x-3 px-4 py-3 border border-primary-600 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors font-medium"
-                      onClick={() => dispatch(closeMobileMenu())}
-                    >
-                      <UserCircleIcon className="h-5 w-5" />
-                      <span>Register</span>
-                    </Link>
-                  </div>
-                )}
-              </div>
-
-              {/* Quick Actions */}
-              <div className="border-t border-gray-200 mt-4 pt-4">
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    onClick={() => {
-                      dispatch(toggleSearch())
-                      dispatch(closeMobileMenu())
-                    }}
-                    className="flex flex-col items-center p-3 text-gray-600 hover:text-primary-600 hover:bg-gray-100 rounded-lg transition-colors"
-                  >
-                    <MagnifyingGlassIcon className="h-5 w-5 mb-1" />
-                    <span className="text-xs">Search</span>
-                  </button>
-                  
-                  <button
-                    onClick={() => {
-                      handleWishlistClick()
-                      dispatch(closeMobileMenu())
-                    }}
-                    className="flex flex-col items-center p-3 text-gray-600 hover:text-primary-600 hover:bg-gray-100 rounded-lg transition-colors relative"
-                  >
-                    <HeartIcon className="h-5 w-5 mb-1" />
-                    <span className="text-xs">Wishlist</span>
-                    {wishlistCount > 0 && (
-                      <span className="absolute top-2 right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                        {wishlistCount > 99 ? '99+' : wishlistCount}
-                      </span>
-                    )}
-                  </button>
-                  
-                  <button
-                    onClick={() => {
-                      handleCartClick()
-                      dispatch(closeMobileMenu())
-                    }}
-                    className="flex flex-col items-center p-3 text-gray-600 hover:text-primary-600 hover:bg-gray-100 rounded-lg transition-colors relative"
-                  >
-                    <ShoppingCartIcon className="h-5 w-5 mb-1" />
-                    <span className="text-xs">Cart</span>
-                    <span className="absolute top-2 right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                      {cartTotalItems > 0 ? (cartTotalItems > 99 ? '99+' : cartTotalItems) : '0'}
-                    </span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </header>
+      </header>
+    </>
   )
 }
 

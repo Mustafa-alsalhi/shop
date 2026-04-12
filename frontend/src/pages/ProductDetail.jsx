@@ -144,7 +144,7 @@ const ProductDetail = () => {
     try {
       // Add to cart (will try database first)
       dispatch(addToCart(cartItem))
-      dispatch(showSuccessNotification(`${product.name} added to cart!`))
+      dispatch(showSuccessNotification(`${product.name} تمت إضافته للسلة!`))
       
       // Force cart sidebar to open
       setTimeout(() => {
@@ -155,7 +155,7 @@ const ProductDetail = () => {
       
     } catch (error) {
       console.error('❌ Error adding to cart:', error)
-      alert('Failed to add to cart. Please try again.')
+      alert('فشل في الإضافة للسلة. يرجى المحاولة مرة أخرى.')
     }
   }
 
@@ -183,9 +183,9 @@ const ProductDetail = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Product not found</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">المنتج غير موجود</h2>
           <Link to="/products" className="text-primary-600 hover:text-primary-700">
-            Back to Products
+            العودة إلى المنتجات
           </Link>
         </div>
       </div>
@@ -193,20 +193,20 @@ const ProductDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50" dir="rtl">
       {/* Breadcrumb */}
-      <nav className="bg-white shadow-sm">
+      <nav className="bg-white/80 backdrop-blur-sm border-b border-amber-200/50">
         <div className="container-custom py-4">
           <div className="flex items-center space-x-2 text-sm">
-            <Link to="/" className="text-gray-600 hover:text-primary-600">
-              Home
+            <Link to="/" className="text-gray-600 hover:text-amber-600 transition-colors">
+              الرئيسية
             </Link>
             <span className="text-gray-400">/</span>
-            <Link to="/products" className="text-gray-600 hover:text-primary-600">
-              Products
+            <Link to="/products" className="text-gray-600 hover:text-amber-600 transition-colors">
+              المنتجات
             </Link>
             <span className="text-gray-400">/</span>
-            <span className="text-gray-900 font-medium">{product.name}</span>
+            <span className="text-amber-900 font-medium">{product.name}</span>
           </div>
         </div>
       </nav>
@@ -215,7 +215,7 @@ const ProductDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Product Images */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-amber-200/30">
               <div className="grid grid-cols-1 gap-4">
                 {allImages.length > 0 ? allImages.map((image, index) => {
                   const imageUrl = getImageUrl(image);
@@ -224,8 +224,8 @@ const ProductDetail = () => {
                   return (
                     <div
                       key={index}
-                      className={`relative overflow-hidden rounded-lg cursor-pointer ${
-                        selectedImage === index ? 'ring-2 ring-blue-500' : ''
+                      className={`relative overflow-hidden rounded-lg cursor-pointer transition-all duration-300 ${
+                        selectedImage === index ? 'ring-2 ring-amber-500 shadow-lg' : 'hover:shadow-md'
                       }`}
                       onClick={() => setSelectedImage(index)}
                     >
@@ -238,8 +238,8 @@ const ProductDetail = () => {
                   );
                 }) : (
                   // Show message when no real images available
-                  <div className="relative overflow-hidden rounded-lg bg-gray-100 flex items-center justify-center h-64">
-                    <div className="text-center text-gray-500">
+                  <div className="relative overflow-hidden rounded-lg bg-amber-100 flex items-center justify-center h-64">
+                    <div className="text-center text-amber-600">
                       <div className="text-4xl mb-2">📷</div>
                       <p>لا توجد صور حقيقية متاحة</p>
                       <p className="text-sm">لم يتم إضافة صور لهذا المنتج بعد</p>
@@ -252,11 +252,11 @@ const ProductDetail = () => {
 
           {/* Product Info */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-amber-200/30">
               {/* Product Title & Price */}
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h1>
+                  <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent mb-2">{product.name}</h1>
                   <div className="flex items-center space-x-2">
                     <div className="flex items-center">
                       {[...Array(5)].map((_, i) => (
@@ -264,18 +264,18 @@ const ProductDetail = () => {
                           key={i}
                           className={`h-5 w-5 ${
                             i < Math.floor(product.rating || 0)
-                              ? 'text-yellow-400'
+                              ? 'text-amber-400'
                               : 'text-gray-300'
                           }`}
                         />
                       ))}
                       <span className="ml-2 text-gray-600">
-                        {product.rating || 0} ({product.reviews_count || 0} reviews)
+                        {product.rating || 0} ({product.reviews_count || 0} تقييم)
                       </span>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-3xl font-bold text-primary-600">${product.price}</p>
+                    <p className="text-3xl font-bold text-amber-600">${product.price}</p>
                     {product.compare_at_price && (
                       <p className="text-sm text-gray-500 line-through">
                         ${product.compare_at_price}
@@ -287,14 +287,14 @@ const ProductDetail = () => {
 
               {/* Product Description */}
               <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-2">Description</h3>
+                <h3 className="text-lg font-semibold text-amber-900 mb-2">الوصف</h3>
                 <p className="text-gray-600 leading-relaxed">{product.description}</p>
               </div>
 
               {/* Product Variants */}
               {product.variants && product.variants.length > 0 && (
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold mb-4">Options</h3>
+                  <h3 className="text-lg font-semibold text-amber-900 mb-4">الخيارات</h3>
                   <div className="space-y-4">
                     {product.variants.map((variant) => (
                       <div key={variant.id || variant.name} className="space-y-2">
@@ -318,7 +318,7 @@ const ProductDetail = () => {
                           }}
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
                         >
-                          <option value="">Choose an option...</option>
+                          <option value="">اختر خياراً...</option>
                           {variant.options && variant.options.map((option) => (
                             <option key={option.id || option.name} value={option.id || option.name}>
                               {option.name} {option.price && `(+${option.price})`}
@@ -334,19 +334,19 @@ const ProductDetail = () => {
               {/* Quantity & Actions */}
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-4">
-                  <label className="text-sm font-medium text-gray-700">Quantity:</label>
+                  <label className="text-sm font-medium text-gray-700">الكمية:</label>
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={() => handleQuantityChange('decrease')}
                       disabled={quantity <= 1}
-                      className="p-2 text-gray-600 hover:text-primary-600 disabled:opacity-50"
+                      className="p-2 text-gray-600 hover:text-amber-600 disabled:opacity-50 transition-colors"
                     >
                       <MinusIcon className="h-4 w-4" />
                     </button>
-                    <span className="px-4 py-2 font-medium">{quantity}</span>
+                    <span className="px-4 py-2 font-medium bg-amber-50 rounded-lg border border-amber-200">{quantity}</span>
                     <button
                       onClick={() => handleQuantityChange('increase')}
-                      className="p-2 text-gray-600 hover:text-primary-600"
+                      className="p-2 text-gray-600 hover:text-amber-600 transition-colors"
                     >
                       <PlusIcon className="h-4 w-4" />
                     </button>
@@ -356,50 +356,50 @@ const ProductDetail = () => {
                 <div className="flex space-x-4">
                   <button
                     onClick={handleToggleWishlist}
-                    className={`p-3 rounded-lg transition-colors ${
+                    className={`p-3 rounded-lg transition-all duration-300 hover:scale-105 ${
                       isWishlisted
-                        ? 'bg-red-100 text-red-600 hover:bg-red-200'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        ? 'bg-rose-100 text-rose-600 hover:bg-rose-200 shadow-md'
+                        : 'bg-amber-100 text-amber-600 hover:bg-amber-200 shadow-md'
                     }`}
                   >
                     <HeartIcon
                       className={`h-6 w-6 ${
-                        isWishlisted ? 'text-red-600' : 'text-gray-600'
+                        isWishlisted ? 'text-rose-600' : 'text-amber-600'
                       }`}
                     />
                   </button>
                   <button
                     onClick={handleAddToCart}
-                    className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors"
+                    className="flex-1 bg-gradient-to-r from-amber-600 to-amber-700 text-white px-6 py-3 rounded-lg hover:from-amber-700 hover:to-amber-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
                   >
                     <ShoppingBagIcon className="h-5 w-5 mr-2" />
-                    Add to Cart
+                    أضف للسلة
                   </button>
                 </div>
               </div>
 
               {/* Product Features */}
-              <div className="border-t pt-6">
+              <div className="border-t border-amber-200/50 pt-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="flex items-center space-x-3">
-                    <TruckIcon className="h-6 w-6 text-primary-600" />
+                    <TruckIcon className="h-6 w-6 text-amber-600" />
                     <div>
-                      <p className="font-medium">Free Shipping</p>
-                      <p className="text-sm text-gray-600">On orders over $50</p>
+                      <p className="font-medium text-amber-900">الشحن المجاني</p>
+                      <p className="text-sm text-gray-600">عند الطلبات فوق 50 ريال</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <ShieldCheckIcon className="h-6 w-6 text-primary-600" />
+                    <ShieldCheckIcon className="h-6 w-6 text-amber-600" />
                     <div>
-                      <p className="font-medium">Secure Payment</p>
+                      <p className="font-medium text-amber-900">الدفع الآمن</p>
                       <p className="text-sm text-gray-600">SSL encrypted</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <ShoppingBagIcon className="h-6 w-6 text-primary-600" />
+                    <ShoppingBagIcon className="h-6 w-6 text-amber-600" />
                     <div>
-                      <p className="font-medium">Easy Returns</p>
-                      <p className="text-sm text-gray-600">30-day return policy</p>
+                      <p className="font-medium text-amber-900">إرجاع سهل</p>
+                      <p className="text-sm text-gray-600">سياسة إرجاع 30 يوم</p>
                     </div>
                   </div>
                 </div>
@@ -408,26 +408,26 @@ const ProductDetail = () => {
 
             {/* Related Products */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-semibold mb-6">Related Products</h3>
+              <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-amber-200/30">
+                <h3 className="text-lg font-semibold text-amber-900 mb-6">منتجات ذات صلة</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {relatedProducts.map((relatedProduct) => {
                     console.log('Rendering related product:', relatedProduct)
                     return (
                       <div key={relatedProduct.id} className="group">
                         <Link to={`/products/${relatedProduct.id}`}>
-                          <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                          <div className="bg-white/90 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 border border-amber-200/30 hover:border-amber-400/50">
                             <div className="aspect-square">
                               <img
                                 src={getImageUrl(relatedProduct.image_url || relatedProduct.main_image_url, relatedProduct.name)}
                                 alt={relatedProduct.name}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                               />
                             </div>
                             <div className="p-4">
-                              <h4 className="font-medium text-gray-900 mb-2">{relatedProduct.name}</h4>
+                              <h4 className="font-medium text-amber-900 mb-2">{relatedProduct.name}</h4>
                               <div className="flex items-center">
-                                <p className="text-lg font-bold text-primary-600">${parseFloat(relatedProduct.price || 0).toFixed(2)}</p>
+                                <p className="text-lg font-bold text-amber-600">${parseFloat(relatedProduct.price || 0).toFixed(2)}</p>
                                 {relatedProduct.compare_at_price && (
                                   <p className="text-sm text-gray-500 line-through">
                                     ${parseFloat(relatedProduct.compare_at_price).toFixed(2)}
@@ -435,9 +435,9 @@ const ProductDetail = () => {
                                 )}
                               </div>
                               <div className="flex items-center space-x-1">
-                                <StarIcon className="h-4 w-4 text-yellow-400" />
+                                <StarIcon className="h-4 w-4 text-amber-400" />
                                 <span className="text-sm text-gray-600">
-                                  {relatedProduct.rating || 0} ({relatedProduct.reviews_count || 0})
+                        ({relatedProduct.rating || 0})
                                 </span>
                               </div>
                             </div>

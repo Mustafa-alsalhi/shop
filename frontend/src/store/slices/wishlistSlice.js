@@ -14,7 +14,13 @@ const wishlistService = {
     const exists = wishlist.find(item => item.id === product.id)
     
     if (!exists) {
-      wishlist.push({ ...product, added_at: new Date().toISOString() })
+      // Ensure product has in_stock field, default to true if not present
+      const productWithStock = {
+        ...product,
+        in_stock: product.in_stock !== undefined ? product.in_stock : true,
+        added_at: new Date().toISOString()
+      }
+      wishlist.push(productWithStock)
       localStorage.setItem('wishlist', JSON.stringify(wishlist))
     }
     
@@ -121,7 +127,13 @@ const wishlistSlice = createSlice({
       const product = action.payload
       const exists = state.items.find(item => item.id === product.id)
       if (!exists) {
-        state.items.push({ ...product, added_at: new Date().toISOString() })
+        // Ensure product has in_stock field, default to true if not present
+        const productWithStock = {
+          ...product,
+          in_stock: product.in_stock !== undefined ? product.in_stock : true,
+          added_at: new Date().toISOString()
+        }
+        state.items.push(productWithStock)
         state.totalCount = state.items.length
       }
     },

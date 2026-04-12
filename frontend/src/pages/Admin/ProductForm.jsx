@@ -279,7 +279,7 @@ const AdminProductForm = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50" dir="rtl">
       <div className="max-w-4xl mx-auto py-6">
         {/* Header */}
         <div className="mb-6">
@@ -287,11 +287,11 @@ const AdminProductForm = () => {
             onClick={() => navigate('/admin/products')}
             className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
           >
-            <ArrowLeftIcon className="h-5 w-5 mr-2" />
-            Back to Products
+            <ArrowLeftIcon className="h-5 w-5 ml-2" />
+            العودة للمنتجات
           </button>
           <h1 className="text-2xl font-bold text-gray-900">
-            {isEditing ? 'Edit Product' : 'Add New Product'}
+            {isEditing ? 'تعديل المنتج' : 'إضافة منتج جديد'}
           </h1>
         </div>
 
@@ -301,14 +301,14 @@ const AdminProductForm = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-6">
+        <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-6" dir="rtl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Left Column */}
             <div className="space-y-6">
               {/* Product Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Product Name *
+                  اسم المنتج *
                 </label>
                 <input
                   type="text"
@@ -317,7 +317,7 @@ const AdminProductForm = () => {
                   onChange={handleChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter product name"
+                  placeholder="أدخل اسم المنتج"
                 />
               </div>
 
@@ -332,14 +332,14 @@ const AdminProductForm = () => {
                   value={formData.sku}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter SKU"
+                  placeholder="أدخل SKU"
                 />
               </div>
 
               {/* Price */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Regular Price *
+                  السعر العادي *
                 </label>
                 <input
                   type="number"
@@ -357,7 +357,7 @@ const AdminProductForm = () => {
               {/* Sale Price */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Sale Price
+                  سعر الترويجي
                 </label>
                 <input
                   type="number"
@@ -370,14 +370,14 @@ const AdminProductForm = () => {
                   placeholder="0.00"
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Discounted price (leave empty if no sale)
+                  السعر المخفضل (اترك فارغ إذا لم يوجد خصم)
                 </p>
               </div>
 
               {/* Currency */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Currency
+                  العملة
                 </label>
                 <select
                   name="currency"
@@ -385,18 +385,18 @@ const AdminProductForm = () => {
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="USD">USD ($)</option>
-                  <option value="EUR">EUR (€)</option>
-                  <option value="GBP">GBP (£)</option>
-                  <option value="SAR">SAR (ر.س)</option>
-                  <option value="AED">AED (د.إ)</option>
+                  <option value="USD">دولار أمريكي ($)</option>
+                  <option value="EUR">يورو (€)</option>
+                  <option value="GBP">جنيه إسترليني (£)</option>
+                  <option value="SAR">ريال سعودي (ر.س)</option>
+                  <option value="AED">درهم إماراتي (د.إ)</option>
                 </select>
               </div>
 
               {/* Stock */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Stock Quantity *
+                  الكمية المتاحة *
                 </label>
                 <input
                   type="number"
@@ -413,7 +413,7 @@ const AdminProductForm = () => {
               {/* Category */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Category *
+                  الفئة *
                 </label>
                 <select
                   name="category_id"
@@ -422,7 +422,7 @@ const AdminProductForm = () => {
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="">Select a category</option>
+                  <option value="">اختر فئة</option>
                   {categories.map((category) => (
                     <option key={category.id} value={category.id}>
                       {category.name}
@@ -434,7 +434,7 @@ const AdminProductForm = () => {
               {/* Condition */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Condition
+                  الحالة
                 </label>
                 <select
                   name="condition"
@@ -442,9 +442,9 @@ const AdminProductForm = () => {
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="new">New</option>
-                  <option value="used">Used</option>
-                  <option value="refurbished">Refurbished</option>
+                  <option value="new">جديد</option>
+                  <option value="used">مستعمل</option>
+                  <option value="refurbished">مجدد</option>
                 </select>
               </div>
 
@@ -452,7 +452,7 @@ const AdminProductForm = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Sale Start Date
+                    تاريخ بدء العرض
                   </label>
                   <input
                     type="datetime-local"
@@ -464,7 +464,7 @@ const AdminProductForm = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Sale End Date
+                    تاريخ انتهاء العرض
                   </label>
                   <input
                     type="datetime-local"
@@ -487,8 +487,8 @@ const AdminProductForm = () => {
                     onChange={handleChange}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <label htmlFor="is_active" className="ml-2 block text-sm text-gray-900">
-                    Active (product will be visible in store)
+                  <label htmlFor="is_active" className="mr-2 block text-sm text-gray-900">
+                    نشط (المنتج سيكون ظاهر في المتجر)
                   </label>
                 </div>
                 <div className="flex items-center">
@@ -500,8 +500,8 @@ const AdminProductForm = () => {
                     onChange={handleChange}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <label htmlFor="is_featured" className="ml-2 block text-sm text-gray-900">
-                    Featured Product (show on homepage)
+                  <label htmlFor="is_featured" className="mr-2 block text-sm text-gray-900">
+                    مميز (سيظهر في المنتجات المميزة)
                   </label>
                 </div>
               </div>
@@ -512,7 +512,7 @@ const AdminProductForm = () => {
               {/* Description */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description
+                  الوصف
                 </label>
                 <textarea
                   name="description"
@@ -520,14 +520,14 @@ const AdminProductForm = () => {
                   onChange={handleChange}
                   rows={6}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter product description"
+                  placeholder="أدخل وصف المنتج"
                 />
               </div>
 
               {/* Main Image Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Main Product Image
+                  صورة المنتج الرئيسية
                 </label>
                 <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors">
                   <div className="space-y-1 text-center">
@@ -535,7 +535,7 @@ const AdminProductForm = () => {
                       <div className="mb-4">
                         <img
                           src={previewImage}
-                          alt="Product preview"
+                          alt="معاينة المنتج"
                           className="mx-auto h-32 w-32 object-cover rounded-lg"
                         />
                       </div>
@@ -547,7 +547,7 @@ const AdminProductForm = () => {
                         htmlFor="image-upload"
                         className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
                       >
-                        <span>Upload a file</span>
+                        <span>رفع ملف</span>
                         <input
                           id="image-upload"
                           name="image_file"
@@ -557,10 +557,10 @@ const AdminProductForm = () => {
                           className="sr-only"
                         />
                       </label>
-                      <p className="pl-1">or drag and drop</p>
+                      <p className="pr-1">أو اسحب وأفلت</p>
                     </div>
                     <p className="text-xs text-gray-500">
-                      PNG, JPG, GIF, WebP up to 2MB
+                      PNG, JPG, GIF, WebP حتى 2MB
                     </p>
                   </div>
                 </div>
@@ -569,7 +569,7 @@ const AdminProductForm = () => {
               {/* OR Main Image URL */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  OR enter Main Image URL
+                  أو أدخل رابط الصورة الرئيسية
                 </label>
                 <input
                   type="url"
@@ -587,14 +587,14 @@ const AdminProductForm = () => {
                   placeholder="https://example.com/image.jpg"
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Use this option if you prefer to link to an external image
+                  استخدم هذا الخيار إذا كنت تفضل ربط صورة خارجية
                 </p>
               </div>
 
               {/* Gallery Images */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Gallery Images (Additional Images)
+                  صور المعرض (صور إضافية)
                 </label>
                 <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors">
                   <div className="space-y-1 text-center">
@@ -603,7 +603,7 @@ const AdminProductForm = () => {
                         htmlFor="gallery-upload"
                         className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
                       >
-                        <span>Upload gallery images</span>
+                        <span>رفع صور المعرض</span>
                         <input
                           id="gallery-upload"
                           name="gallery_images"
@@ -614,10 +614,10 @@ const AdminProductForm = () => {
                           className="sr-only"
                         />
                       </label>
-                      <p className="pl-1">or drag and drop</p>
+                      <p className="pr-1">أو اسحب وأفلت</p>
                     </div>
                     <p className="text-xs text-gray-500">
-                      PNG, JPG, GIF, WebP up to 2MB each. Multiple files allowed.
+                      PNG, JPG, GIF, WebP حتى 2MB لكل صورة. مسموح بملفات متعددة.
                     </p>
                   </div>
                 </div>
@@ -629,13 +629,13 @@ const AdminProductForm = () => {
                       <div key={index} className="relative group">
                         <img
                           src={preview}
-                          alt={`Gallery image ${index + 1}`}
+                          alt={`صورة المعرض ${index + 1}`}
                           className="w-full h-24 object-cover rounded-lg"
                         />
                         <button
                           type="button"
                           onClick={() => removeGalleryImage(index)}
-                          className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute top-2 left-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -651,14 +651,14 @@ const AdminProductForm = () => {
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <label className="block text-sm font-medium text-gray-700">
-                    Product Variants (Colors, Sizes, etc.)
+                    طرازات المنتج (الألوان، المقاسات، إلخ)
                   </label>
                   <button
                     type="button"
                     onClick={addVariant}
                     className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                   >
-                    Add Variant
+                    إضافة طراز
                   </button>
                 </div>
                 
@@ -667,33 +667,33 @@ const AdminProductForm = () => {
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div>
                         <label className="block text-xs font-medium text-gray-700 mb-1">
-                          Variant Name (e.g., Color, Size)
+                          اسم الطراز (مثلاً، اللون، المقاس)
                         </label>
                         <input
                           type="text"
                           value={variant.name}
                           onChange={(e) => updateVariant(index, 'name', e.target.value)}
                           className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="Color"
+                          placeholder="اللون"
                         />
                       </div>
                       <div>
                         <label className="block text-xs font-medium text-gray-700 mb-1">
-                          Variant Value (e.g., Black, M)
+                          قيمة الطراز (مثلاً، أسود، M)
                         </label>
                         <input
                           type="text"
                           value={variant.value}
                           onChange={(e) => updateVariant(index, 'value', e.target.value)}
                           className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="Black"
+                          placeholder="أسود"
                         />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-xs font-medium text-gray-700 mb-1">
-                          Additional Price
+                          السعر الإضافي
                         </label>
                         <input
                           type="number"
@@ -707,7 +707,7 @@ const AdminProductForm = () => {
                       </div>
                       <div>
                         <label className="block text-xs font-medium text-gray-700 mb-1">
-                          Stock
+                          المخزون
                         </label>
                         <input
                           type="number"
@@ -724,14 +724,14 @@ const AdminProductForm = () => {
                       onClick={() => removeVariant(index)}
                       className="mt-2 text-sm text-red-600 hover:text-red-700"
                     >
-                      Remove Variant
+                      حذف الطراز
                     </button>
                   </div>
                 ))}
                 
                 {formData.variants.length === 0 && (
                   <p className="text-sm text-gray-500">
-                    No variants added. Click "Add Variant" to add product variations like colors, sizes, etc.
+                    لم تتم إضافة طرازات. انقر على "إضافة طراز" لإضافة تنوعات المنتج مثل الألوان، المقاسات، إلخ.
                   </p>
                 )}
               </div>
@@ -739,20 +739,20 @@ const AdminProductForm = () => {
           </div>
 
           {/* Form Actions */}
-          <div className="mt-8 flex justify-end space-x-3">
+          <div className="mt-8 flex justify-start space-x-reverse space-x-3">
             <button
               type="button"
               onClick={() => navigate('/admin/products')}
               className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              Cancel
+              إلغاء
             </button>
             <button
               type="submit"
               disabled={loading}
               className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
             >
-              {loading ? 'Saving...' : (isEditing ? 'Update Product' : 'Create Product')}
+              {loading ? 'جاري الحفظ...' : (isEditing ? 'تحديث المنتج' : 'إنشاء المنتج')}
             </button>
           </div>
         </form>

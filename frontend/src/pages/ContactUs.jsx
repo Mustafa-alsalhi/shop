@@ -52,107 +52,91 @@ const ContactUs = () => {
     }
   }
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        duration: 0.6,
-        staggerChildren: 0.2
-      }
-    }
-  }
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: { duration: 0.5 }
-    }
-  }
-
   return (
     <>
       <Helmet>
-        <title>Contact Us - My Store</title>
-        <meta name="description" content="Get in touch with My Store. We're here to help with any questions or concerns." />
+        <title>اتصل بنا - متجر أصالة</title>
+        <meta name="description" content="تواصل مع متجر أصالة عبر الهاتف أو البريد الإلكتروني أو زيارتنا في الرياض" />
       </Helmet>
+      
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-12" dir="rtl">
+        <div className="container-custom">
+          {/* Header */}
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12"
+          >
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent mb-4">
+              اتصل بنا
+            </h1>
+            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+              نحن هنا لمساعدتك. تواصل معنا عبر أي من الطرق التالية وسنرد عليك في أقرب وقت ممكن.
+            </p>
+          </motion.div>
 
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        {/* Hero Section */}
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="bg-gradient-to-r from-primary-600 to-primary-700 text-white py-16"
-        >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center">
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">Contact Us</h1>
-              <p className="text-xl text-primary-100 max-w-2xl mx-auto">
-                We're here to help! Get in touch with our team for any questions, concerns, or feedback.
-              </p>
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
-        >
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
             {/* Contact Information */}
-            <motion.div variants={itemVariants} className="lg:col-span-1">
-              <div className="bg-white rounded-2xl shadow-xl p-8 space-y-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Get in Touch</h2>
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="lg:col-span-1"
+            >
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-amber-200/30 h-full">
+                <h2 className="text-2xl font-bold text-amber-900 mb-6 flex items-center space-x-reverse space-x-2">
+                  <PhoneIcon className="h-6 w-6 text-amber-600" />
+                  معلومات الاتصال
+                </h2>
                 
-                <div className="space-y-4">
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-                      <PhoneIcon className="h-6 w-6 text-primary-600" />
+                <div className="space-y-6">
+                  <div className="flex items-start space-x-reverse space-x-3">
+                    <div className="p-3 bg-amber-100 rounded-lg">
+                      <PhoneIcon className="h-5 w-5 text-amber-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">Phone</h3>
-                      <p className="text-gray-600">+966 50 123 4567</p>
-                      <p className="text-gray-500 text-sm">Sunday - Thursday, 9AM - 6PM</p>
+                      <h3 className="font-semibold text-amber-900 mb-1">الهاتف</h3>
+                      <p className="text-gray-600">+966 77 678 0551</p>
+                      <p className="text-sm text-amber-700">السبت - الخميس: 9 ص - 9 م</p>
                     </div>
                   </div>
 
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-                      <EnvelopeIcon className="h-6 w-6 text-primary-600" />
+                  <div className="flex items-start space-x-reverse space-x-3">
+                    <div className="p-3 bg-amber-100 rounded-lg">
+                      <EnvelopeIcon className="h-5 w-5 text-amber-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">Email</h3>
-                      <p className="text-gray-600">support@mystore.com</p>
-                      <p className="text-gray-500 text-sm">We respond within 24 hours</p>
+                      <h3 className="font-semibold text-amber-900 mb-1">البريد الإلكتروني</h3>
+                      <p className="text-gray-600">support@asalah.store</p>
+                      <p className="text-sm text-amber-700">رد خلال 24 ساعة</p>
                     </div>
                   </div>
 
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-                      <MapPinIcon className="h-6 w-6 text-primary-600" />
+                  <div className="flex items-start space-x-reverse space-x-3">
+                    <div className="p-3 bg-amber-100 rounded-lg">
+                      <MapPinIcon className="h-5 w-5 text-amber-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">Address</h3>
-                      <p className="text-gray-600">Riyadh, Saudi Arabia</p>
-                      <p className="text-gray-500 text-sm">King Abdullah District</p>
+                      <h3 className="font-semibold text-amber-900 mb-1">العنوان</h3>
+                      <p className="text-gray-600">
+                        شارع الملك فهد<br />
+                        الرياض، المملكة العربية السعودية<br />
+                        الرمز البريدي 12345
+                      </p>
                     </div>
                   </div>
 
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-                      <ClockIcon className="h-6 w-6 text-primary-600" />
+                  <div className="flex items-start space-x-reverse space-x-3">
+                    <div className="p-3 bg-amber-100 rounded-lg">
+                      <ClockIcon className="h-5 w-5 text-amber-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">Business Hours</h3>
-                      <p className="text-gray-600">Mon - Fri: 9AM - 6PM</p>
-                      <p className="text-gray-600">Sat: 10AM - 4PM</p>
-                      <p className="text-gray-500 text-sm">Sunday: Closed</p>
+                      <h3 className="font-semibold text-amber-900 mb-1">ساعات العمل</h3>
+                      <p className="text-gray-600">
+                        السبت - الخميس: 9 ص - 9 م<br />
+                        الجمعة: 2 م - 9 م
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -160,60 +144,80 @@ const ContactUs = () => {
             </motion.div>
 
             {/* Contact Form */}
-            <motion.div variants={itemVariants} className="lg:col-span-2">
-              <div className="bg-white rounded-2xl shadow-xl p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Send us a Message</h2>
-                
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="lg:col-span-2"
+            >
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-8 border border-amber-200/30">
+                <h2 className="text-2xl font-bold text-amber-900 mb-6 flex items-center space-x-reverse space-x-2">
+                  <PaperAirplaneIcon className="h-6 w-6 text-amber-600" />
+                  أرسل لنا رسالة
+                </h2>
+
                 {submitStatus === 'success' && (
-                  <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <p className="text-green-800">Thank you for your message! We'll get back to you soon.</p>
-                  </div>
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg"
+                  >
+                    <p className="text-green-700 font-semibold">
+                      ✅ تم إرسال رسالتك بنجاح! سنتواصل معك قريباً.
+                    </p>
+                  </motion.div>
                 )}
 
                 {submitStatus === 'error' && (
-                  <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-red-800">Something went wrong. Please try again later.</p>
-                  </div>
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg"
+                  >
+                    <p className="text-red-700 font-semibold">
+                      ❌ حدث خطأ أثناء إرسال الرسالة. يرجى المحاولة مرة أخرى.
+                    </p>
+                  </motion.div>
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                        Full Name *
+                      <label htmlFor="name" className="block text-sm font-medium text-amber-700 mb-2">
+                        الاسم الكامل *
                       </label>
                       <input
                         type="text"
                         id="name"
                         name="name"
-                        required
                         value={formData.name}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                        placeholder="John Doe"
+                        required
+                        className="w-full px-4 py-3 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 backdrop-blur-sm"
+                        placeholder="أدخل اسمك الكامل"
                       />
                     </div>
 
                     <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                        Email Address *
+                      <label htmlFor="email" className="block text-sm font-medium text-amber-700 mb-2">
+                        البريد الإلكتروني *
                       </label>
                       <input
                         type="email"
                         id="email"
                         name="email"
-                        required
                         value={formData.email}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                        placeholder="john@example.com"
+                        required
+                        className="w-full px-4 py-3 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 backdrop-blur-sm"
+                        placeholder="أدخل بريدك الإلكتروني"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                      Phone Number
+                    <label htmlFor="phone" className="block text-sm font-medium text-amber-700 mb-2">
+                      رقم الهاتف
                     </label>
                     <input
                       type="tel"
@@ -221,73 +225,63 @@ const ContactUs = () => {
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                      placeholder="+966 50 123 4567"
+                      className="w-full px-4 py-3 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 backdrop-blur-sm"
+                      placeholder="أدخل رقم هاتفك"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
-                      Subject *
+                    <label htmlFor="subject" className="block text-sm font-medium text-amber-700 mb-2">
+                      الموضوع *
                     </label>
-                    <select
+                    <input
+                      type="text"
                       id="subject"
                       name="subject"
-                      required
                       value={formData.subject}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                    >
-                      <option value="">Select a subject</option>
-                      <option value="general">General Inquiry</option>
-                      <option value="order">Order Status</option>
-                      <option value="return">Return & Refund</option>
-                      <option value="product">Product Information</option>
-                      <option value="technical">Technical Support</option>
-                      <option value="partnership">Partnership</option>
-                    </select>
+                      required
+                      className="w-full px-4 py-3 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 backdrop-blur-sm"
+                      placeholder="موضوع رسالتك"
+                    />
                   </div>
 
                   <div>
-                    <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                      Message *
+                    <label htmlFor="message" className="block text-sm font-medium text-amber-700 mb-2">
+                      الرسالة *
                     </label>
                     <textarea
                       id="message"
                       name="message"
-                      required
-                      rows={6}
                       value={formData.message}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors resize-none"
-                      placeholder="Tell us how we can help you..."
+                      required
+                      rows={6}
+                      className="w-full px-4 py-3 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 backdrop-blur-sm resize-none"
+                      placeholder="اكتب رسالتك هنا..."
                     />
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm text-gray-500">
-                      * Required fields
-                    </p>
-                    <button
+                  <div className="flex justify-end">
+                    <motion.button
                       type="submit"
                       disabled={isSubmitting}
-                      className="inline-flex items-center px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="px-8 py-3 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-lg hover:from-amber-700 hover:to-amber-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-reverse space-x-2"
                     >
                       {isSubmitting ? (
                         <>
-                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Sending...
+                          <div className="animate-spin rounded-full border-2 border-amber-200 border-t-amber-600 h-5 w-5"></div>
+                          جاري الإرسال...
                         </>
                       ) : (
                         <>
-                          <PaperAirplaneIcon className="h-5 w-5 mr-2" />
-                          Send Message
+                          <PaperAirplaneIcon className="h-5 w-5" />
+                          إرسال الرسالة
                         </>
                       )}
-                    </button>
+                    </motion.button>
                   </div>
                 </form>
               </div>
@@ -295,38 +289,66 @@ const ContactUs = () => {
           </div>
 
           {/* FAQ Section */}
-          <motion.div variants={itemVariants} className="mt-12">
-            <div className="bg-white rounded-2xl shadow-xl p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">How can I track my order?</h3>
-                    <p className="text-gray-600">You can track your order by logging into your account and viewing your order history, or use the tracking number sent to your email.</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">What is your return policy?</h3>
-                    <p className="text-gray-600">We offer 30-day return policy for unused items in original packaging. Please check our return policy page for more details.</p>
-                  </div>
-                </div>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="mt-16"
+          >
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-amber-900 mb-4">
+                الأسئلة الشائعة
+              </h2>
+              <p className="text-gray-600">
+                قد تجد إجابة لسؤالك في قسم الأسئلة الشائعة
+              </p>
+            </div>
 
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">Do you ship internationally?</h3>
-                    <p className="text-gray-600">Currently, we ship within Saudi Arabia. We're working on expanding to other GCC countries soon.</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">How can I become a partner?</h3>
-                    <p className="text-gray-600">Please send us an email with your business proposal to partners@mystore.com and our team will get back to you.</p>
-                  </div>
-                </div>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                {
+                  question: "كيف يمكنني تتبع طلبي؟",
+                  answer: "يمكنك تتبع طلبك من خلال حسابك في موقعنا أو عبر رابط التتبع المرسل إلى بريدك الإلكتروني."
+                },
+                {
+                  question: "ما هي سياسة الإرجاع؟",
+                  answer: "نوفر سياسة إرجاع لمدة 30 يوماً من تاريخ الاستلام للمنتجات غير المستخدمة."
+                },
+                {
+                  question: "هل توفرن الشحن المجاني؟",
+                  answer: "نعم، نوفر الشحن المجاني للطلبات التي تتجاوز 50 ريال سعودي."
+                },
+                {
+                  question: "كم يستغرق التوصيل؟",
+                  answer: "يستغرق التوصيل عادةً 2-3 أيام عمل داخل المدن الرئيسية و 5-7 أيام للمناطق الأخرى."
+                },
+                {
+                  question: "كيف يمكنني الدفع؟",
+                  answer: "نقبل جميع بطاقات الائتمان الرئيسية، الدفع عند الاستلام، والدفع عبر البنوك الإلكترونية."
+                },
+                {
+                  question: "هل المنتجات أصلية؟",
+                  answer: "نعم، نضمن أصالة جميع منتجاتنا ونوفر شهادات ضمان لكل منتج."
+                }
+              ].map((faq, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.1 * index }}
+                  className="bg-white/80 backdrop-blur-sm rounded-lg p-6 border border-amber-200/30 hover:shadow-lg transition-all duration-300"
+                >
+                  <h3 className="font-semibold text-amber-900 mb-3">
+                    {faq.question}
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    {faq.answer}
+                  </p>
+                </motion.div>
+              ))}
             </div>
           </motion.div>
-        </motion.div>
+        </div>
       </div>
     </>
   )

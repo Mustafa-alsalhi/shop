@@ -21,19 +21,19 @@ const AddUser = () => {
     try {
       // Basic validation
       if (!user.name.trim()) {
-        throw new Error('Name is required')
+        throw new Error('الاسم مطلوب')
       }
       if (!user.email.trim()) {
-        throw new Error('Email is required')
+        throw new Error('البريد الإلكتروني مطلوب')
       }
       if (!user.password) {
-        throw new Error('Password is required')
+        throw new Error('كلمة المرور مطلوبة')
       }
       if (user.password.length < 6) {
-        throw new Error('Password must be at least 6 characters')
+        throw new Error('كلمة المرور يجب أن تكون 6 أحرف على الأقل')
       }
       if (!user.role) {
-        throw new Error('Role is required')
+        throw new Error('الدور مطلوب')
       }
 
       const userData = {
@@ -48,7 +48,7 @@ const AddUser = () => {
       const response = await api.post('/admin/users', userData)
       
       console.log('✅ User created successfully:', response.data)
-      alert('User created successfully!')
+      alert('تم إنشاء المستخدم بنجاح!')
       navigate('/admin/users')
     } catch (err) {
       console.error('❌ Create user failed:', err)
@@ -59,7 +59,7 @@ const AddUser = () => {
         data: err.response?.data
       })
       
-      let errorMessage = 'Unknown error occurred'
+      let errorMessage = 'حدث خطأ غير معروف'
       
       if (err.response?.data?.errors) {
         errorMessage = Object.values(err.response.data.errors).flat().join(', ')
@@ -71,7 +71,7 @@ const AddUser = () => {
         errorMessage = err.message
       }
       
-      setError(`Failed to create user: ${errorMessage}`)
+      setError(`فشل في إنشاء المستخدم: ${errorMessage}`)
     } finally {
       setLoading(false)
     }
@@ -91,12 +91,12 @@ const AddUser = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto py-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Add New User</h1>
+          <h1 className="text-2xl font-bold text-gray-900">إضافة مستخدم جديد</h1>
           <button
             onClick={() => navigate('/admin/users')}
             className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
           >
-            Back to Users
+            العودة للمستخدمين
           </button>
         </div>
 
@@ -108,13 +108,13 @@ const AddUser = () => {
 
         <div className="bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b">
-            <h2 className="text-lg font-semibold">User Information</h2>
+            <h2 className="text-lg font-semibold">معلومات المستخدم</h2>
           </div>
           <form onSubmit={handleSubmit} className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Name *
+                  الاسم *
                 </label>
                 <input
                   type="text"
@@ -123,13 +123,13 @@ const AddUser = () => {
                   onChange={handleInputChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter user name"
+                  placeholder="أدخل اسم المستخدم"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email *
+                  البريد الإلكتروني *
                 </label>
                 <input
                   type="email"
@@ -138,13 +138,13 @@ const AddUser = () => {
                   onChange={handleInputChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter email address"
+                  placeholder="أدخل البريد الإلكتروني"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Password *
+                  كلمة المرور *
                 </label>
                 <input
                   type="password"
@@ -154,16 +154,16 @@ const AddUser = () => {
                   required
                   minLength="6"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter password (min 6 characters)"
+                  placeholder="أدخل كلمة المرور (6 أحرف على الأقل)"
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Password must be at least 6 characters long
+                  كلمة المرور يجب أن تكون 6 أحرف على الأقل
                 </p>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Role *
+                  الدور *
                 </label>
                 <select
                   name="role"
@@ -172,12 +172,12 @@ const AddUser = () => {
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="">Select Role</option>
-                  <option value="user">User</option>
-                  <option value="admin">Admin</option>
+                  <option value="">اختيار الدور</option>
+                  <option value="user">مستخدم</option>
+                  <option value="admin">مدير</option>
                 </select>
                 <p className="mt-1 text-xs text-gray-500">
-                  Admin users have full access to admin panel
+                  المستخدمون المديرون لديهم وصول كامل لوحة تحكم المديرين
                 </p>
               </div>
             </div>
@@ -188,14 +188,14 @@ const AddUser = () => {
                 onClick={() => navigate('/admin/users')}
                 className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
               >
-                Cancel
+                إلغاء
               </button>
               <button
                 type="submit"
                 disabled={loading}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
               >
-                {loading ? 'Creating...' : 'Create User'}
+                {loading ? 'جاري الإنشاء...' : 'إنشاء مستخدم'}
               </button>
             </div>
           </form>

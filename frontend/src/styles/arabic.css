@@ -1,0 +1,477 @@
+/* 🌍 ملف الأنماط العربية */
+
+/* استيراد الخطوط العربية */
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap');
+
+/* إعدادات أساسية */
+:root {
+  --primary-arabic: #2D3748;
+  --secondary-arabic: #4A5568;
+  --accent-arabic: #805AD5;
+  --success-arabic: #38A169;
+  --warning-arabic: #D69E2E;
+  --error-arabic: #E53E3E;
+  --info-arabic: #3182CE;
+}
+
+/* إعدادات الجسم */
+body {
+  font-family: 'Tajawal', 'Cairo', sans-serif;
+  direction: rtl;
+  text-align: right;
+  line-height: 1.8;
+  letter-spacing: 0.02em;
+  font-size: 16px;
+}
+
+/* النصوص العربية */
+.arabic-text {
+  font-family: 'Tajawal', 'Cairo', sans-serif;
+  line-height: 1.8;
+  letter-spacing: 0.02em;
+}
+
+/* العناوين العربية */
+.arabic-heading {
+  font-family: 'Cairo', 'Tajawal', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+/* تحويل الاتجاهات */
+.rtl {
+  direction: rtl;
+}
+
+.ltr {
+  direction: ltr;
+}
+
+/* تحويل Flexbox */
+.flex-row-reverse {
+  flex-direction: row-reverse;
+}
+
+/* تحويل Margins */
+.ml-4 { 
+  margin-right: 1rem; 
+  margin-left: 0; 
+}
+
+.mr-4 { 
+  margin-left: 1rem; 
+  margin-right: 0; 
+}
+
+.ml-6 { 
+  margin-right: 1.5rem; 
+  margin-left: 0; 
+}
+
+.mr-6 { 
+  margin-left: 1.5rem; 
+  margin-right: 0; 
+}
+
+/* تحويل Padding */
+.pl-4 { 
+  padding-right: 1rem; 
+  padding-left: 0; 
+}
+
+.pr-4 { 
+  padding-left: 1rem; 
+  padding-right: 0; 
+}
+
+.pl-6 { 
+  padding-right: 1.5rem; 
+  padding-left: 0; 
+}
+
+.pr-6 { 
+  padding-left: 1.5rem; 
+  padding-right: 0; 
+}
+
+/* تحويل Text Alignment */
+.text-right {
+  text-align: right;
+}
+
+.text-left {
+  text-align: left;
+}
+
+/* تحويل Float */
+.float-right {
+  float: left;
+}
+
+.float-left {
+  float: right;
+}
+
+/* تحويل Border */
+.border-r {
+  border-left: 1px solid;
+}
+
+.border-l {
+  border-right: 1px solid;
+}
+
+/* تحويل Position */
+.right-0 {
+  left: 0;
+  right: auto;
+}
+
+.left-0 {
+  right: 0;
+  left: auto;
+}
+
+/* تحويل التحويم */
+.hover\:ml-2:hover {
+  margin-right: 0.5rem;
+  margin-left: 0;
+}
+
+/* تحويل القوائم */
+.dropdown-menu {
+  right: 0;
+  left: auto;
+}
+
+/* تحويل الجداول */
+.arabic-table {
+  direction: rtl;
+  text-align: right;
+}
+
+.arabic-table th {
+  text-align: right;
+}
+
+.arabic-table td {
+  text-align: right;
+}
+
+/* تحويل النماذج */
+.arabic-form {
+  direction: rtl;
+  text-align: right;
+}
+
+.arabic-form input {
+  text-align: right;
+  direction: rtl;
+}
+
+.arabic-form textarea {
+  text-align: right;
+  direction: rtl;
+}
+
+/* تحويل الأزرار */
+.arabic-button {
+  font-family: 'Tajawal', 'Cairo', sans-serif;
+}
+
+/* تحويل البطاقات */
+.arabic-card {
+  direction: rtl;
+  text-align: right;
+}
+
+/* تحويل التنقل */
+.arabic-nav {
+  direction: rtl;
+}
+
+.arabic-nav ul {
+  padding-right: 0;
+  padding-left: 1rem;
+}
+
+/* تحويل الفوتر */
+.arabic-footer {
+  direction: rtl;
+  text-align: right;
+}
+
+/* تحويل الإشعارات */
+.arabic-notification {
+  direction: rtl;
+  text-align: right;
+}
+
+/* تحويل السلة */
+.arabic-cart {
+  direction: rtl;
+  text-align: right;
+}
+
+/* تحويل البحث */
+.arabic-search {
+  direction: rtl;
+  text-align: right;
+}
+
+.arabic-search input {
+  text-align: right;
+  direction: rtl;
+}
+
+/* تحسينات للأجهزة المحمولة */
+@media (max-width: 768px) {
+  .arabic-mobile-menu {
+    direction: rtl;
+    text-align: right;
+    right: 0;
+    left: auto;
+  }
+  
+  .arabic-mobile-sidebar {
+    right: -100%;
+    left: auto;
+  }
+  
+  .arabic-mobile-sidebar.open {
+    right: 0;
+    left: auto;
+  }
+}
+
+/* تحسينات للطباعة */
+@media print {
+  .arabic-print {
+    direction: rtl;
+    text-align: right;
+  }
+}
+
+/* تحسينات إضافية */
+.arabic-content {
+  font-family: 'Tajawal', 'Cairo', sans-serif;
+  line-height: 1.8;
+  direction: rtl;
+  text-align: right;
+}
+
+.arabic-title {
+  font-family: 'Cairo', 'Tajawal', sans-serif;
+  font-weight: 700;
+  direction: rtl;
+  text-align: right;
+}
+
+.arabic-subtitle {
+  font-family: 'Tajawal', 'Cairo', sans-serif;
+  font-weight: 500;
+  direction: rtl;
+  text-align: right;
+}
+
+/* تأثيرات حركية عربية */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes continuousScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.slide-in-right {
+  animation: slideInRight 0.3s ease-out;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.3s ease-out;
+}
+
+/* تحسينات خاصة بالمتجر */
+.arabic-store {
+  direction: rtl;
+  text-align: right;
+  font-family: 'Tajawal', 'Cairo', sans-serif;
+}
+
+.arabic-product-card {
+  direction: rtl;
+  text-align: right;
+}
+
+.arabic-product-title {
+  font-family: 'Cairo', 'Tajawal', sans-serif;
+  font-weight: 600;
+  text-align: right;
+}
+
+.arabic-product-price {
+  font-family: 'Tajawal', 'Cairo', sans-serif;
+  font-weight: 700;
+  text-align: right;
+}
+
+.arabic-cart-item {
+  direction: rtl;
+  text-align: right;
+}
+
+.arabic-checkout-form {
+  direction: rtl;
+  text-align: right;
+}
+
+.arabic-checkout-form input,
+.arabic-checkout-form select,
+.arabic-checkout-form textarea {
+  text-align: right;
+  direction: rtl;
+}
+
+/* تحسينات لوحة التحكم */
+.arabic-admin {
+  direction: rtl;
+  text-align: right;
+}
+
+.arabic-admin-table {
+  direction: rtl;
+  text-align: right;
+}
+
+.arabic-admin-table th {
+  text-align: right;
+  font-family: 'Cairo', 'Tajawal', sans-serif;
+}
+
+.arabic-admin-table td {
+  text-align: right;
+}
+
+.arabic-admin-sidebar {
+  direction: rtl;
+  text-align: right;
+}
+
+.arabic-admin-menu {
+  direction: rtl;
+  text-align: right;
+}
+
+/* تحسينات الألوان العربية */
+.arabic-primary {
+  color: var(--primary-arabic);
+}
+
+.arabic-secondary {
+  color: var(--secondary-arabic);
+}
+
+.arabic-accent {
+  color: var(--accent-arabic);
+}
+
+.arabic-success {
+  color: var(--success-arabic);
+}
+
+/* إصلاح حركة المنتجات المميزة */
+#featured-products-container {
+  direction: ltr !important;
+  overflow-x: auto !important;
+  scroll-behavior: smooth !important;
+}
+
+#featured-products-container .scroll-content {
+  display: flex;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+}
+
+#featured-products-container .scroll-content > div {
+  flex-shrink: 0 !important;
+}
+
+/* إضافة حركة تلقائية سلسة ومستمرة */
+@keyframes continuousScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+#featured-products-container .scroll-content {
+  display: flex;
+  animation: continuousScroll 2s linear infinite;
+}
+
+#featured-products-container:hover .scroll-content {
+  animation-play-state: paused;
+}
+
+.arabic-warning {
+  color: var(--warning-arabic);
+}
+
+.arabic-error {
+  color: var(--error-arabic);
+}
+
+.arabic-info {
+  color: var(--info-arabic);
+}
+
+/* تحسينات الخلفية */
+.arabic-bg-primary {
+  background-color: var(--primary-arabic);
+}
+
+.arabic-bg-secondary {
+  background-color: var(--secondary-arabic);
+}
+
+.arabic-bg-accent {
+  background-color: var(--accent-arabic);
+}
+
+.arabic-bg-success {
+  background-color: var(--success-arabic);
+}
+
+.arabic-bg-warning {
+  background-color: var(--warning-arabic);
+}
+
+.arabic-bg-error {
+  background-color: var(--error-arabic);
+}
+
+.arabic-bg-info {
+  background-color: var(--info-arabic);
+}

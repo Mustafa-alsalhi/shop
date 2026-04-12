@@ -38,82 +38,82 @@ const ShippingInfo = () => {
 
   const shippingOptions = [
     {
-      type: "Standard Delivery",
+      type: "التوصيل القياسي",
       icon: TruckIcon,
-      time: "3-5 Business Days",
-      price: "Free (Orders over SAR 200)",
-      description: "Reliable standard delivery to all major cities in Saudi Arabia."
+      time: "3-5 أيام عمل",
+      price: "مجاني (للطلبات فوق 200 ريال)",
+      description: "توصيل موثوق لجميع المدن الرئيسية في السعودية."
     },
     {
-      type: "Express Delivery",
+      type: "التوصيل السريع",
       icon: ClockIcon,
-      time: "1-2 Business Days",
-      price: "SAR 25",
-      description: "Fast delivery for urgent orders within Riyadh, Jeddah, and Dammam."
+      time: "1-2 أيام عمل",
+      price: "25 ريال",
+      description: "توصيل سريع للطلبات العاجلة في الرياض، جدة، والدمام."
     },
     {
-      type: "Same Day Delivery",
+      type: "التوصيل في نفس اليوم",
       icon: RocketLaunchIcon,
-      time: "Same Day",
-      price: "SAR 50",
-      description: "Available for Riyadh orders placed before 12 PM."
+      time: "نفس اليوم",
+      price: "50 ريال",
+      description: "متاح لطلبات الرياض المقدمة قبل الساعة 12 ظهراً."
     }
   ]
 
   const cities = [
-    { id: 'riyadh', name: 'Riyadh', deliveryTime: '1-3 days', expressAvailable: true },
-    { id: 'jeddah', name: 'Jeddah', deliveryTime: '2-4 days', expressAvailable: true },
-    { id: 'dammam', name: 'Dammam', deliveryTime: '2-4 days', expressAvailable: true },
-    { id: 'mecca', name: 'Mecca', deliveryTime: '3-5 days', expressAvailable: false },
-    { id: 'medina', name: 'Medina', deliveryTime: '3-5 days', expressAvailable: false },
-    { id: 'khobar', name: 'Khobar', deliveryTime: '2-4 days', expressAvailable: true }
+    { id: 'riyadh', name: 'الرياض', deliveryTime: '1-3 أيام', expressAvailable: true },
+    { id: 'jeddah', name: 'جدة', deliveryTime: '2-4 أيام', expressAvailable: true },
+    { id: 'dammam', name: 'الدمام', deliveryTime: '2-4 أيام', expressAvailable: true },
+    { id: 'mecca', name: 'مكة', deliveryTime: '3-5 أيام', expressAvailable: false },
+    { id: 'medina', name: 'المدينة', deliveryTime: '3-5 أيام', expressAvailable: false },
+    { id: 'khobar', name: 'الخبر', deliveryTime: '2-4 أيام', expressAvailable: true }
   ]
 
   const shippingPolicies = [
     {
-      title: "Order Processing Time",
+      title: "وقت معالجة الطلب",
       icon: ClockIcon,
-      content: "Orders are processed within 24 hours on business days. Orders placed after 2 PM will be processed the next business day."
+      content: "يتم معالجة الطلبات خلال 24 ساعة في أيام العمل. الطلبات المقدمة بعد الساعة 2 مساءً تتم معالجتها في يوم العمل التالي."
     },
     {
-      title: "Shipping Confirmation",
+      title: "تأكيد الشحن",
       icon: CheckCircleIcon,
-      content: "You'll receive a confirmation email with tracking information once your order ships. Track your package in real-time through our website or the carrier's tracking system."
+      content: "ستتلقى بريداً إلكترونياً بتأكيد الشحن ومعلومات التتبع بمجرد شحن طلبك. تتبع طردك في الوقت الفعلي من خلال موقعنا أو نظام التتبع الخاص بالشركة."
     },
     {
-      title: "Shipping Insurance",
+      title: "تأمين الشحن",
       icon: ShieldCheckIcon,
-      content: "All orders are automatically insured against loss or damage during transit. If your package is lost or damaged, we'll either reship or refund your order."
+      content: "جميع الطلبات مؤمنة تلقائياً ضد الضياع أو التلف أثناء النقل. إذا فقد طردك أو تلف، سنعيد شحنه أو نسترد أموالك."
     },
     {
-      title: "Customs & Duties",
+      title: "الرسوم الجمركية",
       icon: CurrencyDollarIcon,
-      content: "For domestic orders within Saudi Arabia, there are no additional customs fees. All prices include applicable taxes."
+      content: "للطلبات المحلية داخل السعودية، لا توجد رسوم جمركية إضافية. جميع الأسعار تشمل الضرائب المطبقة."
     }
   ]
 
   const restrictions = [
-    "Large furniture items over 50kg",
-    "Hazardous materials and chemicals",
-    "Perishable items",
-    "Live animals or plants",
-    "Items requiring special handling or temperature control"
+    "عناصر الأثاث الكبيرة فوق 50 كجم",
+    "المواد الخطرة والمواد الكيميائية",
+    "العناصر القابلة للتلف",
+    "الحيوانات الحية أو النباتات",
+    "العناصر التي تتطلب معاملة خاصة أو تحكم في درجة الحرارة"
   ]
 
   return (
     <>
       <Helmet>
-        <title>Shipping Information - My Store</title>
-        <meta name="description" content="Complete shipping information for My Store Saudi Arabia. Delivery options, rates, and policies." />
+        <title>معلومات الشحن - متجر أصالة</title>
+        <meta name="description" content="معلومات الشحن الكاملة لمتجر أصالة السعودية. خيارات التوصيل، الأسعار، والسياسات." />
       </Helmet>
 
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50" dir="rtl">
         {/* Hero Section */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="bg-gradient-to-r from-primary-600 to-primary-700 text-white py-16"
+          className="bg-gradient-to-r from-amber-600 to-orange-600 text-white py-16"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
@@ -125,9 +125,9 @@ const ShippingInfo = () => {
               >
                 <TruckIcon className="h-10 w-10 text-white" />
               </motion.div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">Shipping Information</h1>
-              <p className="text-xl text-primary-100 max-w-3xl mx-auto">
-                Fast, reliable, and affordable shipping across Saudi Arabia. Track your orders every step of the way.
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">معلومات الشحن</h1>
+              <p className="text-xl text-amber-100 max-w-3xl mx-auto">
+                توصيل سريع وموثوق وبأسعار معقولة عبر السعودية. تتبع طلباتك في كل خطوة.
               </p>
             </div>
           </div>
@@ -143,24 +143,24 @@ const ShippingInfo = () => {
           {/* Shipping Options */}
           <motion.div variants={itemVariants} className="mb-16">
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Shipping Options</h2>
+              <h2 className="text-3xl font-bold text-amber-900 mb-4">خيارات الشحن</h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
-                Choose the delivery method that best suits your needs and timeline.
+                اختر طريقة التوصيل التي تناسب احتياجاتك وجدولك الزمني.
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6" dir="rtl">
               {shippingOptions.map((option, index) => (
-                <div key={index} className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-shadow">
+                <div key={index} className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-shadow border border-amber-200/30">
                   <div className="flex items-center mb-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mr-4">
-                      <option.icon className="h-6 w-6 text-primary-600" />
+                    <div className="flex-shrink-0 w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center ml-4">
+                      <option.icon className="h-6 w-6 text-amber-600" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-semibold text-gray-900">{option.type}</h3>
+                      <h3 className="text-xl font-semibold text-amber-900">{option.type}</h3>
                       <p className="text-sm text-gray-500">{option.time}</p>
                     </div>
                   </div>
-                  <p className="text-lg font-semibold text-primary-600 mb-2">{option.price}</p>
+                  <p className="text-lg font-semibold text-amber-600 mb-2">{option.price}</p>
                   <p className="text-gray-600 text-sm">{option.description}</p>
                 </div>
               ))}
@@ -169,27 +169,27 @@ const ShippingInfo = () => {
 
           {/* Delivery Areas */}
           <motion.div variants={itemVariants} className="mb-16">
-            <div className="bg-white rounded-2xl shadow-xl p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Delivery Areas & Times</h2>
+            <div className="bg-white rounded-2xl shadow-xl p-8 border border-amber-200/30">
+              <h2 className="text-2xl font-bold text-amber-900 mb-6">مناطق التوصيل والأوقات</h2>
               
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8" dir="rtl">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Select Your City</h3>
-                  <div className="grid grid-cols-2 gap-3">
+                  <h3 className="text-lg font-semibold text-amber-900 mb-4">اختر مدينتك</h3>
+                  <div className="grid grid-cols-2 gap-3" dir="rtl">
                     {cities.map((city) => (
                       <button
                         key={city.id}
                         onClick={() => setSelectedCity(city.id)}
                         className={`p-3 rounded-lg border-2 transition-all ${
                           selectedCity === city.id
-                            ? 'border-primary-500 bg-primary-50 text-primary-700'
+                            ? 'border-amber-500 bg-amber-50 text-amber-700'
                             : 'border-gray-200 hover:border-gray-300'
                         }`}
                       >
                         <div className="font-medium">{city.name}</div>
                         <div className="text-sm text-gray-500">{city.deliveryTime}</div>
                         {city.expressAvailable && (
-                          <div className="text-xs text-primary-600 mt-1">Express Available</div>
+                          <div className="text-xs text-amber-600 mt-1">متاح السريع</div>
                         )}
                       </button>
                     ))}
@@ -197,24 +197,24 @@ const ShippingInfo = () => {
                 </div>
                 
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Delivery Information</h3>
-                  <div className="bg-gray-50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-amber-900 mb-4">معلومات التوصيل</h3>
+                  <div className="bg-amber-50 rounded-lg p-4">
                     {(() => {
                       const city = cities.find(c => c.id === selectedCity)
                       return (
                         <div className="space-y-3">
                           <div className="flex items-center">
-                            <MapPinIcon className="h-5 w-5 text-gray-400 mr-2" />
+                            <MapPinIcon className="h-5 w-5 text-amber-600 ml-2" />
                             <span className="font-medium">{city?.name}</span>
                           </div>
                           <div className="flex items-center">
-                            <ClockIcon className="h-5 w-5 text-gray-400 mr-2" />
-                            <span>Standard: {city?.deliveryTime}</span>
+                            <ClockIcon className="h-5 w-5 text-amber-600 ml-2" />
+                            <span>القياسي: {city?.deliveryTime}</span>
                           </div>
                           {city?.expressAvailable && (
                             <div className="flex items-center">
-                              <TruckIcon className="h-5 w-5 text-gray-400 mr-2" />
-                              <span>Express: 1-2 days</span>
+                              <TruckIcon className="h-5 w-5 text-amber-600 ml-2" />
+                              <span>السريع: 1-2 أيام</span>
                             </div>
                           )}
                         </div>
@@ -229,19 +229,19 @@ const ShippingInfo = () => {
           {/* Shipping Policies */}
           <motion.div variants={itemVariants} className="mb-16">
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Shipping Policies</h2>
+              <h2 className="text-3xl font-bold text-amber-900 mb-4">سياسات الشحن</h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
-                Everything you need to know about our shipping process and policies.
+                كل ما تحتاج لمعرفته عن عملية الشحن وسياساتنا.
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6" dir="rtl">
               {shippingPolicies.map((policy, index) => (
-                <div key={index} className="bg-white rounded-2xl shadow-xl p-6">
+                <div key={index} className="bg-white rounded-2xl shadow-xl p-6 border border-amber-200/30">
                   <div className="flex items-start mb-4">
-                    <div className="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center mr-4">
-                      <policy.icon className="h-5 w-5 text-primary-600" />
+                    <div className="flex-shrink-0 w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center mr-4">
+                      <policy.icon className="h-5 w-5 text-amber-600" />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900">{policy.title}</h3>
+                    <h3 className="text-lg font-semibold text-amber-900">{policy.title}</h3>
                   </div>
                   <p className="text-gray-600">{policy.content}</p>
                 </div>
@@ -253,37 +253,37 @@ const ShippingInfo = () => {
           <motion.div variants={itemVariants} className="mb-16">
             <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-8">
               <div className="flex items-center mb-4">
-                <ExclamationTriangleIcon className="h-8 w-8 text-amber-600 mr-3" />
-                <h3 className="text-xl font-bold text-gray-900">Shipping Restrictions</h3>
+                <ExclamationTriangleIcon className="h-8 w-8 text-amber-600 ml-3" />
+                <h3 className="text-xl font-bold text-amber-900">قيود الشحن</h3>
               </div>
               <p className="text-gray-700 mb-4">
-                The following items cannot be shipped through our standard delivery service:
+                العناصر التالية لا يمكن شحنها عبر خدمة التوصيل القياسية:
               </p>
               <ul className="space-y-2">
                 {restrictions.map((restriction, index) => (
                   <li key={index} className="flex items-center text-gray-700">
-                    <div className="w-2 h-2 bg-amber-500 rounded-full mr-3"></div>
+                    <div className="w-2 h-2 bg-amber-500 rounded-full ml-3"></div>
                     {restriction}
                   </li>
                 ))}
               </ul>
               <p className="text-gray-600 mt-4 text-sm">
-                For special handling requirements, please contact our customer service team.
+                لمتطلبات المعاملة الخاصة، يرجى التواصل مع فريق خدمة العملاء.
               </p>
             </div>
           </motion.div>
 
           {/* Tracking Information */}
           <motion.div variants={itemVariants} className="mb-16">
-            <div className="bg-gradient-to-r from-primary-600 to-primary-700 rounded-2xl p-8 text-white">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div className="bg-gradient-to-r from-amber-600 to-orange-600 rounded-2xl p-8 text-white">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center" dir="rtl">
                 <div>
-                  <h3 className="text-2xl font-bold mb-4">Track Your Order</h3>
-                  <p className="text-primary-100 mb-6">
-                    Stay updated on your order status with our real-time tracking system. Get notifications at every step of your delivery journey.
+                  <h3 className="text-2xl font-bold mb-4">تتبع طلبك</h3>
+                  <p className="text-amber-100 mb-6">
+                    ابق على اطلاع على حالة طلبك مع نظام التتبع في الوقت الفعلي. احصل على إشعارات في كل خطوة من رحلة التوصيل.
                   </p>
-                  <button className="px-6 py-3 bg-white text-primary-600 font-semibold rounded-lg hover:bg-gray-50 transition-colors">
-                    Track Order
+                  <button className="px-6 py-3 bg-white text-amber-600 font-semibold rounded-lg hover:bg-amber-50 transition-colors">
+                    تتبع الطلب
                   </button>
                 </div>
                 <div className="flex justify-center">
@@ -297,28 +297,28 @@ const ShippingInfo = () => {
 
           {/* FAQ Section */}
           <motion.div variants={itemVariants}>
-            <div className="bg-white rounded-2xl shadow-xl p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
+            <div className="bg-white rounded-2xl shadow-xl p-8 border border-amber-200/30">
+              <h2 className="text-2xl font-bold text-amber-900 mb-6">الأسئلة المتكررة</h2>
               
               <div className="space-y-6">
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">How much does shipping cost?</h3>
-                  <p className="text-gray-600">Standard shipping is free for orders over SAR 200. For orders below this amount, shipping costs SAR 15. Express and same-day delivery have additional charges.</p>
+                  <h3 className="font-semibold text-amber-900 mb-2">كم تكلفة الشحن؟</h3>
+                  <p className="text-gray-600">الشحن القياسي مجاني للطلبات فوق 200 ريال. للطلبات أقل من هذا المبلغ، تكلفة الشحن 15 ريال. التوصيل السريع وفي نفس اليوم له رسوم إضافية.</p>
                 </div>
                 
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Can I change my delivery address after placing an order?</h3>
-                  <p className="text-gray-600">Address changes are possible within 2 hours of order placement. After this time, please contact customer service immediately for assistance.</p>
+                  <h3 className="font-semibold text-amber-900 mb-2">هل يمكنني تغيير عنوان التوصيل بعد تقديم الطلب؟</h3>
+                  <p className="text-gray-600">تغيير العنوان ممكن خلال ساعتين من تقديم الطلب. بعد هذا الوقت، يرجى التواصل مع خدمة العملاء فوراً للمساعدة.</p>
                 </div>
                 
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">What if I'm not home when my package arrives?</h3>
-                  <p className="text-gray-600">Our delivery team will attempt delivery twice. If unsuccessful, your package will be available for pickup at the nearest collection point.</p>
+                  <h3 className="font-semibold text-amber-900 mb-2">ماذا لو لم أكن في المنزل عند وصول طردتي؟</h3>
+                  <p className="text-gray-600">فريق التوصيل سيحاول التسليم مرتين. إذا لم ينجح، ستكون طردتك متاحة للاستلام في أقرب نقطة تجميع.</p>
                 </div>
                 
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Do you ship to PO boxes?</h3>
-                  <p className="text-gray-600">No, we only deliver to physical addresses within Saudi Arabia. Please provide a complete and accurate delivery address.</p>
+                  <h3 className="font-semibold text-amber-900 mb-2">هل تشحنون إلى صناديق البريد؟</h3>
+                  <p className="text-gray-600">لا، نسلم فقط إلى عناوين فعلية داخل السعودية. يرجى تقديم عنوان توصيل كامل ودقيق.</p>
                 </div>
               </div>
             </div>

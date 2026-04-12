@@ -42,25 +42,25 @@ const ResetPassword = () => {
     const errors = {}
     
     if (!formData.token) {
-      errors.token = 'Reset token is required'
+      errors.token = 'رمز إعادة التعيين مطلوب'
     }
     
     if (!formData.email) {
-      errors.email = 'Email is required'
+      errors.email = 'البريد الإلكتروني مطلوب'
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = 'Email is invalid'
+      errors.email = 'البريد الإلكتروني غير صالح'
     }
     
     if (!formData.password) {
-      errors.password = 'Password is required'
+      errors.password = 'كلمة المرور مطلوبة'
     } else if (formData.password.length < 8) {
-      errors.password = 'Password must be at least 8 characters'
+      errors.password = 'يجب أن تكون كلمة المرور 8 أحرف على الأقل'
     }
     
     if (!formData.password_confirmation) {
-      errors.password_confirmation = 'Password confirmation is required'
+      errors.password_confirmation = 'تأكيد كلمة المرور مطلوب'
     } else if (formData.password !== formData.password_confirmation) {
-      errors.password_confirmation = 'Passwords do not match'
+      errors.password_confirmation = 'كلمات المرور غير متطابقة'
     }
     
     setValidationErrors(errors)
@@ -77,11 +77,11 @@ const ResetPassword = () => {
     try {
       const result = await dispatch(resetPassword(formData))
       if (result.meta.requestStatus === 'fulfilled') {
-        dispatch(showSuccessNotification('Password reset successful!'))
+        dispatch(showSuccessNotification('تم إعادة تعيين كلمة المرور بنجاح!'))
         navigate('/login')
       }
     } catch (error) {
-      dispatch(showErrorNotification('Password reset failed'))
+      dispatch(showErrorNotification('فشل في إعادة تعيين كلمة المرور'))
     }
   }
 
@@ -91,10 +91,10 @@ const ResetPassword = () => {
         {/* Header */}
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            Reset your password
+            إعادة تعيين كلمة المرور
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Enter your new password below
+            أدخل كلمة المرور الجديدة أدناه
           </p>
         </div>
 
@@ -113,7 +113,7 @@ const ResetPassword = () => {
           {/* Email */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email address
+              عنوان البريد الإلكتروني
             </label>
             <div className="mt-1">
               <input
@@ -125,7 +125,7 @@ const ResetPassword = () => {
                 value={formData.email}
                 onChange={handleChange}
                 className={`input ${validationErrors.email ? 'input-error' : ''}`}
-                placeholder="Enter your email"
+                placeholder="أدخل بريدك الإلكتروني"
                 readOnly
               />
               {validationErrors.email && (
@@ -139,7 +139,7 @@ const ResetPassword = () => {
           {/* Password */}
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              New Password
+              كلمة المرور الجديدة
             </label>
             <div className="mt-1 relative">
               <input
@@ -151,7 +151,7 @@ const ResetPassword = () => {
                 value={formData.password}
                 onChange={handleChange}
                 className={`input pr-10 ${validationErrors.password ? 'input-error' : ''}`}
-                placeholder="Enter your new password"
+                placeholder="أدخل كلمة المرور الجديدة"
               />
               <button
                 type="button"
@@ -175,7 +175,7 @@ const ResetPassword = () => {
           {/* Confirm Password */}
           <div>
             <label htmlFor="password_confirmation" className="block text-sm font-medium text-gray-700">
-              Confirm New Password
+              تأكيد كلمة المرور الجديدة
             </label>
             <div className="mt-1 relative">
               <input
@@ -187,7 +187,7 @@ const ResetPassword = () => {
                 value={formData.password_confirmation}
                 onChange={handleChange}
                 className={`input pr-10 ${validationErrors.password_confirmation ? 'input-error' : ''}`}
-                placeholder="Confirm your new password"
+                placeholder="أكد كلمة المرور الجديدة"
               />
               <button
                 type="button"
@@ -218,10 +218,10 @@ const ResetPassword = () => {
               {isLoading ? (
                 <div className="flex items-center justify-center">
                   <div className="spinner h-5 w-5 mr-2"></div>
-                  Resetting...
+                  جاري إعادة التعيين...
                 </div>
               ) : (
-                'Reset Password'
+                'إعادة تعيين كلمة المرور'
               )}
             </button>
           </div>
@@ -233,7 +233,7 @@ const ResetPassword = () => {
             to="/login"
             className="font-medium text-primary-600 hover:text-primary-500"
           >
-            Back to Login
+            العودة لتسجيل الدخول
           </Link>
         </div>
       </div>

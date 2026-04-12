@@ -895,25 +895,24 @@ const Home = () => {
     }
   }, [])
 
-  // Handle mouse drag/swipe functionality for electronics products
+  // Handle mouse drag/swipe functionality for security features
   useEffect(() => {
     const timer = setTimeout(() => {
-      const container = document.getElementById('electronics-container')
+      const container = document.getElementById('security-features-container')
       if (!container) {
-        console.log('Electronics products container not found - retrying...')
+        console.log('Security features container not found - retrying...')
         return
       }
 
-      console.log('Electronics products container found:', container)
-      console.log('Electronics products container children:', container.children.length)
+      console.log('Security features container found:', container)
+      console.log('Security features container children:', container.children.length)
 
       let isDown = false
       let startX
       let scrollLeft
 
       const handleMouseDown = (e) => {
-        console.log('Electronics products mouse down triggered on:', e.target)
-        setIsAutoPlaying(false) // Stop auto-play on user interaction
+        console.log('Security features mouse down triggered on:', e.target)
         isDown = true
         container.style.cursor = 'grabbing'
         container.style.userSelect = 'none'
@@ -925,7 +924,7 @@ const Home = () => {
       }
 
       const handleMouseLeave = () => {
-        console.log('Electronics products mouse leave triggered')
+        console.log('Security features mouse leave triggered')
         isDown = false
         container.style.cursor = 'grab'
         container.style.userSelect = 'auto'
@@ -933,7 +932,7 @@ const Home = () => {
       }
 
       const handleMouseUp = () => {
-        console.log('Electronics products mouse up triggered')
+        console.log('Security features mouse up triggered')
         isDown = false
         container.style.cursor = 'grab'
         container.style.userSelect = 'auto'
@@ -942,11 +941,11 @@ const Home = () => {
 
       const handleMouseMove = (e) => {
         if (!isDown) return
-        console.log('Electronics products mouse move triggered')
+        console.log('Security features mouse move triggered')
         e.preventDefault()
         e.stopPropagation()
         const x = e.pageX - container.offsetLeft
-        const walk = (x - startX) * 4 // Increase scroll speed significantly
+        const walk = (x - startX) * 2 // Moderate scroll speed
         container.scrollLeft = scrollLeft - walk
       }
 
@@ -958,8 +957,7 @@ const Home = () => {
 
       // Add touch event listeners for mobile
       const handleTouchStart = (e) => {
-        console.log('Electronics products touch start triggered')
-        setIsAutoPlaying(false) // Stop auto-play on user interaction
+        console.log('Security features touch start triggered')
         isDown = true
         container.style.userSelect = 'none'
         container.style.webkitUserSelect = 'none'
@@ -969,7 +967,7 @@ const Home = () => {
       }
 
       const handleTouchEnd = () => {
-        console.log('Electronics products touch end triggered')
+        console.log('Security features touch end triggered')
         isDown = false
         container.style.userSelect = 'auto'
         container.style.webkitUserSelect = 'auto'
@@ -977,10 +975,10 @@ const Home = () => {
 
       const handleTouchMove = (e) => {
         if (!isDown) return
-        console.log('Electronics products touch move triggered')
+        console.log('Security features touch move triggered')
         e.preventDefault()
         const x = e.touches[0].pageX - container.offsetLeft
-        const walk = (x - startX) * 4 // Increase scroll speed significantly
+        const walk = (x - startX) * 2 // Moderate scroll speed
         container.scrollLeft = scrollLeft - walk
       }
 
@@ -1356,7 +1354,7 @@ const Home = () => {
   }, [featuredProducts, isLoading])
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50">
       {/* Advertisement Banner */}
       <AdvertisementBanner />
 
@@ -1364,15 +1362,15 @@ const Home = () => {
       <CategoryBanner />
 
       {/* Featured Products */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-white/60 backdrop-blur-sm">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-12">
-            <h2 className="text-3xl font-bold">Featured Products</h2>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">المنتجات المميزة</h2>
             <Link 
               to="/products?featured=true" 
-              className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium"
+              className="inline-flex items-center text-amber-600 hover:text-amber-700 font-medium transition-colors"
             >
-              <span>View All Featured Products</span>
+              <span>عرض جميع المنتجات المميزة</span>
               <ChevronRightIcon className="h-5 w-5 ml-1" />
             </Link>
           </div>
@@ -1388,7 +1386,7 @@ const Home = () => {
                 {/* Scroll Buttons */}
                 <button
                   onClick={goToPreviousClothing}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg transition-all duration-200 -ml-6"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -ml-6"
                   aria-label="Scroll left"
                 >
                   <ChevronLeftIcon className="h-6 w-6" />
@@ -1396,7 +1394,7 @@ const Home = () => {
                 
                 <button
                   onClick={goToNextClothing}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg transition-all duration-200 -mr-6"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -mr-6"
                   aria-label="Scroll right"
                 >
                   <ChevronRightIcon className="h-6 w-6" />
@@ -1428,9 +1426,9 @@ const Home = () => {
             <div className="text-center mt-8">
               <Link 
                 to="/products?featured=true" 
-                className="inline-flex items-center btn btn-primary"
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-lg font-semibold hover:from-amber-700 hover:to-amber-800 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
               >
-                View All Featured Products
+                عرض جميع المنتجات المميزة
                 <ChevronRightIcon className="h-5 w-5 ml-2" />
               </Link>
             </div>
@@ -1438,12 +1436,12 @@ const Home = () => {
           
           {!isLoading && Array.isArray(featuredProducts) && featuredProducts.length === 0 && (
             <div className="text-center py-12">
-              <div className="text-gray-500 text-lg mb-4">No featured products available at the moment.</div>
+              <div className="text-amber-600 text-lg mb-4">لا توجد منتجات مميزة حالياً.</div>
               <Link 
                 to="/products" 
-                className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-lg font-semibold hover:from-amber-700 hover:to-amber-800 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
               >
-                Browse All Products
+                تصفح جميع المنتجات
               </Link>
             </div>
           )}
@@ -1452,15 +1450,15 @@ const Home = () => {
 
 
       {/* New Products */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-amber-50/50">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-12">
-            <h2 className="text-3xl font-bold">New Products</h2>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">المنتجات الجديدة</h2>
             <Link 
               to="/products?sort=newest" 
-              className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium"
+              className="inline-flex items-center text-amber-600 hover:text-amber-700 font-medium transition-colors"
             >
-              <span>View All New Products</span>
+              <span>عرض جميع المنتجات الجديدة</span>
               <ChevronRightIcon className="h-5 w-5 ml-1" />
             </Link>
           </div>
@@ -1476,7 +1474,7 @@ const Home = () => {
                 {/* Scroll Buttons */}
                 <button
                   onClick={goToPreviousNew}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg transition-all duration-200 -ml-6"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -ml-6"
                   aria-label="Scroll left"
                 >
                   <ChevronLeftIcon className="h-6 w-6" />
@@ -1484,7 +1482,7 @@ const Home = () => {
                 
                 <button
                   onClick={goToNextNew}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg transition-all duration-200 -mr-6"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -mr-6"
                   aria-label="Scroll right"
                 >
                   <ChevronRightIcon className="h-6 w-6" />
@@ -1512,20 +1510,20 @@ const Home = () => {
             </div>
           ) : (
             <div className="text-center py-12">
-              <p className="text-gray-500">No new products available at the moment.</p>
+              <p className="text-amber-600">لا توجد منتجات جديدة حالياً.</p>
             </div>
           )}
         </div>
       </section>
 
       {/* Clothing Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-white/80 backdrop-blur-sm">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-12">
-            <h2 className="text-3xl font-bold">{clothingCategoryName}</h2>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">{clothingCategoryName}</h2>
             <Link 
               to="/products?category=clothing" 
-              className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium"
+              className="inline-flex items-center text-amber-600 hover:text-amber-700 font-medium transition-colors"
             >
               <span>عرض جميع {clothingCategoryName}</span>
               <ChevronRightIcon className="h-5 w-5 ml-1" />
@@ -1537,7 +1535,7 @@ const Home = () => {
               <div className="relative">
                 <button
                   onClick={goToPreviousClothing}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg transition-all duration-200 -ml-6"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -ml-6"
                   aria-label="Scroll left"
                 >
                   <ChevronLeftIcon className="h-6 w-6" />
@@ -1545,7 +1543,7 @@ const Home = () => {
                 
                 <button
                   onClick={goToNextClothing}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg transition-all duration-200 -mr-6"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -mr-6"
                   aria-label="Scroll right"
                 >
                   <ChevronRightIcon className="h-6 w-6" />
@@ -1632,20 +1630,20 @@ const Home = () => {
             </div>
           ) : (
             <div className="text-center py-12">
-              <p className="text-gray-500">لا توجد منتجات بناتي وأولاد متاحة حالياً.</p>
+              <p className="text-amber-600">لا توجد منتجات بناتي وأولاد متاحة حالياً.</p>
             </div>
           )}
         </div>
       </section>
 
       {/* Electronics Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-amber-50/30">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-12">
-            <h2 className="text-3xl font-bold">{electronicsCategoryName}</h2>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">{electronicsCategoryName}</h2>
             <Link 
               to="/products?category=electronics" 
-              className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium"
+              className="inline-flex items-center text-amber-600 hover:text-amber-700 font-medium transition-colors"
             >
               <span>عرض جميع {electronicsCategoryName}</span>
               <ChevronRightIcon className="h-5 w-5 ml-1" />
@@ -1657,7 +1655,7 @@ const Home = () => {
               <div className="relative">
                 <button
                   onClick={goToPreviousElectronics}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg transition-all duration-200 -ml-6"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -ml-6"
                   aria-label="Scroll left"
                 >
                   <ChevronLeftIcon className="h-6 w-6" />
@@ -1665,7 +1663,7 @@ const Home = () => {
                 
                 <button
                   onClick={goToNextElectronics}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg transition-all duration-200 -mr-6"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -mr-6"
                   aria-label="Scroll right"
                 >
                   <ChevronRightIcon className="h-6 w-6" />
@@ -1692,36 +1690,69 @@ const Home = () => {
             </div>
           ) : (
             <div className="text-center py-12">
-              <p className="text-gray-500">لا توجد إلكترونيات متاحة حالياً.</p>
+              <p className="text-amber-600">لا توجد إلكترونيات متاحة حالياً.</p>
             </div>
           )}
         </div>
       </section>
 
       {/* Security Features */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <TruckIcon className="h-8 w-8 text-blue-600" />
+      <section className="py-8 sm:py-12 md:py-16 bg-gradient-to-r from-amber-50 to-orange-50" dir="rtl">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="block sm:hidden">
+            {/* Mobile: Horizontal scrolling layout */}
+            <div 
+              id="security-features-container"
+              className="flex overflow-x-auto scrollbar-hide gap-4 pb-4 scroll-smooth cursor-grab"
+            >
+              <div className="text-center flex-none w-64">
+                <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <TruckIcon className="h-6 w-6 text-amber-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">الشحن المجاني</h3>
+                <p className="text-sm text-amber-700">الشحن المجاني على جميع الطلبات فوق 50 ريال</p>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Free Shipping</h3>
-              <p className="text-gray-600">Free shipping on all orders over $50</p>
+              <div className="text-center flex-none w-64">
+                <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <ShieldCheckIcon className="h-6 w-6 text-emerald-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">الدفع الآمن</h3>
+                <p className="text-sm text-amber-700">عملية دفع آمنة بنسبة 100%</p>
+              </div>
+              <div className="text-center flex-none w-64">
+                <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <ArrowPathIcon className="h-6 w-6 text-orange-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">إرجاع سهل</h3>
+                <p className="text-sm text-amber-700">سياسة إرجاع 30 يوم</p>
+              </div>
             </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <ShieldCheckIcon className="h-8 w-8 text-green-600" />
+          </div>
+          
+          <div className="hidden sm:block">
+            {/* Laptop & Desktop: Full display layout */}
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6 md:gap-8 lg:gap-8">
+              <div className="text-center flex-1 sm:flex-none sm:w-64 md:w-80 lg:w-96">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <TruckIcon className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-amber-600" />
+                </div>
+                <h3 className="text-lg sm:text-xl md:text-xl font-semibold mb-2">الشحن المجاني</h3>
+                <p className="text-sm sm:text-base text-amber-700">الشحن المجاني على جميع الطلبات فوق 50 ريال</p>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Secure Payment</h3>
-              <p className="text-gray-600">100% secure payment process</p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <ArrowPathIcon className="h-8 w-8 text-purple-600" />
+              <div className="text-center flex-1 sm:flex-none sm:w-64 md:w-80 lg:w-96">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <ShieldCheckIcon className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-emerald-600" />
+                </div>
+                <h3 className="text-lg sm:text-xl md:text-xl font-semibold mb-2">الدفع الآمن</h3>
+                <p className="text-sm sm:text-base text-amber-700">عملية دفع آمنة بنسبة 100%</p>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Easy Returns</h3>
-              <p className="text-gray-600">30 days return policy</p>
+              <div className="text-center flex-1 sm:flex-none sm:w-64 md:w-80 lg:w-96">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <ArrowPathIcon className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-orange-600" />
+                </div>
+                <h3 className="text-lg sm:text-xl md:text-xl font-semibold mb-2">إرجاع سهل</h3>
+                <p className="text-sm sm:text-base text-amber-700">سياسة إرجاع 30 يوم</p>
+              </div>
             </div>
           </div>
         </div>

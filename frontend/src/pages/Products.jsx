@@ -6,6 +6,7 @@ import {
   CogIcon,
   XMarkIcon,
   FunnelIcon,
+  ChatBubbleLeftRightIcon,
 } from '@heroicons/react/24/outline'
 import {
   fetchProducts,
@@ -150,30 +151,30 @@ const Products = () => {
   ).length
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50" dir="rtl">
       <div className="container-custom py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {filters.search ? `Search Results for "${filters.search}"` : 'All Products'}
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent mb-2">
+            {filters.search ? `نتائج البحث لـ "${filters.search}"` : 'جميع المنتجات'}
           </h1>
           <p className="text-gray-600">
-            {pagination.total} products found
+            {pagination.total} منتج تم العثور عليه
           </p>
         </div>
 
         {/* Search and Filters Bar */}
-        <div className="mb-8 flex flex-col lg:flex-row gap-4">
+        <div className="mb-8 flex flex-col lg:flex-row-reverse gap-4">
           {/* Search */}
           <form onSubmit={handleSearch} className="flex-1">
             <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <MagnifyingGlassIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-amber-400" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search products..."
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                placeholder="البحث في المنتجات..."
+                className="w-full pr-10 pl-4 py-3 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 backdrop-blur-sm"
               />
             </div>
           </form>
@@ -185,27 +186,27 @@ const Products = () => {
               const [sortBy, sortOrder] = e.target.value.split('-')
               handleFilterChange({ sortBy, sortOrder })
             }}
-            className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            className="px-4 py-3 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 backdrop-blur-sm"
           >
-            <option value="created_at-desc">Newest First</option>
-            <option value="created_at-asc">Oldest First</option>
-            <option value="name-asc">Name: A-Z</option>
-            <option value="name-desc">Name: Z-A</option>
-            <option value="price-asc">Price: Low to High</option>
-            <option value="price-desc">Price: High to Low</option>
-            <option value="rating-desc">Highest Rated</option>
-            <option value="sales-desc">Best Selling</option>
+            <option value="created_at-desc">الأحدث أولاً</option>
+            <option value="created_at-asc">الأقدم أولاً</option>
+            <option value="name-asc">الاسم: أ-ي</option>
+            <option value="name-desc">الاسم: ي-أ</option>
+            <option value="price-asc">السعر: منخفض للمرتفع</option>
+            <option value="price-desc">السعر: مرتفع للمنخفض</option>
+            <option value="rating-desc">الأعلى تقييماً</option>
+            <option value="sales-desc">الأكثر مبيعاً</option>
           </select>
 
           {/* Filter Toggle */}
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex items-center px-4 py-3 border border-amber-300 rounded-lg hover:bg-amber-50 transition-colors bg-white/80 backdrop-blur-sm"
           >
-            <FunnelIcon className="h-5 w-5 mr-2" />
-            Filters
+            <FunnelIcon className="h-5 w-5 ml-2 text-amber-600" />
+            الترشيحات
             {activeFiltersCount > 0 && (
-              <span className="ml-2 bg-primary-600 text-white text-xs px-2 py-1 rounded-full">
+              <span className="mr-2 bg-amber-600 text-white text-xs px-2 py-1 rounded-full">
                 {activeFiltersCount}
               </span>
             )}
@@ -230,20 +231,20 @@ const Products = () => {
               </div>
             ) : products.length === 0 ? (
               <div className="text-center py-12">
-                <div className="text-gray-400 mb-4">
+                <div className="text-amber-400 mb-4">
                   <MagnifyingGlassIcon className="h-16 w-16 mx-auto" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  No products found
+                <h3 className="text-xl font-semibold text-amber-900 mb-2">
+                  لم يتم العثور على منتجات
                 </h3>
-                <p className="text-gray-600 mb-6">
-                  Try adjusting your filters or search terms
+                <p className="text-amber-700 mb-6">
+                  حاول تعديل الفلاتر أو كلمات البحث
                 </p>
                 <button
                   onClick={clearFilters}
-                  className="btn btn-outline"
+                  className="px-6 py-3 border-2 border-amber-600 text-amber-600 rounded-lg hover:bg-amber-600 hover:text-white transition-all duration-300 font-semibold"
                 >
-                  Clear Filters
+                  مسح الفلاتر
                 </button>
               </div>
             ) : (
@@ -264,9 +265,9 @@ const Products = () => {
                     <button
                       onClick={() => handlePageChange(pagination.currentPage - 1)}
                       disabled={pagination.currentPage <= 1}
-                      className="px-3 py-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                      className="px-3 py-2 border border-amber-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-amber-50 bg-white/80 backdrop-blur-sm"
                     >
-                      Previous
+                      السابق
                     </button>
 
                     <div className="flex space-x-1">
@@ -286,10 +287,10 @@ const Products = () => {
                           <button
                             key={pageNum}
                             onClick={() => handlePageChange(pageNum)}
-                            className={`px-3 py-2 border rounded-md ${
+                            className={`px-3 py-2 border rounded-md transition-all duration-300 ${
                               pageNum === pagination.currentPage
-                                ? 'bg-primary-600 text-white border-primary-600'
-                                : 'border-gray-300 hover:bg-gray-50'
+                                ? 'bg-amber-600 text-white border-amber-600 shadow-lg'
+                                : 'border-amber-300 hover:bg-amber-50 bg-white/80 backdrop-blur-sm'
                             }`}
                           >
                             {pageNum}
@@ -301,9 +302,9 @@ const Products = () => {
                     <button
                       onClick={() => handlePageChange(pagination.currentPage + 1)}
                       disabled={pagination.currentPage >= pagination.totalPages}
-                      className="px-3 py-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                      className="px-3 py-2 border border-amber-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-amber-50 bg-white/80 backdrop-blur-sm"
                     >
-                      Next
+                      التالي
                     </button>
                   </div>
                 )}

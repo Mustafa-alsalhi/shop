@@ -1,156 +1,239 @@
 import React from 'react'
+import { CogIcon, BellIcon, GlobeAltIcon, ShieldCheckIcon, CreditCardIcon, UserGroupIcon } from '@heroicons/react/24/outline'
 
 const AdminSettings = () => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
       <div className="max-w-7xl mx-auto py-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">System Settings</h1>
+        {/* Header */}
+        <div className="bg-white shadow-xl rounded-2xl border border-gray-100 p-6 mb-6">
+          <div className="flex items-center space-x-reverse space-x-3">
+            <div className="p-3 bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl">
+              <CogIcon className="h-6 w-6 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+              إعدادات النظام
+            </h1>
+          </div>
+        </div>
         
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b">
-            <h2 className="text-lg font-semibold">Settings</h2>
+        <div className="bg-white shadow-xl rounded-2xl border border-gray-100">
+          <div className="px-6 py-5 border-b border-gray-100">
+            <div className="flex items-center space-x-reverse space-x-3">
+              <div className="p-2 bg-gradient-to-r from-amber-500 to-orange-600 rounded-lg">
+                <CogIcon className="h-5 w-5 text-white" />
+              </div>
+              <h2 className="text-xl font-bold text-gray-900">
+                الإعدادات العامة
+              </h2>
+            </div>
           </div>
           
           <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Store Settings */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-900">Store Settings</h3>
-                <div className="space-y-3">
+              <div className="space-y-6">
+                <div className="flex items-center space-x-reverse space-x-3">
+                  <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg">
+                    <GlobeAltIcon className="h-5 w-5 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900">إعدادات المتجر</h3>
+                </div>
+                <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Store Name</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">اسم المتجر</label>
                     <input
                       type="text"
                       defaultValue="ShopHub"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-50"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Store Email</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">البريد الإلكتروني للمتجر</label>
                     <input
                       type="email"
                       defaultValue="admin@shophub.com"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-50"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
-                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-                      <option value="USD">USD - US Dollar</option>
-                      <option value="EUR">EUR - Euro</option>
-                      <option value="GBP">GBP - British Pound</option>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">العملة</label>
+                    <select className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-50">
+                      <option value="USD">USD - دولار أمريكي</option>
+                      <option value="EUR">EUR - يورو</option>
+                      <option value="GBP">GBP - جنيه إسترليني</option>
+                      <option value="SAR">SAR - ريال سعودي</option>
+                      <option value="AED">AED - درهم إماراتي</option>
                     </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">رقم الهاتف</label>
+                    <input
+                      type="tel"
+                      defaultValue="+966 50 123 4567"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">العنوان</label>
+                    <textarea
+                      rows="3"
+                      defaultValue=" الرياض، المملكة العربية السعودية"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-50"
+                    />
                   </div>
                 </div>
               </div>
 
               {/* Notification Settings */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-900">Notification Settings</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      defaultChecked={true}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label className="ml-2 block text-sm text-gray-900">
-                      Email notifications for new orders
-                    </label>
+              <div className="space-y-6">
+                <div className="flex items-center space-x-reverse space-x-3">
+                  <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg">
+                    <BellIcon className="h-5 w-5 text-white" />
                   </div>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      defaultChecked={true}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label className="ml-2 block text-sm text-gray-900">
-                      Email notifications for new users
-                    </label>
+                  <h3 className="text-lg font-bold text-gray-900">إعدادات الإشعارات</h3>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                    <div className="flex items-center space-x-reverse space-x-3">
+                      <input
+                        type="checkbox"
+                        defaultChecked={true}
+                        className="h-5 w-5 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
+                      />
+                      <label className="text-sm font-medium text-gray-900">
+                        إشعارات البريد الإلكتروني للطلبات الجديدة
+                      </label>
+                    </div>
+                    <BellIcon className="h-5 w-5 text-gray-400" />
                   </div>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      defaultChecked={false}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label className="ml-2 block text-sm text-gray-900">
-                      SMS notifications
-                    </label>
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                    <div className="flex items-center space-x-reverse space-x-3">
+                      <input
+                        type="checkbox"
+                        defaultChecked={true}
+                        className="h-5 w-5 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
+                      />
+                      <label className="text-sm font-medium text-gray-900">
+                        إشعارات البريد الإلكتروني للمستخدمين الجدد
+                      </label>
+                    </div>
+                    <UserGroupIcon className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                    <div className="flex items-center space-x-reverse space-x-3">
+                      <input
+                        type="checkbox"
+                        defaultChecked={false}
+                        className="h-5 w-5 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
+                      />
+                      <label className="text-sm font-medium text-gray-900">
+                        إشعارات الرسائل النصية
+                      </label>
+                    </div>
+                    <BellIcon className="h-5 w-5 text-gray-400" />
                   </div>
                 </div>
               </div>
 
               {/* Payment Settings */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-900">Payment Settings</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      defaultChecked={true}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label className="ml-2 block text-sm text-gray-900">
-                      Enable Credit Card Payments
-                    </label>
+              <div className="space-y-6">
+                <div className="flex items-center space-x-reverse space-x-3">
+                  <div className="p-2 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg">
+                    <CreditCardIcon className="h-5 w-5 text-white" />
                   </div>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      defaultChecked={true}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label className="ml-2 block text-sm text-gray-900">
-                      Enable PayPal
-                    </label>
+                  <h3 className="text-lg font-bold text-gray-900">إعدادات الدفع</h3>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                    <div className="flex items-center space-x-reverse space-x-3">
+                      <input
+                        type="checkbox"
+                        defaultChecked={true}
+                        className="h-5 w-5 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
+                      />
+                      <label className="text-sm font-medium text-gray-900">
+                        تفعيل مدفوعات بطاقة الائتمان
+                      </label>
+                    </div>
+                    <CreditCardIcon className="h-5 w-5 text-gray-400" />
                   </div>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      defaultChecked={false}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label className="ml-2 block text-sm text-gray-900">
-                      Enable Cash on Delivery
-                    </label>
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                    <div className="flex items-center space-x-reverse space-x-3">
+                      <input
+                        type="checkbox"
+                        defaultChecked={true}
+                        className="h-5 w-5 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
+                      />
+                      <label className="text-sm font-medium text-gray-900">
+                        تفعيل مدفوعات PayPal
+                      </label>
+                    </div>
+                    <CreditCardIcon className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                    <div className="flex items-center space-x-reverse space-x-3">
+                      <input
+                        type="checkbox"
+                        defaultChecked={false}
+                        className="h-5 w-5 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
+                      />
+                      <label className="text-sm font-medium text-gray-900">
+                        تفعيل الدفع عند الاستلام
+                      </label>
+                    </div>
+                    <CreditCardIcon className="h-5 w-5 text-gray-400" />
                   </div>
                 </div>
               </div>
 
-              {/* Shipping Settings */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-900">Shipping Settings</h3>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Default Shipping Rate ($)</label>
-                    <input
-                      type="number"
-                      defaultValue="10"
-                      min="0"
-                      step="0.01"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                    />
+              {/* Security Settings */}
+              <div className="space-y-6">
+                <div className="flex items-center space-x-reverse space-x-3">
+                  <div className="p-2 bg-gradient-to-r from-red-500 to-pink-600 rounded-lg">
+                    <ShieldCheckIcon className="h-5 w-5 text-white" />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Free Shipping Threshold ($)</label>
-                    <input
-                      type="number"
-                      defaultValue="100"
-                      min="0"
-                      step="0.01"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                    />
+                  <h3 className="text-lg font-bold text-gray-900">إعدادات الأمان</h3>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                    <div className="flex items-center space-x-reverse space-x-3">
+                      <input
+                        type="checkbox"
+                        defaultChecked={true}
+                        className="h-5 w-5 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
+                      />
+                      <label className="text-sm font-medium text-gray-900">
+                        تفعيل المصادقة الثنائية
+                      </label>
+                    </div>
+                    <ShieldCheckIcon className="h-5 w-5 text-gray-400" />
                   </div>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      defaultChecked={true}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label className="ml-2 block text-sm text-gray-900">
-                      Enable international shipping
-                    </label>
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                    <div className="flex items-center space-x-reverse space-x-3">
+                      <input
+                        type="checkbox"
+                        defaultChecked={true}
+                        className="h-5 w-5 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
+                      />
+                      <label className="text-sm font-medium text-gray-900">
+                        تفعيل تسجيل الدخول التلقائي
+                      </label>
+                    </div>
+                    <ShieldCheckIcon className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                    <div className="flex items-center space-x-reverse space-x-3">
+                      <input
+                        type="checkbox"
+                        defaultChecked={false}
+                        className="h-5 w-5 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
+                      />
+                      <label className="text-sm font-medium text-gray-900">
+                        تفعيل تحقق البريد الإلكتروني
+                      </label>
+                    </div>
+                    <ShieldCheckIcon className="h-5 w-5 text-gray-400" />
                   </div>
                 </div>
               </div>
@@ -158,8 +241,8 @@ const AdminSettings = () => {
 
             {/* Save Button */}
             <div className="mt-8 flex justify-end">
-              <button className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                Save Settings
+              <button className="px-8 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105 font-medium">
+                حفظ الإعدادات
               </button>
             </div>
           </div>

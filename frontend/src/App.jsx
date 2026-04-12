@@ -27,13 +27,17 @@ import AdminProducts from './pages/Admin/Products'
 import AdminProductForm from './pages/Admin/ProductForm'
 import AdminOrders from './pages/Admin/Orders'
 import AdminUsers from './pages/Admin/Users'
+import AddUser from './pages/Admin/AddUser'
+import EditUser from './pages/Admin/EditUser'
+import AdminBanners from './pages/Admin/Banners'
 import AdminCategories from './pages/Admin/Categories'
+import AdminCoupons from './pages/Admin/Coupons'
 import AdminSettings from './pages/Admin/Settings'
 import AdminTestPage from './pages/Admin/TestPage'
 import ContactUs from './pages/ContactUs'
 import AboutUs from './pages/AboutUs'
 import ShippingInfo from './pages/ShippingInfo'
-import DealsOffers from './pages/DealsOffers'
+import Coupons from './pages/user/Coupons'
 import NotFound from './pages/Errors/NotFound'
 import ServerError from './pages/Errors/ServerError'
 
@@ -44,13 +48,14 @@ function App() {
   return (
     <Provider store={store}>
       <Helmet>
-        <title>E-Commerce Store - Professional Online Shopping</title>
-        <meta name="description" content="Shop quality products at great prices" />
-        <meta name="keywords" content="ecommerce, shopping, products, online store" />
-        <meta property="og:title" content="E-Commerce Store" />
-        <meta property="og:description" content="Professional online shopping experience" />
+        <title>متجر أصالة - تسوق عالي الجودة بأسعار ممتازة</title>
+        <meta name="description" content="متجر أصالة - وجهتك الأولى للتسوق الموثوقة للمنتجات عالية الجودة بأسعار تنافسية وخدمة عملاء ممتازة" />
+        <meta name="keywords" content="متجر أصالة، تسوق، منتجات عالية الجودة، متجر إلكتروني، أسعار ممتازة، خدمة عملاء" />
+        <meta property="og:title" content="متجر أصالة - تجربة تسوق فريدة" />
+        <meta property="og:description" content="اكتشف أفضل المنتجات عالية الجودة بأسعار تنافسية في متجر أصالة" />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="theme-color" content="#f59e0b" />
       </Helmet>
       <Routes>
         {/* Public Routes */}
@@ -63,12 +68,12 @@ function App() {
           <Route path="checkout" element={<Checkout />} />
           <Route path="orders" element={<Orders />} />
           <Route path="wishlist" element={<Wishlist />} />
+          <Route path="coupons" element={<Coupons />} />
           
           {/* Info Pages */}
           <Route path="contact-us" element={<ContactUs />} />
           <Route path="about-us" element={<AboutUs />} />
           <Route path="shipping-info" element={<ShippingInfo />} />
-          <Route path="deals-offers" element={<DealsOffers />} />
           
           {/* Auth Routes */}
           <Route path="login" element={<Login />} />
@@ -91,7 +96,11 @@ function App() {
           <Route path="products/:id/edit" element={<AdminProductForm />} />
           <Route path="orders" element={<AdminOrders />} />
           <Route path="users" element={<AdminUsers />} />
+          <Route path="users/add" element={<AddUser />} />
+          <Route path="users/:id/edit" element={<EditUser />} />
+          <Route path="banners" element={<AdminBanners />} />
           <Route path="categories" element={<AdminCategories />} />
+          <Route path="coupons" element={<AdminCoupons />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
 

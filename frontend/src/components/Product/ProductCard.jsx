@@ -59,10 +59,10 @@ const ProductCard = ({ product }) => {
     console.log('Toggling wishlist:', product.id, product.name, 'isWishlisted:', isWishlisted)
     if (isWishlisted) {
       dispatch(removeFromWishlist(product.id))
-      dispatch(showSuccessNotification(`${product.name} removed from wishlist!`))
+      dispatch(showSuccessNotification(`${product.name} تمت إزالته من قائمة الرغبات!`))
     } else {
       dispatch(addToWishlist(product))
-      dispatch(showSuccessNotification(`${product.name} added to wishlist!`))
+      dispatch(showSuccessNotification(`${product.name} تمت إضافته إلى قائمة الرغبات!`))
     }
   }
 
@@ -78,7 +78,7 @@ const ProductCard = ({ product }) => {
     : 0
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 group w-full">
+    <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg overflow-hidden hover:shadow-amber-200/50 transition-all duration-300 group w-full border border-amber-200/30 hover:border-amber-300/60">
       {/* Product Image */}
       <div className="relative overflow-hidden">
         <Link to={`/products/${product.id}`}>
@@ -95,18 +95,18 @@ const ProductCard = ({ product }) => {
         {/* Badges */}
         <div className="absolute top-1 sm:top-2 left-1 sm:left-2 flex flex-col gap-1">
           {product.is_featured && (
-            <span className="bg-purple-600 text-white px-1.5 py-0.5 sm:px-2 sm:py-1 text-xs rounded-full">
-              Featured
+            <span className="bg-gradient-to-r from-amber-600 to-amber-700 text-white px-1.5 py-0.5 sm:px-2 sm:py-1 text-xs rounded-full shadow-md">
+              مميز
             </span>
           )}
           {discountPercentage > 0 && (
-            <span className="bg-red-600 text-white px-1.5 py-0.5 sm:px-2 sm:py-1 text-xs rounded-full">
+            <span className="bg-gradient-to-r from-rose-600 to-rose-700 text-white px-1.5 py-0.5 sm:px-2 sm:py-1 text-xs rounded-full shadow-md">
               -{discountPercentage}%
             </span>
           )}
           {product.stock <= 0 && (
-            <span className="bg-gray-800 text-white px-1.5 py-0.5 sm:px-2 sm:py-1 text-xs rounded-full">
-              Out of Stock
+            <span className="bg-gradient-to-r from-gray-700 to-gray-800 text-white px-1.5 py-0.5 sm:px-2 sm:py-1 text-xs rounded-full shadow-md">
+              غير متوفر
             </span>
           )}
         </div>
@@ -115,23 +115,23 @@ const ProductCard = ({ product }) => {
         <div className="absolute top-1 sm:top-2 right-1 sm:right-2 flex flex-col gap-1.5 sm:gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <button
             onClick={handleToggleWishlist}
-            className={`p-1.5 sm:p-2 bg-white rounded-full shadow-md transition-colors ${
-              isWishlisted ? 'hover:bg-red-50' : 'hover:bg-gray-100'
+            className={`p-1.5 sm:p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md transition-all duration-300 hover:scale-110 ${
+              isWishlisted ? 'hover:bg-rose-50 border border-rose-200' : 'hover:bg-amber-50 border border-amber-200'
             }`}
-            title={isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}
+            title={isWishlisted ? 'إزالة من قائمة الرغبات' : 'إضافة إلى قائمة الرغبات'}
           >
             {isWishlisted ? (
-              <HeartIconSolid className="h-3 w-3 sm:h-4 sm:w-4 text-red-500" />
+              <HeartIconSolid className="h-3 w-3 sm:h-4 sm:w-4 text-rose-500" />
             ) : (
-              <HeartIcon className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600 hover:text-red-500 transition-colors" />
+              <HeartIcon className="h-3 w-3 sm:h-4 sm:w-4 text-amber-600 hover:text-rose-500 transition-colors" />
             )}
           </button>
           <button
             onClick={handleQuickView}
-            className="p-1.5 sm:p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors"
-            title="Quick View"
+            className="p-1.5 sm:p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-amber-50 border border-amber-200 transition-all duration-300 hover:scale-110"
+            title="عرض سريع"
           >
-            <EyeIcon className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600" />
+            <EyeIcon className="h-3 w-3 sm:h-4 sm:w-4 text-amber-600" />
           </button>
         </div>
       </div>
@@ -140,7 +140,7 @@ const ProductCard = ({ product }) => {
       <div className="p-3 sm:p-4">
         {/* Category */}
         {product.category && (
-          <p className="text-xs sm:text-sm text-primary-600 font-medium mb-1">
+          <p className="text-xs sm:text-sm text-amber-600 font-medium mb-1">
             {product.category.name}
           </p>
         )}
@@ -150,26 +150,26 @@ const ProductCard = ({ product }) => {
           to={`/products/${product.id}`}
           className="block mb-1.5 sm:mb-2"
         >
-          <h3 className="font-semibold text-sm sm:text-base text-gray-900 line-clamp-2 hover:text-primary-600 transition-colors">
+          <h3 className="font-semibold text-sm sm:text-base text-gray-900 line-clamp-2 hover:text-amber-600 transition-colors">
             {product.name}
           </h3>
         </Link>
 
         {/* Rating */}
         <div className="flex items-center mb-1.5 sm:mb-2">
-          <div className="flex text-yellow-400">
+          <div className="flex text-amber-400">
             {[...Array(5)].map((_, i) => (
               <StarIcon
                 key={i}
                 className={`h-3 w-3 sm:h-4 sm:w-4 ${
                   i < Math.floor(product.average_rating || 0)
-                    ? 'text-yellow-400'
+                    ? 'text-amber-400'
                     : 'text-gray-300'
                 }`}
               />
             ))}
           </div>
-          <span className="text-xs sm:text-sm text-gray-500 ml-1.5 sm:ml-2">
+          <span className="text-xs sm:text-sm text-amber-600 ml-1.5 sm:ml-2">
             ({product.total_reviews || 0})
           </span>
         </div>
@@ -177,7 +177,7 @@ const ProductCard = ({ product }) => {
         {/* Price */}
         <div className="flex items-center justify-between mb-2 sm:mb-3">
           <div className="flex items-center flex-wrap">
-            <span className="text-lg sm:text-2xl font-bold text-primary-600">
+            <span className="text-lg sm:text-2xl font-bold text-amber-600">
               {product.currency || 'USD'} {product.price}
             </span>
             {product.sale_price && (
@@ -186,7 +186,7 @@ const ProductCard = ({ product }) => {
               </span>
             )}
             {product.sale_price && (
-              <span className="text-sm sm:text-lg font-bold text-green-600 ml-1.5 sm:ml-2">
+              <span className="text-sm sm:text-lg font-bold text-emerald-600 ml-1.5 sm:ml-2">
                 {product.currency || 'USD'} {product.sale_price}
               </span>
             )}
@@ -202,10 +202,10 @@ const ProductCard = ({ product }) => {
         <div className="flex gap-1.5 sm:gap-2">
           <Link
             to={`/products/${product.id}`}
-            className="w-full btn btn-primary btn-xs sm:btn-sm"
+            className="w-full px-3 py-2 bg-gradient-to-r from-amber-600 to-amber-700 text-white text-xs sm:text-sm font-semibold rounded-lg hover:from-amber-700 hover:to-amber-800 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center"
           >
-            <EyeIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-            <span className="text-xs sm:text-sm">View Details</span>
+            <EyeIcon className="h-3 w-3 sm:h-4 sm:w-4 ml-1" />
+            عرض التفاصيل
           </Link>
         </div>
       </div>

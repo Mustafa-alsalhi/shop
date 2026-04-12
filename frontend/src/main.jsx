@@ -10,6 +10,8 @@ import { Toaster } from 'react-hot-toast'
 import App from './App.jsx'
 import { store } from './store/store.js'
 import './styles/globals.css'
+import WhatsAppButton from './components/UI/WhatsAppButton.jsx'
+import { WHATSAPP_NUMBER, WHATSAPP_MESSAGES } from './config/whatsapp.js'
 
 // Create a client for React Query
 const queryClient = new QueryClient({
@@ -54,7 +56,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
               }}
             />
           </BrowserRouter>
-          {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+          <WhatsAppButton 
+            phoneNumber={WHATSAPP_NUMBER} 
+            message={WHATSAPP_MESSAGES.default}
+          />
         </QueryClientProvider>
       </Provider>
     </HelmetProvider>

@@ -233,25 +233,25 @@ const CategoryBanner = () => {
           baseURL: err.config?.baseURL,
           url: err.config?.url
         })
-        setError('Failed to load categories')
+        setError('فشل في تحميل الفئات')
         setLoading(false)
       }
     }
 
-    fetchCategories()
+              fetchCategories()
   }, [])
 
   if (loading) {
     return (
-      <div className="bg-white py-8 border-y">
+      <div className="bg-white/80 backdrop-blur-sm py-8 border-y border-amber-200/30">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-12">
-            <h2 className="text-3xl font-bold">Shop by Category</h2>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">تسوق حسب الفئة</h2>
             <Link 
               to="/categories" 
-              className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium"
+              className="inline-flex items-center text-amber-600 hover:text-amber-700 font-medium transition-colors"
             >
-              <span>View All Categories</span>
+              <span>عرض جميع الفئات</span>
               <ChevronRightIcon className="h-5 w-5 ml-1" />
             </Link>
           </div>
@@ -268,7 +268,7 @@ const CategoryBanner = () => {
                 {[...Array(8)].map((_, index) => (
                   <div 
                     key={index} 
-                    className="flex-none w-32 h-32 bg-gray-200 rounded-lg animate-pulse"
+                    className="flex-none w-32 h-32 bg-amber-100 rounded-lg animate-pulse"
                   />
                 ))}
               </div>
@@ -284,15 +284,15 @@ const CategoryBanner = () => {
   }
 
   return (
-    <div className="bg-white py-8 border-y">
+    <div className="bg-white/80 backdrop-blur-sm py-8 border-y border-amber-200/30">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center mb-12">
-          <h2 className="text-3xl font-bold">Shop by Category</h2>
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">تسوق حسب الفئة</h2>
           <Link 
             to="/categories" 
-            className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium"
+            className="inline-flex items-center text-amber-600 hover:text-amber-700 font-medium transition-colors"
           >
-            <span>View All Categories</span>
+            <span>عرض جميع الفئات</span>
             <ChevronRightIcon className="h-5 w-5 ml-1" />
           </Link>
         </div>
@@ -303,7 +303,7 @@ const CategoryBanner = () => {
               {/* Scroll Buttons */}
               <button
                 onClick={goToPreviousCategories}
-                className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg transition-all duration-200 -ml-6"
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -ml-6"
                 aria-label="Scroll left"
               >
                 <ChevronLeftIcon className="h-6 w-6" />
@@ -311,7 +311,7 @@ const CategoryBanner = () => {
               
               <button
                 onClick={goToNextCategories}
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg transition-all duration-200 -mr-6"
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -mr-6"
                 aria-label="Scroll right"
               >
                 <ChevronRightIcon className="h-6 w-6" />
@@ -333,9 +333,9 @@ const CategoryBanner = () => {
                   >
                     <Link 
                       to={`/products?category=${category.slug}`}
-                      className="block bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                      className="block bg-white/80 backdrop-blur-sm rounded-lg shadow-lg overflow-hidden hover:shadow-amber-200/50 transition-all duration-300 transform hover:scale-105 border border-amber-200/30 hover:border-amber-300/60"
                     >
-                      <div className="h-32 sm:h-36 md:h-40 lg:h-44 xl:h-48 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center relative overflow-hidden">
+                      <div className="h-32 sm:h-36 md:h-40 lg:h-44 xl:h-48 bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center relative overflow-hidden">
                         {category.image_url ? (
                           <img
                             src={category.image_url}
@@ -347,7 +347,7 @@ const CategoryBanner = () => {
                             }}
                           />
                         ) : null}
-                        <div className="absolute inset-0 bg-black/10 flex items-center justify-center" style={{ display: category.image_url ? 'none' : 'flex' }}>
+                        <div className="absolute inset-0 bg-amber-900/10 flex items-center justify-center" style={{ display: category.image_url ? 'none' : 'flex' }}>
                           <span className="text-3xl">
                             {category.name.includes('إلكترونيات') || category.name.toLowerCase().includes('electronics') ? '💻' :
                              category.name.includes('ملابس') || category.name.toLowerCase().includes('clothing') ? '👕' :
@@ -357,8 +357,8 @@ const CategoryBanner = () => {
                           </span>
                         </div>
                       </div>
-                      <div className="p-3">
-                        <h3 className="text-sm font-semibold text-gray-800 text-center truncate">{category.name}</h3>
+                      <div className="p-3 bg-white/60 backdrop-blur-sm">
+                        <h3 className="text-sm font-semibold text-amber-800 text-center truncate">{category.name}</h3>
                       </div>
                     </Link>
                   </div>
@@ -368,7 +368,7 @@ const CategoryBanner = () => {
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-gray-500">No categories available at the moment.</p>
+            <p className="text-amber-600">لا توجد فئات متاحة في الوقت الحالي.</p>
           </div>
         )}
       </div>

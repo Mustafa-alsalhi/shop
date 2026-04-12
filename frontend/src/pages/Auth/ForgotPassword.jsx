@@ -35,9 +35,9 @@ const ForgotPassword = () => {
     const errors = {}
     
     if (!formData.email) {
-      errors.email = 'Email is required'
+      errors.email = 'البريد الإلكتروني مطلوب'
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = 'Email is invalid'
+      errors.email = 'البريد الإلكتروني غير صالح'
     }
     
     setValidationErrors(errors)
@@ -55,10 +55,10 @@ const ForgotPassword = () => {
       const result = await dispatch(forgotPassword(formData.email))
       if (result.meta.requestStatus === 'fulfilled') {
         setIsSubmitted(true)
-        dispatch(showSuccessNotification('Password reset link sent to your email!'))
+        dispatch(showSuccessNotification('تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني!'))
       }
     } catch (error) {
-      dispatch(showErrorNotification('Failed to send password reset link'))
+      dispatch(showErrorNotification('فشل في إرسال رابط إعادة تعيين كلمة المرور'))
     }
   }
 
@@ -73,30 +73,30 @@ const ForgotPassword = () => {
               </svg>
             </div>
             <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-              Check your email
+              تحقق من بريدك الإلكتروني
             </h2>
             <p className="mt-2 text-sm text-gray-600">
-              We've sent a password reset link to{' '}
+              لقد أرسلنا رابط إعادة تعيين كلمة المرور إلى {' '}
               <span className="font-medium">{formData.email}</span>
             </p>
             <p className="mt-4 text-sm text-gray-600">
-              The link will expire in 60 minutes.
+              ستنتهي صلاحية الرابط خلال 60 دقيقة.
             </p>
             <div className="mt-6">
               <Link
                 to="/login"
                 className="btn btn-primary"
               >
-                Back to Login
+                العودة لتسجيل الدخول
               </Link>
             </div>
             <div className="mt-4 text-sm text-gray-600">
-              Didn't receive the email?{' '}
+              هل لم تستلم البريد الإلكتروني؟{' '}
               <button
                 onClick={() => setIsSubmitted(false)}
                 className="font-medium text-primary-600 hover:text-primary-500"
               >
-                Try again
+                حاول مرة أخرى
               </button>
             </div>
           </div>
@@ -111,10 +111,10 @@ const ForgotPassword = () => {
         {/* Header */}
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            Forgot your password?
+            هل نسيت كلمة المرور؟
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Enter your email address and we'll send you a link to reset your password.
+            أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور.
           </p>
         </div>
 
@@ -130,7 +130,7 @@ const ForgotPassword = () => {
           {/* Email */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email address
+              عنوان البريد الإلكتروني
             </label>
             <div className="mt-1">
               <input
@@ -142,7 +142,7 @@ const ForgotPassword = () => {
                 value={formData.email}
                 onChange={handleChange}
                 className={`input ${validationErrors.email ? 'input-error' : ''}`}
-                placeholder="Enter your email"
+                placeholder="أدخل بريدك الإلكتروني"
               />
               {validationErrors.email && (
                 <p className="mt-1 text-sm text-red-600">
@@ -162,10 +162,10 @@ const ForgotPassword = () => {
               {isLoading ? (
                 <div className="flex items-center justify-center">
                   <div className="spinner h-5 w-5 mr-2"></div>
-                  Sending...
+                  جاري الإرسال...
                 </div>
               ) : (
-                'Send Reset Link'
+                'إرسال رابط إعادة التعيين'
               )}
             </button>
           </div>
@@ -177,7 +177,7 @@ const ForgotPassword = () => {
             to="/login"
             className="font-medium text-primary-600 hover:text-primary-500"
           >
-            Back to Login
+            العودة لتسجيل الدخول
           </Link>
         </div>
       </div>

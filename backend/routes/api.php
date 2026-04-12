@@ -8,7 +8,9 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\WishlistController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\BannerController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CouponController;
 
 /*
 |--------------------------------------------------------------------------
@@ -105,6 +107,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/orders', [OrderController::class, 'index']);
     Route::post('/orders', [OrderController::class, 'store']);
     Route::get('/orders/{id}', [OrderController::class, 'show']);
+    
+    // Coupon validation routes (for users)
+    Route::post('/coupons/validate', [CouponController::class, 'validateCoupon']);
+    Route::get('/coupons', [CouponController::class, 'userCoupons']);
+    
+    // Public banner routes
+    Route::get('/banners', [BannerController::class, 'getActiveBanners']);
 });
 
 // Admin routes
@@ -127,4 +136,22 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::post('/categories', [AdminController::class, 'storeCategory']);
     Route::put('/categories/{id}', [AdminController::class, 'updateCategory']);
     Route::delete('/categories/{id}', [AdminController::class, 'deleteCategory']);
+    
+    // Banner management routes
+    Route::get('/banners', [BannerController::class, 'index']);
+    Route::post('/banners', [BannerController::class, 'store']);
+    Route::get('/banners/{id}', [BannerController::class, 'show']);
+    Route::put('/banners/{id}', [BannerController::class, 'update']);
+    Route::delete('/banners/{id}', [BannerController::class, 'destroy']);
+    Route::post('/banners/upload', [BannerController::class, 'uploadImage']);
+    
+    // Coupon management routes
+    Route::get('/coupons', [CouponController::class, 'index']);
+    Route::post('/coupons', [CouponController::class, 'store']);
+    Route::get('/coupons/{id}', [CouponController::class, 'show']);
+    Route::put('/coupons/{id}', [CouponController::class, 'update']);
+    Route::delete('/coupons/{id}', [CouponController::class, 'destroy']);
+    Route::put('/coupons/{id}/toggle', [CouponController::class, 'toggleStatus']);
+    Route::get('/coupons/active', [CouponController::class, 'active']);
+    Route::get('/coupons/statistics', [CouponController::class, 'statistics']);
 });

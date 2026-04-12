@@ -16,10 +16,10 @@ const ServerError = () => {
             </div>
             
             <h1 className="mt-4 text-3xl font-extrabold text-gray-900">
-              Server error
+              خطأ في الخادم
             </h1>
             <p className="mt-2 text-sm text-gray-600">
-              Something went wrong on our end. Please try again later.
+              حدث خطأ من جانبنا. يرجى المحاولة مرة أخرى لاحقاً.
             </p>
           </div>
 
@@ -29,7 +29,7 @@ const ServerError = () => {
               className="w-full btn btn-primary inline-flex items-center justify-center"
             >
               <ArrowPathIcon className="h-5 w-5 mr-2" />
-              Try again
+              حاول مرة أخرى
             </button>
             
             <Link
@@ -37,19 +37,19 @@ const ServerError = () => {
               className="w-full btn btn-outline inline-flex items-center justify-center"
             >
               <HomeIcon className="h-5 w-5 mr-2" />
-              Go to homepage
+              اذهب إلى الصفحة الرئيسية
             </Link>
           </div>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-500">
-              If the problem persists, please contact our support team
+              إذا استمرت المشكلة، يرجى التواصل مع فريق الدعم
             </p>
             <Link
               to="/contact"
               className="mt-2 text-sm text-primary-600 hover:text-primary-500"
             >
-              Contact Support
+              تواصل مع الدعم
             </Link>
           </div>
         </div>

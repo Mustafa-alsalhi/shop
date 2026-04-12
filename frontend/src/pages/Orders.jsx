@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import {
   ShoppingBagIcon,
   EyeIcon,
   ExclamationTriangleIcon,
   XMarkIcon,
   TruckIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  ClockIcon,
+  CheckCircleIcon,
+  CubeIcon
 } from '@heroicons/react/24/outline'
 import { selectIsAuthenticated, selectUser } from '../store/slices/authSlice'
 import { showSuccessNotification, showErrorNotification } from '../store/slices/uiSlice'
@@ -27,11 +31,32 @@ const Orders = () => {
   const [showOrderDetails, setShowOrderDetails] = useState(false)
   const [selectedOrder, setSelectedOrder] = useState(null)
 
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.6,
+        staggerChildren: 0.1
+      }
+    }
+  }
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.5 }
+    }
+  }
+
   // Utility functions
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A'
+    if (!dateString) return 'غير متاح'
     const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString('ar-SA', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -65,32 +90,32 @@ const Orders = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'pending':
-        return 'text-yellow-600 bg-yellow-100'
+        return 'text-amber-700 bg-amber-100 border-amber-200'
       case 'processing':
-        return 'text-blue-600 bg-blue-100'
+        return 'text-blue-700 bg-blue-100 border-blue-200'
       case 'shipped':
-        return 'text-purple-600 bg-purple-100'
+        return 'text-purple-700 bg-purple-100 border-purple-200'
       case 'delivered':
-        return 'text-green-600 bg-green-100'
+        return 'text-green-700 bg-green-100 border-green-200'
       case 'cancelled':
-        return 'text-red-600 bg-red-100'
+        return 'text-red-700 bg-red-100 border-red-200'
       default:
-        return 'text-gray-600 bg-gray-100'
+        return 'text-gray-700 bg-gray-100 border-gray-200'
     }
   }
 
   const getStatusIcon = (status) => {
     switch (status) {
       case 'pending':
-        return <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+        return <ClockIcon className="h-4 w-4" />
       case 'processing':
         return <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
       case 'shipped':
         return <TruckIcon className="h-4 w-4" />
       case 'delivered':
-        return <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+        return <CheckCircleIcon className="h-4 w-4" />
       case 'cancelled':
-        return <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+        return <XMarkIcon className="h-4 w-4" />
       default:
         return <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
     }
@@ -99,17 +124,17 @@ const Orders = () => {
   const getStatusText = (status) => {
     switch (status) {
       case 'pending':
-        return 'Pending'
+        return 'في انتظار'
       case 'processing':
-        return 'Processing'
+        return 'قيد المعالجة'
       case 'shipped':
-        return 'Shipped'
+        return 'تم الشحن'
       case 'delivered':
-        return 'Delivered'
+        return 'تم التسليم'
       case 'cancelled':
-        return 'Cancelled'
+        return 'ملغي'
       default:
-        return 'Unknown'
+        return 'غير معروف'
     }
   }
 
@@ -152,8 +177,8 @@ const Orders = () => {
       }
     } catch (error) {
       console.error('❌ Error fetching orders:', error)
-      setError('Failed to load orders. Please try again.')
-      dispatch(showErrorNotification('Failed to load orders'))
+      setError('فشل في تحميل الطلبات. يرجى المحاولة مرة أخرى.')
+      dispatch(showErrorNotification('فشل في تحميل الطلبات'))
     } finally {
       setLoading(false)
     }
@@ -174,27 +199,27 @@ const Orders = () => {
   const handleTrackOrder = async (order) => {
     try {
       if (!order.tracking_number) {
-        dispatch(showErrorNotification('No tracking number available'))
+        dispatch(showErrorNotification('لا يوجد رقم تتبع متاح'))
         return
       }
 
       const response = await orderService.trackOrder(order.tracking_number)
       
       if (response.data) {
-        dispatch(showSuccessNotification('Tracking information updated'))
+        dispatch(showSuccessNotification('تم تحديث معلومات التتبع'))
         // Refresh orders to get updated tracking info
         fetchOrders()
       }
     } catch (error) {
       console.error('Error tracking order:', error)
-      dispatch(showErrorNotification('Failed to track order'))
+      dispatch(showErrorNotification('فشل في تتبع الطلب'))
     }
   }
 
   // Handle reorder
   const handleReorder = (order) => {
     console.log('Reordering items from order:', order.id)
-    dispatch(showSuccessNotification('Items added to cart!'))
+    dispatch(showSuccessNotification('تمت إضافة العناصر إلى السلة!'))
     navigate('/cart')
   }
 
@@ -214,72 +239,106 @@ const Orders = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-8" dir="rtl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">My Orders</h1>
-            <p className="text-gray-600 mt-2">
-              Track and manage your orders
-            </p>
-          </div>
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="mb-8"
+          >
+            <div className="flex items-center mb-4">
+              <div className="flex-shrink-0 w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center ml-4">
+                <CubeIcon className="h-6 w-6 text-amber-600" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-amber-900">طلباتي</h1>
+                <p className="text-gray-600 mt-1">
+                  تتبع وإدارة طلباتك
+                </p>
+              </div>
+            </div>
+          </motion.div>
 
           {error && (
-            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4"
+            >
               <div className="flex">
-                <ExclamationTriangleIcon className="h-5 w-5 text-red-400 mr-3" />
+                <ExclamationTriangleIcon className="h-5 w-5 text-red-400 ml-3" />
                 <div>
-                  <h3 className="text-sm font-medium text-red-800">Error loading orders</h3>
+                  <h3 className="text-sm font-medium text-red-800">خطأ في تحميل الطلبات</h3>
                   <p className="mt-1 text-sm text-red-700">{error}</p>
                   <button
                     onClick={fetchOrders}
                     className="mt-2 text-sm text-red-600 hover:text-red-800 font-medium"
                   >
-                    Try Again
+                    حاول مرة أخرى
                   </button>
                 </div>
               </div>
-            </div>
+            </motion.div>
           )}
 
           {/* Orders List */}
           {(!orders || orders.length === 0) && !error ? (
-            <div className="text-center py-12">
-              <ShoppingBagIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">No orders yet</h2>
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="text-center py-12"
+            >
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-amber-100 rounded-full mb-4">
+                <ShoppingBagIcon className="h-10 w-10 text-amber-600" />
+              </div>
+              <h2 className="text-xl font-semibold text-amber-900 mb-2">لا توجد طلبات بعد</h2>
               <p className="text-gray-600 mb-6">
-                You haven't placed any orders yet. Start shopping to see your orders here.
+                لم تقم بوضع أي طلبات بعد. ابدأ التسوق لرؤية طلباتك هنا.
               </p>
               <Link
                 to="/products"
-                className="btn btn-primary"
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold rounded-lg hover:from-amber-700 hover:to-orange-700 transition-all duration-300 shadow-lg hover:shadow-xl"
               >
-                Start Shopping
+                ابدأ التسوق
               </Link>
-            </div>
+            </motion.div>
           ) : (
-            <div className="space-y-6">
+            <motion.div 
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="space-y-6"
+            >
               {orders && Array.isArray(orders) && orders.map((order) => (
-                <div key={order.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
+                <motion.div
+                  key={order.id}
+                  variants={itemVariants}
+                  className="bg-white rounded-xl shadow-lg overflow-hidden border border-amber-200/30 hover:shadow-xl transition-all duration-300"
+                  dir="rtl"
+                >
                   {/* Order Header */}
-                  <div className="px-6 py-4 border-b border-gray-200">
+                  <div className="px-6 py-4 border-b border-amber-100">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          Order #{order.id}
+                        <h3 className="text-lg font-semibold text-amber-900">
+                          طلب #{order.id}
                         </h3>
                         <p className="text-sm text-gray-600">
-                          Placed on {formatDate(order.created_at)}
+                          تم الطلب في {formatDate(order.created_at)}
                         </p>
                       </div>
-                      <div className="flex items-center space-x-3">
-                        <div className={`flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
+                      <div className="flex items-center space-x-reverse space-x-3">
+                        <div className={`flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(order.status)}`}>
                           {getStatusIcon(order.status)}
-                          <span className="ml-2">{getStatusText(order.status)}</span>
+                          <span className="mr-2">{getStatusText(order.status)}</span>
                         </div>
                         <button
                           onClick={() => handleViewOrderDetails(order)}
-                          className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
+                          className="p-2 text-amber-600 hover:text-amber-700 transition-colors"
                         >
                           <EyeIcon className="h-5 w-5" />
                         </button>
@@ -289,7 +348,7 @@ const Orders = () => {
 
                   {/* Order Summary */}
                   <div className="px-6 py-4">
-                    <div className="flex items-center space-x-4 mb-4">
+                    <div className="flex items-center space-x-reverse space-x-4 mb-4">
                       {(order.order_items || []).slice(0, 3).map((item, index) => (
                         <img
                           key={index}
@@ -299,8 +358,8 @@ const Orders = () => {
                         />
                       ))}
                       {(order.order_items || []).length > 3 && (
-                        <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
-                          <span className="text-sm text-gray-600 font-medium">
+                        <div className="w-16 h-16 bg-amber-100 rounded-lg flex items-center justify-center">
+                          <span className="text-sm text-amber-700 font-medium">
                             +{(order.order_items || []).length - 3}
                           </span>
                         </div>
@@ -310,48 +369,59 @@ const Orders = () => {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-gray-600">
-                          {(order.order_items || []).length} {(order.order_items || []).length === 1 ? 'item' : 'items'}
+                          {(order.order_items || []).length} {(order.order_items || []).length === 1 ? 'عنصر' : 'عناصر'}
                         </p>
                         <p className="text-sm text-gray-600">
-                          Total: <span className="font-semibold text-gray-900">${order.total_amount ? formatPrice(order.total_amount) : '0.00'}</span>
+                          الإجمالي: <span className="font-semibold text-amber-900">{order.total_amount ? formatPrice(order.total_amount) : '0.00'} ريال</span>
                         </p>
                       </div>
                       <div className="flex items-center space-x-2">
                         {order.tracking_number && (
                           <button
                             onClick={() => handleTrackOrder(order)}
-                            className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                            className="text-sm text-amber-600 hover:text-amber-700 font-medium"
                           >
-                            Track Order
+                            تتبع الطلب
                           </button>
                         )}
                         <button
                           onClick={() => handleReorder(order)}
-                          className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                          className="text-sm text-amber-600 hover:text-amber-700 font-medium"
                         >
-                          Reorder
+                          إعادة الطلب
                         </button>
                       </div>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
 
           {/* Order Details Modal */}
           {showOrderDetails && selectedOrder && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-              <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+            >
+              <motion.div 
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-amber-200/30"
+              >
                 {/* Modal Header */}
-                <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4">
+                <div className="sticky top-0 bg-white border-b border-amber-100 px-6 py-4">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold text-gray-900">
-                      Order #{selectedOrder.id} Details
+                    <h2 className="text-xl font-semibold text-amber-900">
+                      تفاصيل الطلب #{selectedOrder.id}
                     </h2>
                     <button
                       onClick={handleCloseOrderDetails}
-                      className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
+                      className="p-2 text-amber-600 hover:text-amber-700 transition-colors"
                     >
                       <XMarkIcon className="h-6 w-6" />
                     </button>
@@ -364,37 +434,37 @@ const Orders = () => {
                     {/* Order Information */}
                     <div className="space-y-6">
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Information</h3>
+                        <h3 className="text-lg font-semibold text-amber-900 mb-4">معلومات الطلب</h3>
                         <div className="space-y-3">
                           <div className="flex justify-between">
-                            <span className="text-gray-600">Order Date:</span>
+                            <span className="text-gray-600">تاريخ الطلب:</span>
                             <span className="font-medium">{formatDate(selectedOrder.created_at)}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-gray-600">Status:</span>
-                            <div className={`flex items-center px-2 py-1 rounded-full text-sm font-medium ${getStatusColor(selectedOrder.status)}`}>
+                            <span className="text-gray-600">الحالة:</span>
+                            <div className={`flex items-center px-2 py-1 rounded-full text-sm font-medium border ${getStatusColor(selectedOrder.status)}`}>
                               {getStatusIcon(selectedOrder.status)}
                               <span className="ml-2">{getStatusText(selectedOrder.status)}</span>
                             </div>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-gray-600">Payment Status:</span>
+                            <span className="text-gray-600">حالة الدفع:</span>
                             <span className={`px-2 py-1 rounded-full text-sm font-medium ${selectedOrder.payment_status === 'paid'
-                              ? 'text-green-600 bg-green-100'
-                              : 'text-yellow-600 bg-yellow-100'
+                              ? 'text-green-700 bg-green-100 border-green-200'
+                              : 'text-amber-700 bg-amber-100 border-amber-200'
                               }`}>
-                              {selectedOrder.payment_status === 'paid' ? 'Paid' : 'Pending'}
+                              {selectedOrder.payment_status === 'paid' ? 'مدفوع' : 'في انتظار'}
                             </span>
                           </div>
                           {selectedOrder.tracking_number && (
                             <div className="flex justify-between">
-                              <span className="text-gray-600">Tracking Number:</span>
+                              <span className="text-gray-600">رقم التتبع:</span>
                               <span className="font-medium">{selectedOrder.tracking_number}</span>
                             </div>
                           )}
                           {selectedOrder.estimated_delivery && (
                             <div className="flex justify-between">
-                              <span className="text-gray-600">Estimated Delivery:</span>
+                              <span className="text-gray-600">التسليم المقدر:</span>
                               <span className="font-medium">{formatDate(selectedOrder.estimated_delivery)}</span>
                             </div>
                           )}
@@ -403,10 +473,10 @@ const Orders = () => {
 
                       {/* Customer Information */}
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Customer Information</h3>
+                        <h3 className="text-lg font-semibold text-amber-900 mb-4">معلومات العميل</h3>
                         <div className="space-y-3">
                           <div>
-                            <span className="text-gray-600">Name:</span>
+                            <span className="text-gray-600">الاسم:</span>
                             <p className="font-medium">
                               {selectedOrder.customer_info ?
                                 `${selectedOrder.customer_info.first_name || ''} ${selectedOrder.customer_info.last_name || ''}`.trim()
@@ -415,12 +485,12 @@ const Orders = () => {
                             </p>
                           </div>
                           <div>
-                            <span className="text-gray-600">Email:</span>
+                            <span className="text-gray-600">البريد الإلكتروني:</span>
                             <p className="font-medium">{selectedOrder.customer_info ? selectedOrder.customer_info.email : 'N/A'}</p>
                           </div>
                           {selectedOrder.customer_info && selectedOrder.customer_info.phone && (
                             <div>
-                              <span className="text-gray-600">Phone:</span>
+                              <span className="text-gray-600">الهاتف:</span>
                               <p className="font-medium">{selectedOrder.customer_info.phone}</p>
                             </div>
                           )}
@@ -429,8 +499,8 @@ const Orders = () => {
 
                       {/* Shipping Address */}
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Shipping Address</h3>
-                        <div className="bg-gray-50 rounded-lg p-4">
+                        <h3 className="text-lg font-semibold text-amber-900 mb-4">عنوان الشحن</h3>
+                        <div className="bg-amber-50 rounded-lg p-4">
                           <p className="font-medium">{selectedOrder.shipping_address ? selectedOrder.shipping_address.address : 'N/A'}</p>
                           <p className="text-gray-600">
                             {selectedOrder.shipping_address ? 
@@ -450,12 +520,12 @@ const Orders = () => {
 
                     {/* Order Items */}
                     <div className="lg:col-span-2 mt-8">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Items</h3>
-                      <div className="bg-gray-50 rounded-lg overflow-hidden">
+                      <h3 className="text-lg font-semibold text-amber-900 mb-4">عناصر الطلب</h3>
+                      <div className="bg-amber-50 rounded-lg overflow-hidden">
                         {(selectedOrder.order_items || []).map((item, index) => (
                           <div
                             key={index}
-                            className={`flex items-center p-4 ${index !== (selectedOrder.order_items || []).length - 1 ? 'border-b border-gray-200' : ''}`}
+                            className={`flex items-center p-4 ${index !== (selectedOrder.order_items || []).length - 1 ? 'border-b border-amber-200' : ''}`}
                           >
                             <img
                               src={getImageUrl(item.image_url, item.product_name, 80)}
@@ -463,36 +533,36 @@ const Orders = () => {
                               className="w-20 h-20 object-cover rounded-lg mr-4"
                             />
                             <div className="flex-1">
-                              <h4 className="font-medium text-gray-900">{item.product_name}</h4>
-                              <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
+                              <h4 className="font-medium text-amber-900">{item.product_name}</h4>
+                              <p className="text-sm text-gray-600">الكمية: {item.quantity}</p>
                             </div>
                             <div className="text-right">
-                              <p className="text-sm text-gray-600">${item.price ? formatPrice(item.price) : '0.00'} each</p>
-                              <p className="font-semibold text-gray-900">${item.total ? formatPrice(item.total) : '0.00'}</p>
+                              <p className="text-sm text-gray-600">{item.price ? formatPrice(item.price) : '0.00'} ريال لكل وحدة</p>
+                              <p className="font-semibold text-amber-900">{item.total ? formatPrice(item.total) : '0.00'} ريال</p>
                             </div>
                           </div>
                         ))}
                       </div>
 
                       {/* Order Total */}
-                      <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                      <div className="mt-6 bg-white rounded-lg p-4 border border-amber-200/30">
                         <div className="space-y-2">
                           <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Subtotal:</span>
-                            <span className="font-medium">${selectedOrder.total_amount ? formatPrice(selectedOrder.total_amount * 0.9) : '0.00'}</span>
+                            <span className="text-gray-600">المجموع الفرعي:</span>
+                            <span className="font-medium">{selectedOrder.total_amount ? formatPrice(selectedOrder.total_amount * 0.9) : '0.00'} ريال</span>
                           </div>
                           <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Tax:</span>
-                            <span className="font-medium">${selectedOrder.total_amount ? formatPrice(selectedOrder.total_amount * 0.1) : '0.00'}</span>
+                            <span className="text-gray-600">الضريبة:</span>
+                            <span className="font-medium">{selectedOrder.total_amount ? formatPrice(selectedOrder.total_amount * 0.1) : '0.00'} ريال</span>
                           </div>
                           <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Shipping:</span>
-                            <span className="font-medium text-green-600">Free</span>
+                            <span className="text-gray-600">الشحن:</span>
+                            <span className="font-medium text-green-600">مجاني</span>
                           </div>
-                          <div className="border-t pt-2">
+                          <div className="border-t border-amber-200 pt-2">
                             <div className="flex justify-between text-lg font-bold">
-                              <span>Total:</span>
-                              <span className="text-primary-600">${selectedOrder.total_amount ? formatPrice(selectedOrder.total_amount) : '0.00'}</span>
+                              <span>الإجمالي:</span>
+                              <span className="text-amber-600">{selectedOrder.total_amount ? formatPrice(selectedOrder.total_amount) : '0.00'} ريال</span>
                             </div>
                           </div>
                         </div>
@@ -502,34 +572,34 @@ const Orders = () => {
                 </div>
 
                 {/* Modal Footer */}
-                <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4">
+                <div className="sticky bottom-0 bg-white border-t border-amber-100 px-6 py-4">
                   <div className="flex items-center justify-between">
                     <button
                       onClick={handleCloseOrderDetails}
-                      className="btn btn-outline"
+                      className="px-6 py-2 border border-amber-300 text-amber-700 rounded-lg hover:bg-amber-50 transition-colors font-medium"
                     >
-                      Close
+                      إغلاق
                     </button>
                     <div className="flex items-center space-x-3">
                       {selectedOrder.tracking_number && (
                         <button
                           onClick={() => handleTrackOrder(selectedOrder)}
-                          className="btn btn-outline"
+                          className="px-6 py-2 border border-amber-300 text-amber-700 rounded-lg hover:bg-amber-50 transition-colors font-medium"
                         >
-                          Track Order
+                          تتبع الطلب
                         </button>
                       )}
                       <button
                         onClick={() => handleReorder(selectedOrder)}
-                        className="btn btn-primary"
+                        className="px-6 py-2 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg hover:from-amber-700 hover:to-orange-700 transition-all duration-300 font-medium"
                       >
-                        Reorder
+                        إعادة الطلب
                       </button>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           )}
         </div>
       </div>

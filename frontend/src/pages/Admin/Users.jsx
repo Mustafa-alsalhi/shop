@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../../services/api'
+import { UsersIcon, PlusIcon, PencilIcon, TrashIcon, EyeIcon, UserCircleIcon } from '@heroicons/react/24/outline'
 
 const AdminUsers = () => {
   const navigate = useNavigate()
@@ -18,19 +19,19 @@ const AdminUsers = () => {
       setUsers(response.data.data || response.data)
       setLoading(false)
     } catch (err) {
-      setError('Failed to fetch users: ' + err.message)
+      setError('فشل في جلب المستخدمين: ' + err.message)
       setLoading(false)
     }
   }
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
+    if (window.confirm('هل أنت متأكد من أنك تريد حذف هذا المستخدم؟')) {
       try {
         await api.delete(`/admin/users/${id}`)
         setUsers(users.filter(u => u.id !== id))
-        alert('User deleted successfully!')
+        alert('تم حذف المستخدم بنجاح!')
       } catch (err) {
-        setError('Failed to delete user: ' + err.message)
+        setError('فشل في حذف المستخدم: ' + err.message)
       }
     }
   }
@@ -40,7 +41,7 @@ const AdminUsers = () => {
   }
 
   const handleView = (user) => {
-    alert(`User Details:\n\nName: ${user.name}\nEmail: ${user.email}\nRole: ${user.role}\nJoined: ${user.created_at}`)
+    alert(`تفاصيل المستخدم:\n\nالاسم: ${user.name}\nالبريد الإلكتروني: ${user.email}\nالدور: ${user.role}\nتاريخ الانضمام: ${user.created_at}`)
   }
 
   const handleAddUser = () => {
@@ -56,126 +57,130 @@ const AdminUsers = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
       <div className="max-w-7xl mx-auto py-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Manage Users</h1>
-          <button
-            onClick={handleAddUser}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            Add New User
-          </button>
+        {/* Header */}
+        <div className="bg-white shadow-xl rounded-2xl border border-gray-100 p-6 mb-6">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-reverse space-x-3">
+              <div className="p-3 bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl">
+                <UsersIcon className="h-6 w-6 text-white" />
+              </div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                إدارة المستخدمين
+              </h1>
+            </div>
+            <button
+              onClick={handleAddUser}
+              className="flex items-center px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105"
+            >
+              <PlusIcon className="h-5 w-5 ml-2" />
+              إضافة مستخدم جديد
+            </button>
+          </div>
         </div>
 
+        {/* Error Alert */}
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
+          <div className="bg-red-50 border border-red-200 text-red-800 px-6 py-4 rounded-xl mb-6 shadow-lg">
+            <div className="flex items-center space-x-reverse space-x-3">
+              <div className="p-2 bg-red-100 rounded-lg">
+                <UserCircleIcon className="h-5 w-5 text-red-600" />
+              </div>
+              <span className="font-medium">{error}</span>
+            </div>
           </div>
         )}
 
         {/* Users Table */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b">
-            <h2 className="text-lg font-semibold">Users ({users.length})</h2>
+        <div className="bg-white shadow-xl rounded-2xl border border-gray-100">
+          <div className="px-6 py-5 border-b border-gray-100">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-gray-900">
+                المستخدمون ({users.length})
+              </h2>
+              <div className="flex items-center space-x-reverse space-x-2">
+                <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                <span className="text-sm text-gray-600">متصل بقاعدة البيانات</span>
+              </div>
+            </div>
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    User
+                  <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    المستخدم
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
+                  <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    البريد الإلكتروني
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Role
+                  <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    الدور
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                  <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    الحالة
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Joined
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
+                  <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    الإجراءات
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {users.map((user) => (
-                  <tr key={user.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 flex-shrink-0">
-                          <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                            <span className="text-gray-600 font-medium">
-                              {user.name?.charAt(0)?.toUpperCase() || 'U'}
-                            </span>
-                          </div>
+                  <tr key={user.id} className="hover:bg-gray-50 transition-colors duration-200">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                      <div className="flex items-center space-x-reverse space-x-3">
+                        <div className="h-10 w-10 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold">
+                          {user.name?.charAt(0)?.toUpperCase() || 'U'}
                         </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                        </div>
+                        <div className="font-medium">{user.name}</div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
                       {user.email}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        user.role === 'admin' 
-                          ? 'bg-purple-100 text-purple-800' 
-                          : 'bg-green-100 text-green-800'
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                      <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        user.role === 'admin' ? 'bg-purple-100 text-purple-800' :
+                        user.role === 'manager' ? 'bg-blue-100 text-blue-800' :
+                        'bg-gray-100 text-gray-800'
                       }`}>
-                        {user.role}
+                        {user.role === 'admin' ? '👑 مدير' :
+                         user.role === 'manager' ? '👨‍💼 مشرف' :
+                         user.role || 'مستخدم'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        user.email_verified_at 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-yellow-100 text-yellow-800'
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                      <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                       }`}>
-                        {user.email_verified_at ? 'Verified' : 'Pending'}
+                        {user.is_active ? '✅ نشط' : '❌ غير نشط'}
                       </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(user.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-2">
+                      <div className="flex items-center space-x-reverse space-x-2">
                         <button
                           onClick={() => handleView(user)}
-                          className="text-blue-600 hover:text-blue-900"
-                          title="View"
+                          className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
+                          title="عرض التفاصيل"
                         >
-                          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                          </svg>
+                          <EyeIcon className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleEdit(user)}
-                          className="text-green-600 hover:text-green-900"
-                          title="Edit"
+                          className="p-2 bg-amber-100 text-amber-600 rounded-lg hover:bg-amber-200 transition-colors"
+                          title="تعديل المستخدم"
                         >
-                          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
+                          <PencilIcon className="h-4 w-4" />
                         </button>
-                        {user.role !== 'admin' && (
-                          <button
-                            onClick={() => handleDelete(user.id)}
-                            className="text-red-600 hover:text-red-900"
-                            title="Delete"
-                          >
-                            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>
-                        )}
+                        <button
+                          onClick={() => handleDelete(user.id)}
+                          className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+                          title="حذف المستخدم"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
                       </div>
                     </td>
                   </tr>

@@ -14,10 +14,10 @@ const NotFound = () => {
             </div>
             
             <h1 className="mt-4 text-3xl font-extrabold text-gray-900">
-              Page not found
+              الصفحة غير موجودة
             </h1>
             <p className="mt-2 text-sm text-gray-600">
-              Sorry, we couldn't find the page you're looking for.
+              عذراً، لم نتمكن من العثور على الصفحة التي تبحث عنها.
             </p>
           </div>
 
@@ -27,7 +27,7 @@ const NotFound = () => {
               className="w-full btn btn-primary inline-flex items-center justify-center"
             >
               <HomeIcon className="h-5 w-5 mr-2" />
-              Go back home
+              العودة إلى الصفحة الرئيسية
             </Link>
             
             <Link
@@ -35,13 +35,13 @@ const NotFound = () => {
               className="w-full btn btn-outline inline-flex items-center justify-center"
             >
               <ArrowLeftIcon className="h-5 w-5 mr-2" />
-              Browse products
+              تصفح المنتجات
             </Link>
           </div>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-500">
-              Or try searching for what you need
+              أو حاول البحث عما تحتاجه
             </p>
           </div>
         </div>

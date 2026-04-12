@@ -75,7 +75,7 @@ const SearchOverlay = ({ isOpen }) => {
                   type="text"
                   value={localQuery}
                   onChange={handleInputChange}
-                  placeholder="Search for products..."
+                  placeholder="ابحث عن المنتجات..."
                   className="w-full pl-12 pr-4 py-3 text-lg border-b-2 border-gray-300 focus:border-primary-500 focus:outline-none"
                 />
               </div>
@@ -85,7 +85,7 @@ const SearchOverlay = ({ isOpen }) => {
                 className="btn btn-primary"
                 disabled={!localQuery.trim()}
               >
-                Search
+                بحث
               </button>
             </form>
 
@@ -102,7 +102,7 @@ const SearchOverlay = ({ isOpen }) => {
           {localQuery.trim() && (
             <div className="py-4 border-t border-gray-200">
               <div className="text-sm text-gray-500 mb-2">
-                Popular searches for "{localQuery}"
+                عمليات البحث الشائعة لـ "{localQuery}"
               </div>
               <div className="flex flex-wrap gap-2">
                 {['laptop', 'phone', 'shoes', 'watch'].map((suggestion) => (
@@ -124,9 +124,9 @@ const SearchOverlay = ({ isOpen }) => {
           {/* Recent Searches */}
           {!localQuery.trim() && (
             <div className="py-4 border-t border-gray-200">
-              <div className="text-sm text-gray-500 mb-2">Recent searches</div>
+              <div className="text-sm text-gray-500 mb-2">لا توجد عمليات بحث أخيرة</div>
               <div className="space-y-2">
-                <div className="text-gray-700">No recent searches</div>
+                <div className="text-gray-700">لا توجد عمليات بحث أخيرة</div>
               </div>
             </div>
           )}

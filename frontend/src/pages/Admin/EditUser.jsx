@@ -35,7 +35,7 @@ const EditUser = () => {
     } catch (err) {
       console.error('Fetch error:', err)
       const errorMessage = err.response?.data?.message || err.message
-      setError('Failed to fetch user: ' + errorMessage)
+      setError('فشل في جلب المستخدم: ' + errorMessage)
       setLoading(false)
     }
   }
@@ -52,13 +52,13 @@ const EditUser = () => {
       
       // Simple validation
       if (!user.name || user.name.trim() === '') {
-        throw new Error('Name is required')
+        throw new Error('الاسم مطلوب')
       }
       if (!user.email || user.email.trim() === '') {
-        throw new Error('Email is required')
+        throw new Error('البريد الإلكتروني مطلوب')
       }
       if (!user.role) {
-        throw new Error('Role is required')
+        throw new Error('الدور مطلوب')
       }
 
       const updateData = {
@@ -72,7 +72,7 @@ const EditUser = () => {
       const response = await api.put(`/admin/users/${id}`, updateData)
       
       console.log('✅ Update successful:', response)
-      alert('User updated successfully!')
+      alert('تم تحديث المستخدم بنجاح!')
       navigate('/admin/users')
     } catch (err) {
       console.error('❌ Update failed:', err)
@@ -83,7 +83,7 @@ const EditUser = () => {
         data: err.response?.data
       })
       
-      let errorMessage = 'Unknown error occurred'
+      let errorMessage = 'حدث خطأ غير معروف'
       
       if (err.response?.data?.errors) {
         errorMessage = Object.values(err.response.data.errors).flat().join(', ')
@@ -95,7 +95,7 @@ const EditUser = () => {
         errorMessage = err.message
       }
       
-      setError(`Failed to update user: ${errorMessage}`)
+      setError(`فشل في تحديث المستخدم: ${errorMessage}`)
     } finally {
       setSaving(false)
     }
@@ -112,15 +112,15 @@ const EditUser = () => {
   }
 
   const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+    if (window.confirm('هل أنت متأكد من أنك تريد حذف هذا المستخدم؟ هذا الإجراء لا يمكن التراجع عنه.')) {
       try {
         await api.delete(`/admin/users/${id}`)
-        alert('User deleted successfully!')
+        alert('تم حذف المستخدم بنجاح!')
         navigate('/admin/users')
       } catch (err) {
         console.error('Delete error:', err)
         const errorMessage = err.response?.data?.message || err.message
-        setError('Failed to delete user: ' + errorMessage)
+        setError('فشل في حذف المستخدم: ' + errorMessage)
       }
     }
   }
@@ -137,12 +137,12 @@ const EditUser = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto py-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Edit User</h1>
+          <h1 className="text-2xl font-bold text-gray-900">تعديل المستخدم</h1>
           <button
             onClick={() => navigate('/admin/users')}
             className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
           >
-            Back to Users
+            العودة للمستخدمين
           </button>
         </div>
 
@@ -154,13 +154,13 @@ const EditUser = () => {
 
         <div className="bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b">
-            <h2 className="text-lg font-semibold">User Information</h2>
+            <h2 className="text-lg font-semibold">معلومات المستخدم</h2>
           </div>
           <form onSubmit={handleSubmit} className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Name *
+                  الاسم *
                 </label>
                 <input
                   type="text"
@@ -169,13 +169,13 @@ const EditUser = () => {
                   onChange={handleInputChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter user name"
+                  placeholder="أدخل اسم المستخدم"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email *
+                  البريد الإلكتروني *
                 </label>
                 <input
                   type="email"
@@ -184,13 +184,13 @@ const EditUser = () => {
                   onChange={handleInputChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter email address"
+                  placeholder="أدخل البريد الإلكتروني"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Role *
+                  الدور *
                 </label>
                 <select
                   name="role"
@@ -199,18 +199,18 @@ const EditUser = () => {
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="">Select Role</option>
-                  <option value="user">User</option>
-                  <option value="admin">Admin</option>
+                  <option value="">اختيار الدور</option>
+                  <option value="user">مستخدم</option>
+                  <option value="admin">مدير</option>
                 </select>
                 <p className="mt-1 text-xs text-gray-500">
-                  Admin users have full access to admin panel
+                  المستخدمون المديرون لديهم وصول كامل لوحة تحكم المديرين
                 </p>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  User ID
+                  معرف المستخدم
                 </label>
                 <input
                   type="text"
@@ -223,7 +223,7 @@ const EditUser = () => {
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Verification Status
+                  حالة التحقق من البريد الإلكتروني
                 </label>
                 <div className="flex items-center">
                   <div className={`w-3 h-3 rounded-full mr-2 ${
@@ -231,22 +231,22 @@ const EditUser = () => {
                   }`}></div>
                   <span className="text-sm text-gray-600">
                     {user.email_verified_at 
-                      ? `Verified on ${new Date(user.email_verified_at).toLocaleDateString()}`
-                      : 'Not verified'
+                      ? `تم التحقق في ${new Date(user.email_verified_at).toLocaleDateString()}`
+                      : 'لم يتم التحقق'
                     }
                   </span>
                 </div>
                 <p className="mt-1 text-xs text-gray-500">
                   {user.email_verified_at 
-                    ? 'User has verified their email address'
-                    : 'User has not yet verified their email address'
+                    ? 'المستخدم قام بالتحقق من بريده الإلكتروني'
+                    : 'المستخدم لم يقم بالتحقق من بريده الإلكتروني بعد'
                   }
                 </p>
               </div>
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Account Created
+                  تاريخ إنشاء الحساب
                 </label>
                 <div className="text-sm text-gray-600">
                   {new Date(user.created_at).toLocaleString()}
@@ -255,7 +255,7 @@ const EditUser = () => {
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Last Updated
+                  آخر تحديث
                 </label>
                 <div className="text-sm text-gray-600">
                   {new Date(user.updated_at).toLocaleString()}
@@ -270,14 +270,14 @@ const EditUser = () => {
                   onClick={() => navigate('/admin/users')}
                   className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                 >
-                  Cancel
+                  إلغاء
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
                   className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
                 >
-                  {saving ? 'Saving...' : 'Update User'}
+                  {saving ? 'جاري الحفظ...' : 'تحديث المستخدم'}
                 </button>
               </div>
 
@@ -287,7 +287,7 @@ const EditUser = () => {
                   onClick={handleDelete}
                   className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
                 >
-                  Delete User
+                  حذف المستخدم
                 </button>
               )}
             </div>
