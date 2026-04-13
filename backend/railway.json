@@ -1,8 +1,7 @@
 {
-  "$schema": "https://railway.com/railway.schema.json",
   "build": {
     "builder": "RAILPACK",
-    "buildCommand": "chmod +x fix-env-sed.sh && ./fix-env-sed.sh && composer install --no-dev --optimize-autoloader --no-scripts && php artisan config:clear && php artisan cache:clear && php artisan config:cache && php artisan route:cache && php artisan view:cache"
+    "buildCommand": "chmod +x create-env.sh && ./create-env.sh && composer install --no-dev --optimize-autoloader --no-scripts && php artisan config:clear && php artisan cache:clear && php artisan config:cache && php artisan route:cache && php artisan view:cache"
   },
   "deploy": {
     "runtime": "V2",
