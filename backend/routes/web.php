@@ -18,7 +18,15 @@ Route::get('/', function () {
 });
 
 Route::get('/api/health', function () {
-    return response()->json([
-        'status' => 'ok'
-    ]);
+    try {
+        return response()->json([
+            'status' => 'ok',
+            'timestamp' => now()->toISOString()
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Health check failed'
+        ], 500);
+    }
 });
