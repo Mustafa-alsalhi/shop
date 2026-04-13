@@ -1,7 +1,7 @@
 {
   "build": {
     "builder": "RAILPACK",
-    "buildCommand": "chmod +x create-env.sh && ./create-env.sh && cat .env && php -r 'var_dump(getenv(\"APP_NAME\"));' && printenv | grep APP_NAME && unset APP_NAME && composer install --no-dev --optimize-autoloader --no-scripts && php artisan config:clear && php artisan cache:clear && php artisan key:generate && php artisan config:cache && php artisan route:cache && php artisan view:cache"
+    "buildCommand": "env -i bash -c './create-env.sh && composer install --no-dev --optimize-autoloader --no-scripts && php artisan config:clear && php artisan cache:clear && php artisan key:generate && php artisan config:cache && php artisan route:cache && php artisan view:cache'"
   },
   "deploy": {
     "runtime": "V2",
