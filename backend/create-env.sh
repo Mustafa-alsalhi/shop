@@ -3,6 +3,9 @@
 # Delete any old file
 rm -f .env
 
+# Override Railway APP_NAME to prevent parsing errors
+export APP_NAME=E_Commerce_Store
+
 # Create clean file without encoding issues
 printf '%s\n' \
 'APP_NAME=E_Commerce_Store' \
@@ -38,3 +41,5 @@ echo "Environment file created successfully!"
 echo "=== DEBUG: Content of .env file ==="
 cat .env
 echo "=== DEBUG: End of .env file ==="
+echo "=== DEBUG: APP_NAME override ==="
+echo "APP_NAME=$APP_NAME"
