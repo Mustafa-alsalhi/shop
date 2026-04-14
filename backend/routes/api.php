@@ -23,6 +23,21 @@ use App\Http\Controllers\CouponController;
 |
 */
 
+// Health check endpoint
+Route::get('/health', function () {
+    try {
+        return response()->json([
+            'status' => 'ok',
+            'timestamp' => now()->toISOString()
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Health check failed'
+        ], 500);
+    }
+});
+
 // Test endpoint for order creation
 Route::get('/test-order', function () {
     return response()->json([
