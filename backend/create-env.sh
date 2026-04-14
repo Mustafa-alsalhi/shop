@@ -5,7 +5,7 @@ rm -f .env
 
 # Create clean file without encoding issues
 printf '%s\n' \
-'APP_NAME="E-Commerce Store"' \
+'APP_NAME=E_Commerce_Store' \
 'APP_ENV=production' \
 'APP_KEY=' \
 'APP_DEBUG=false' \
