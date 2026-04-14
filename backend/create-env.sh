@@ -35,3 +35,6 @@ printf '%s\n' \
 > .env
 
 echo "Environment file created successfully!"
+echo "=== DEBUG: Content of .env file ==="
+cat .env
+echo "=== DEBUG: End of .env file ==="
