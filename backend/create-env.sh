@@ -43,3 +43,21 @@ cat .env
 echo "=== DEBUG: End of .env file ==="
 echo "=== DEBUG: APP_NAME override ==="
 echo "APP_NAME=$APP_NAME"
+
+# Create a custom bootstrap to bypass ENV loading
+cat > bootstrap/custom_env.php << 'EOF'
+<?php
+
+return [
+    'name' => 'E_Commerce_Store',
+    'env' => 'production',
+    'debug' => false,
+    'url' => 'https://your-app-name.railway.app',
+    'timezone' => 'UTC',
+    'locale' => 'en',
+    'fallback_locale' => 'en',
+    'key' => 'base64:'.base64_encode(random_bytes(32)),
+];
+EOF
+
+echo "Custom environment configuration created!"
