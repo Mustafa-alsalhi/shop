@@ -23,19 +23,12 @@ use App\Http\Controllers\CouponController;
 |
 */
 
-// Health check endpoint
+// Health check endpoint - simple without database dependencies
 Route::get('/health', function () {
-    try {
-        return response()->json([
-            'status' => 'ok',
-            'timestamp' => now()->toISOString()
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Health check failed'
-        ], 500);
-    }
+    return response()->json([
+        'status' => 'ok',
+        'timestamp' => now()->toISOString()
+    ]);
 });
 
 // Test endpoint for order creation
