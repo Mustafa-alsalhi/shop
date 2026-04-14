@@ -13,9 +13,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return response()->json([
-        'status' => 'ok',
-        'message' => 'Laravel application is running'
-    ]);
-});
+
+Route::get('/{any}', function () {
+    return file_get_contents(base_path('../frontend/dist/index.html'));
+})->where('any', '.*');
