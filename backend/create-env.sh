@@ -3,14 +3,11 @@
 # Delete any old file
 rm -f .env
 
-# Override Railway APP_NAME to prevent parsing errors
-export APP_NAME=E_Commerce_Store
-
 # Create clean file without encoding issues
 printf '%s\n' \
 'APP_NAME=E_Commerce_Store' \
 'APP_ENV=production' \
-'APP_KEY=' \
+'APP_KEY=base64:J7sWlYpYg0sXk9F2YlQvZzFqV0ZkZ0VqR2tqU2FqWkE=' \
 'APP_DEBUG=false' \
 'APP_URL=https://your-app-name.railway.app' \
 '' \
@@ -41,8 +38,6 @@ echo "Environment file created successfully!"
 echo "=== DEBUG: Content of .env file ==="
 cat .env
 echo "=== DEBUG: End of .env file ==="
-echo "=== DEBUG: APP_NAME override ==="
-echo "APP_NAME=$APP_NAME"
 
 # Create a custom bootstrap to bypass ENV loading
 cat > bootstrap/custom_env.php << 'EOF'
@@ -56,7 +51,7 @@ return [
     'timezone' => 'UTC',
     'locale' => 'en',
     'fallback_locale' => 'en',
-    'key' => 'base64:'.base64_encode(random_bytes(32)),
+    'key' => 'base64:J7sWlYpYg0sXk9F2YlQvZzFqV0ZkZ0VqR2tqU2FqWkE=',
 ];
 EOF
 
