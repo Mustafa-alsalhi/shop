@@ -1,0 +1,9 @@
+:80 {
+  root * /app
+  encode gzip
+  
+  # Try to serve the requested file, if it doesn't exist, serve index.html
+  try_files {path} /index.html
+  
+  file_server
+}
