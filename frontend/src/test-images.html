@@ -88,7 +88,7 @@
     <div id="results"></div>
 
     <script>
-        const API_BASE = 'http://localhost:8000/api';
+        const API_BASE = '/api';
         let token = localStorage.getItem('token');
 
         function log(message, type = 'info') {
@@ -104,7 +104,7 @@
             let html = '<div class="product-grid">';
             products.forEach(product => {
                 const imageUrl = product.image_url && product.image_url !== 'null' 
-                    ? (product.image_url.startsWith('http') ? product.image_url : `http://localhost:8000${product.image_url}`)
+                    ? (product.image_url.startsWith('http') ? product.image_url : `${product.image_url}`)
                     : `https://picsum.photos/seed/${encodeURIComponent(product.name)}/150/150.jpg`;
                 
                 html += `
@@ -124,7 +124,7 @@
             let html = '<h3>Order Items:</h3>';
             orderItems.forEach(item => {
                 const imageUrl = item.image_url && item.image_url !== 'null' 
-                    ? (item.image_url.startsWith('http') ? item.image_url : `http://localhost:8000${item.image_url}`)
+                    ? (item.image_url.startsWith('http') ? item.image_url : `${item.image_url}`)
                     : `https://picsum.photos/seed/${encodeURIComponent(item.product_name)}/80/80.jpg`;
                 
                 html += `

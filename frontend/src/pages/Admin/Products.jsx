@@ -129,7 +129,7 @@ const AdminProducts = () => {
     if (product.image_url) {
       // If it's a relative path starting with /images/, convert to full URL
       if (product.image_url.startsWith('/images/')) {
-        return `http://localhost:8000${product.image_url}`
+        return `${product.image_url}`
       }
       // If it's already a full URL, use it as is
       if (product.image_url.startsWith('http')) {
@@ -140,7 +140,7 @@ const AdminProducts = () => {
         return `https://picsum.photos/seed/${product.name.replace(/\s+/g, '')}/400/400.jpg`
       }
       // Otherwise, treat as relative path
-      return `http://localhost:8000${product.image_url.startsWith('/') ? '' : '/'}${product.image_url}`
+      return `${product.image_url.startsWith('/') ? '' : '/'}${product.image_url}`
     }
     // Use a reliable image service as fallback
     return `https://picsum.photos/seed/${product.name.replace(/\s+/g, '')}/400/400.jpg`

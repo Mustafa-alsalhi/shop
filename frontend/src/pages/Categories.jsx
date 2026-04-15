@@ -72,7 +72,7 @@ const Categories = () => {
         return category.image
       }
       // Otherwise, use backend URL with correct path
-      return `http://localhost:8000/storage/images/categories/${category.image}`
+      return `/storage/images/categories/${category.image}`
     }
     return null
   }

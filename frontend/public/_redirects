@@ -1,0 +1,4 @@
+/api/*  https://shop-production-d82a.up.railway.app/api/:splat  200
+/storage/*  https://shop-production-d82a.up.railway.app/storage/:splat  200
+/images/*  https://shop-production-d82a.up.railway.app/images/:splat  200
+/*    /index.html   200

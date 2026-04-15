@@ -148,7 +148,7 @@ const AdminCategories = () => {
     
     // If it's a relative path starting with /images/, convert to full URL
     if (imagePath.startsWith('/images/')) {
-      return `http://localhost:8000${imagePath}`
+      return `${imagePath}`
     }
     
     // If it's already a full URL, use it as is
@@ -157,7 +157,7 @@ const AdminCategories = () => {
     }
     
     // Otherwise, treat as relative path
-    return `http://localhost:8000${imagePath.startsWith('/') ? '' : '/'}${imagePath}`
+    return `${imagePath.startsWith('/') ? '' : '/'}${imagePath}`
   }
 
   if (loading) {

@@ -40,7 +40,7 @@ const Checkout = () => {
         return imageUrl
       }
       if (imageUrl.startsWith('/')) {
-        const absoluteUrl = `http://localhost:8000${imageUrl}`
+        const absoluteUrl = `${imageUrl}`
         console.log('🔗 Converting relative to absolute:', absoluteUrl)
         return absoluteUrl
       }

@@ -80,7 +80,7 @@ const CartSidebar = ({ isOpen }) => {
     if (!imagePath) return `https://picsum.photos/seed/${productName?.replace(/\s+/g, '') || 'product'}/80x80.jpg`
     
     if (imagePath.startsWith('/images/')) {
-      return `http://localhost:8000${imagePath}`
+      return `${imagePath}`
     }
     
     if (imagePath.startsWith('http')) {
@@ -91,7 +91,7 @@ const CartSidebar = ({ isOpen }) => {
       return `https://picsum.photos/seed/${productName?.replace(/\s+/g, '') || 'product'}/80x80.jpg`
     }
     
-    return `http://localhost:8000${imagePath.startsWith('/') ? '' : '/'}${imagePath}`
+    return `${imagePath.startsWith('/') ? '' : '/'}${imagePath}`
   }
 
   if (!isOpen) return null

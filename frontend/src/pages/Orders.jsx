@@ -77,7 +77,7 @@ const Orders = () => {
       }
       // If it's a relative path, make it absolute
       if (imageUrl.startsWith('/')) {
-        return `http://localhost:8000${imageUrl}`
+        return `${imageUrl}`
       }
       return imageUrl
     }

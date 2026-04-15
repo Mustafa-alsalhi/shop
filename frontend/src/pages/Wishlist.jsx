@@ -200,7 +200,7 @@ const Wishlist = () => {
     if (!imagePath) return `https://picsum.photos/seed/${productName?.replace(/\s+/g, '') || 'product'}/300x300.jpg`
     
     if (imagePath.startsWith('/images/')) {
-      return `http://localhost:8000${imagePath}`
+      return `${imagePath}`
     }
     
     if (imagePath.startsWith('http')) {
@@ -211,7 +211,7 @@ const Wishlist = () => {
       return `https://picsum.photos/seed/${productName?.replace(/\s+/g, '') || 'product'}/300x300.jpg`
     }
     
-    return `http://localhost:8000${imagePath.startsWith('/') ? '' : '/'}${imagePath}`
+    return `${imagePath.startsWith('/') ? '' : '/'}${imagePath}`
   }
 
   // Helper function to ensure product has in_stock field
