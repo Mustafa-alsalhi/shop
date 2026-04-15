@@ -21,9 +21,9 @@ return [
 
     'allowed_origins' => [
     'http://localhost:3000',
-    'http://127.0.0.1:3000',
     'https://dependable-benevolence-production-8c3c.up.railway.app',
-    'https://shop-production-d82a.up.railway.app',
+    'https://agent-69dee8ea4d2cebd006f9d915--trtree.netlify.app',
+    'https://trtree.netlify.app',
     ],
 
     'allowed_origins_patterns' => [],
