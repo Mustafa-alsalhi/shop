@@ -22,7 +22,7 @@ return [
     'allowed_origins' => [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
-    'https://jgusgy.netlify.app',
+    'https://agent-69dee8ea4d2cebd006f9d915--trtree.netlify.app/',
     'https://trtree.netlify.app/',
     ],
 
