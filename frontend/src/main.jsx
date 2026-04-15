@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { HashRouter } from 'react-router-dom'
+import { BrowserRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { ReactQueryDevtools } from 'react-query/devtools'
@@ -29,7 +29,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <HelmetProvider>
       <Provider store={store}>
         <QueryClientProvider client={queryClient}>
-          <HashRouter>
+          <BrowserRouter>
             <App />
             <Toaster
               position="top-right"
@@ -55,7 +55,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                 },
               }}
             />
-          </HashRouter>
+          </BrowserRouter>
           <WhatsAppButton 
             phoneNumber={WHATSAPP_NUMBER} 
             message={WHATSAPP_MESSAGES.default}
