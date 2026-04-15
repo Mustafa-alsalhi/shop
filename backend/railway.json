@@ -1,6 +1,6 @@
 {
   "build": {
-    "builder": "NIXPACKS",
+    "builder": "RAILPACK",
     "buildCommand": "chmod +x create-env.sh && ./create-env.sh && composer install --no-dev --optimize-autoloader --no-scripts && php artisan config:clear && php artisan cache:clear"
   },
   "deploy": {
