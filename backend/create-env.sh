@@ -1,58 +1,104 @@
-#!/bin/bash
+APP_NAME=ShopHub
+APP_ENV=local
+APP_KEY=base64:0KEIct/ga5Qbx72rSaF1DCRclP8HCNqWbbjaRgs6bfY=
+APP_DEBUG=true
+APP_URL=http://localhost:8000
 
-# Delete any old file
-rm -f .env
+LOG_CHANNEL=stack
+LOG_DEPRECATIONS_CHANNEL=null
+LOG_LEVEL=debug
 
-# Create clean file without encoding issues
-printf '%s\n' \
-'APP_NAME=E_Commerce_Store' \
-'APP_ENV=production' \
-'APP_KEY=base64:J7sWlYpYg0sXk9F2YlQvZzFqV0ZkZ0VqR2tqU2FqWkE=' \
-'APP_DEBUG=false' \
-'APP_URL=https://your-app-name.railway.app' \
-'' \
-'LOG_CHANNEL=stack' \
-'LOG_DEPRECATIONS_CHANNEL=null' \
-'LOG_LEVEL=error' \
-'' \
-'DB_CONNECTION=mysql' \
-'DB_HOST=railway' \
-'DB_PORT=3306' \
-'DB_DATABASE=railway' \
-'DB_USERNAME=root' \
-'DB_PASSWORD=' \
-'' \
-'BROADCAST_DRIVER=log' \
-'CACHE_DRIVER=redis' \
-'FILESYSTEM_DRIVER=local' \
-'QUEUE_CONNECTION=sync' \
-'SESSION_DRIVER=redis' \
-'SESSION_LIFETIME=120' \
-'' \
-'REDIS_HOST=railway' \
-'REDIS_PASSWORD=' \
-'REDIS_PORT=6379' \
-> .env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=ecommerce_store
+DB_USERNAME=root
+DB_PASSWORD=
 
-echo "Environment file created successfully!"
-echo "=== DEBUG: Content of .env file ==="
-cat .env
-echo "=== DEBUG: End of .env file ==="
+BROADCAST_DRIVER=log
+CACHE_DRIVER=file
+FILESYSTEM_DRIVER=local
+QUEUE_CONNECTION=sync
+SESSION_DRIVER=file
+SESSION_LIFETIME=120
 
-# Create a custom bootstrap to bypass ENV loading
-cat > bootstrap/custom_env.php << 'EOF'
-<?php
+MEMCACHED_HOST=127.0.0.1
 
-return [
-    'name' => 'E_Commerce_Store',
-    'env' => 'production',
-    'debug' => false,
-    'url' => 'https://your-app-name.railway.app',
-    'timezone' => 'UTC',
-    'locale' => 'en',
-    'fallback_locale' => 'en',
-    'key' => 'base64:J7sWlYpYg0sXk9F2YlQvZzFqV0ZkZ0VqR2tqU2FqWkE=',
-];
-EOF
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
 
-echo "Custom environment configuration created!"
+MAIL_MAILER=smtp
+MAIL_HOST=mailhog
+MAIL_PORT=1025
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS=null
+MAIL_FROM_NAME=
+
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_DEFAULT_REGION=us-east-1
+AWS_BUCKET=
+AWS_USE_PATH_STYLE_ENDPOINT=false
+
+PUSHER_APP_ID=
+PUSHER_APP_KEY=
+PUSHER_APP_SECRET=
+PUSHER_APP_CLUSTER=mt1
+
+MIX_PUSHER_APP_KEY=
+MIX_PUSHER_APP_CLUSTER=
+APP_NAME=ShopHub
+APP_ENV=local
+APP_KEY=base64:0KEIct/ga5Qbx72rSaF1DCRclP8HCNqWbbjaRgs6bfY=
+APP_DEBUG=true
+APP_URL=http://localhost:8000
+
+LOG_CHANNEL=stack
+LOG_DEPRECATIONS_CHANNEL=null
+LOG_LEVEL=debug
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=ecommerce_store
+DB_USERNAME=root
+DB_PASSWORD=
+
+BROADCAST_DRIVER=log
+CACHE_DRIVER=file
+FILESYSTEM_DRIVER=local
+QUEUE_CONNECTION=sync
+SESSION_DRIVER=file
+SESSION_LIFETIME=120
+
+MEMCACHED_HOST=127.0.0.1
+
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+
+MAIL_MAILER=smtp
+MAIL_HOST=mailhog
+MAIL_PORT=1025
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS=null
+MAIL_FROM_NAME=
+
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_DEFAULT_REGION=us-east-1
+AWS_BUCKET=
+AWS_USE_PATH_STYLE_ENDPOINT=false
+
+PUSHER_APP_ID=
+PUSHER_APP_KEY=
+PUSHER_APP_SECRET=
+PUSHER_APP_CLUSTER=mt1
+
+MIX_PUSHER_APP_KEY=
+MIX_PUSHER_APP_CLUSTER=
