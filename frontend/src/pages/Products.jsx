@@ -251,7 +251,7 @@ const Products = () => {
               <>
                 {/* Products Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                  {products && products.map((product) => (
+                  {products && Array.isArray(products) && products.map((product) => (
                     <ProductCard
                       key={product.id}
                       product={product}
@@ -260,7 +260,7 @@ const Products = () => {
                 </div>
 
                 {/* Pagination */}
-                {pagination.totalPages > 1 && (
+                {pagination && pagination.totalPages > 1 && (
                   <div className="flex justify-center items-center space-x-2">
                     <button
                       onClick={() => handlePageChange(pagination.currentPage - 1)}
@@ -271,7 +271,7 @@ const Products = () => {
                     </button>
 
                     <div className="flex space-x-1">
-                      {pagination && Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                      {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
                         let pageNum
                         if (pagination.totalPages <= 5) {
                           pageNum = i + 1
