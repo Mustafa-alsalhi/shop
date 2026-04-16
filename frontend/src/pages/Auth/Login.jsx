@@ -21,7 +21,7 @@ const Login = () => {
   const [validationErrors, setValidationErrors] = useState({})
 
   // Get redirect path from location state
-  const from = location.state?.from?.pathname || '/'
+  const from = location.state?.from?.pathname || '/products'
 
   useEffect(() => {
     // Clear any previous errors
@@ -68,7 +68,11 @@ const Login = () => {
       const result = await dispatch(loginUser(formData))
       if (result.meta.requestStatus === 'fulfilled') {
         dispatch(showSuccessNotification('تم تسجيل الدخول بنجاح!'))
-        navigate(from, { replace: true })
+        // Check if user is already authenticated to prevent redirect loop
+        const isAuthenticated = result.payload?.token ? true : false
+        if (isAuthenticated) {
+          navigate(from, { replace: true })
+        }
       }
     } catch (error) {
       dispatch(showErrorNotification('فشل تسجيل الدخول'))
