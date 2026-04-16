@@ -43,22 +43,6 @@ $app->singleton(
 
 /*
 |--------------------------------------------------------------------------
-| Disable ENV Loading to Prevent Railway Issues
-|--------------------------------------------------------------------------
-|
-| Railway injects APP_NAME with spaces which causes dotenv parsing errors.
-| We'll load environment values directly to bypass this issue.
-|
-*/
-
-// Force clean environment to prevent Railway injection
-$_ENV['APP_NAME'] = 'E_Commerce_Store';
-$_ENV['APP_ENV'] = 'production';
-$_ENV['APP_DEBUG'] = 'false';
-$_ENV['APP_URL'] = 'https://your-app-name.railway.app';
-
-/*
-|--------------------------------------------------------------------------
 | Return The Application
 |--------------------------------------------------------------------------
 |
