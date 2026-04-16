@@ -19,12 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [
-    'http://localhost:3000',
-    'https://dependable-benevolence-production-8c3c.up.railway.app',
-    'https://agent-69dee8ea4d2cebd006f9d915--trtree.netlify.app',
-    'https://trtree.netlify.app',
-    ],
+    'allowed_origins' => ['http://localhost:3000', 'http://localhost:3001', 'https://dependable-benevolence-production-8c3c.up.railway.app'],
 
     'allowed_origins_patterns' => [],
 
@@ -34,6 +29,6 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => false,
+    'supports_credentials' => true,
 
 ];
