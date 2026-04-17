@@ -25,26 +25,26 @@ const ProductCard = ({ product }) => {
   // Check if product is in wishlist
   const isWishlisted = wishlistItems.some(item => item.id === product.id)
 
+  // Inline SVG placeholder used when no real image is available
+  const PLACEHOLDER_SVG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Crect width='300' height='300' fill='%23f3f4f6'/%3E%3Crect x='90' y='80' width='120' height='90' rx='6' fill='%23d1d5db'/%3E%3Ccircle cx='150' cy='210' r='18' fill='%23d1d5db'/%3E%3C/svg%3E`
+
   // Helper function to get correct image URL
   const getImageUrl = (imagePath) => {
-    if (!imagePath) return 'https://picsum.photos/seed/product/300x300.jpg'
-    
-    // If it's a relative path starting with /images/, convert to full URL
-    if (imagePath.startsWith('/images/')) {
-      return `http://localhost:8000${imagePath}`
+    // No path supplied, or path points to an external placeholder service
+    if (
+      !imagePath ||
+      imagePath.includes('via.placeholder.com') ||
+      imagePath.includes('picsum.photos')
+    ) {
+      return PLACEHOLDER_SVG
     }
-    
-    // If it's already a full URL, use it as is
+
+    // Already a full URL (but not a placeholder service) — use as-is
     if (imagePath.startsWith('http')) {
       return imagePath
     }
-    
-    // If it's a placeholder URL, use fallback
-    if (imagePath.includes('via.placeholder.com')) {
-      return `https://picsum.photos/seed/${product.name?.replace(/\s+/g, '') || 'product'}/300x300.jpg`
-    }
-    
-    // Otherwise, treat as relative path
+
+    // Relative path — prefix with the backend origin
     return `http://localhost:8000${imagePath.startsWith('/') ? '' : '/'}${imagePath}`
   }
 
@@ -87,7 +87,8 @@ const ProductCard = ({ product }) => {
             alt={product.name}
             className="w-full h-48 sm:h-56 md:h-60 lg:h-64 object-cover group-hover:scale-105 transition-transform duration-300"
             onError={(e) => {
-              e.target.src = `https://picsum.photos/seed/${product.name?.replace(/\s+/g, '') || 'product'}/300x300.jpg`
+              e.target.onerror = null
+              e.target.src = PLACEHOLDER_SVG
             }}
           />
         </Link>
