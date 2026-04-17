@@ -199,19 +199,19 @@ const Wishlist = () => {
   const getImageUrl = (imagePath, productName) => {
     if (!imagePath) return `https://picsum.photos/seed/${productName?.replace(/\s+/g, '') || 'product'}/300x300.jpg`
     
+    // Get base URL from environment or fallback to Railway production
+    const baseUrl = import.meta.env.VITE_API_URL || 'https://shop-production-d82a.up.railway.app/api'
+    const publicUrl = baseUrl.replace('/api', '')
+    
     if (imagePath.startsWith('/images/')) {
-      return `http://localhost:8000${imagePath}`
+      return `${publicUrl}${imagePath}`
     }
     
     if (imagePath.startsWith('http')) {
       return imagePath
     }
     
-    if (imagePath.includes('via.placeholder.com')) {
-      return `https://picsum.photos/seed/${productName?.replace(/\s+/g, '') || 'product'}/300x300.jpg`
-    }
-    
-    return `http://localhost:8000${imagePath.startsWith('/') ? '' : '/'}${imagePath}`
+    return `${publicUrl}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`
   }
 
   // Helper function to ensure product has in_stock field
