@@ -1354,7 +1354,7 @@ const Home = () => {
   }, [featuredProducts, isLoading])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50">
+   <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 pt-16 sm:pt-20">
       {/* Advertisement Banner */}
       <AdvertisementBanner />
 
