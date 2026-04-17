@@ -27,22 +27,31 @@ import LoadingSpinner from '../components/UI/LoadingSpinner'
 const Cart = () => {
   // Helper function to get correct image URL
   const getImageUrl = (imageUrl, productName, size = 80) => {
+    console.log('Cart getImageUrl called:', { imageUrl, productName, size })
+    
     // Get base URL from environment or fallback to Railway production
     const baseUrl = import.meta.env.VITE_API_URL || 'https://shop-production-d82a.up.railway.app/api'
     const publicUrl = baseUrl.replace('/api', '')
     
     if (imageUrl && imageUrl !== 'null' && imageUrl !== 'undefined' && imageUrl !== null) {
+      console.log('Processing image URL:', imageUrl)
       if (imageUrl.startsWith('http')) {
+        console.log('Using HTTP URL directly')
         return imageUrl
       }
       // If it's a relative path starting with /images/, convert to full URL
       if (imageUrl.startsWith('/images/')) {
-        return `${publicUrl}${imageUrl}`
+        const fullUrl = `${publicUrl}${imageUrl}`
+        console.log('Converted relative path to full URL:', fullUrl)
+        return fullUrl
       }
       // Otherwise, treat as relative path
-      return `${publicUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`
+      const fullUrl = `${publicUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`
+      console.log('Treated as relative path:', fullUrl)
+      return fullUrl
     }
     
+    console.log('Using fallback placeholder')
     // Fallback to placeholder
     return `https://picsum.photos/seed/${productName?.replace(/\s+/g, '') || 'product'}/${size}x${size}.jpg`
   }
@@ -170,7 +179,9 @@ const Cart = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                {cartItems.map((item) => (
+                {cartItems.map((item) => {
+                  console.log('Cart item data:', item)
+                  return (
                   <div
                     key={item.id}
                     className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-amber-200/30"
@@ -183,6 +194,7 @@ const Cart = () => {
                         alt={item.product_name}
                         className="h-20 w-20 object-cover rounded-md border border-amber-200/50"
                         onError={(e) => {
+                          console.log('Image load error for item:', item)
                           e.target.src = `https://picsum.photos/seed/${item.product_name?.replace(/\s+/g, '') || 'product'}/80x80.jpg`
                         }}
                       />
@@ -245,7 +257,8 @@ const Cart = () => {
                       </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
