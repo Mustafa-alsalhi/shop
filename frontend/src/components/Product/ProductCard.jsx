@@ -25,32 +25,27 @@ const ProductCard = ({ product }) => {
   // Check if product is in wishlist
   const isWishlisted = wishlistItems.some(item => item.id === product.id)
 
-  // Inline SVG placeholder — gray box with a simple image icon
-  const PLACEHOLDER_SVG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23e5e7eb'/%3E%3Crect x='120' y='110' width='160' height='130' rx='8' fill='%239ca3af'/%3E%3Ccircle cx='165' cy='152' r='18' fill='%23e5e7eb'/%3E%3Cpolygon points='120%2C240%20185%2C175%20225%2C210%20265%2C165%20280%2C240' fill='%236b7280'/%3E%3C/svg%3E`
-
   // Helper function to get correct image URL
   const getImageUrl = (imagePath) => {
-    // No path supplied, or path points to an unreliable external placeholder service
-    if (
-      !imagePath ||
-      imagePath.includes('via.placeholder.com') ||
-      imagePath.includes('picsum.photos')
-    ) {
-      return PLACEHOLDER_SVG
+    if (!imagePath) return 'https://picsum.photos/seed/product/300x300.jpg'
+    
+    // If it's a relative path starting with /images/, convert to full URL
+    if (imagePath.startsWith('/images/')) {
+      return `http://localhost:8000${imagePath}`
     }
-
-    // Full URL (real CDN / backend absolute URL) — use as-is
+    
+    // If it's already a full URL, use it as is
     if (imagePath.startsWith('http')) {
       return imagePath
     }
-
-    // Recognised backend image path — use as-is
-    if (imagePath.startsWith('/images/')) {
-      return imagePath
+    
+    // If it's a placeholder URL, use fallback
+    if (imagePath.includes('via.placeholder.com')) {
+      return `https://picsum.photos/seed/${product.name?.replace(/\s+/g, '') || 'product'}/300x300.jpg`
     }
-
-    // Anything else is unknown / untrusted — fall back to placeholder
-    return PLACEHOLDER_SVG
+    
+    // Otherwise, treat as relative path
+    return `http://localhost:8000${imagePath.startsWith('/') ? '' : '/'}${imagePath}`
   }
 
   const handleAddToCart = () => {
@@ -92,8 +87,7 @@ const ProductCard = ({ product }) => {
             alt={product.name}
             className="w-full h-48 sm:h-56 md:h-60 lg:h-64 object-cover group-hover:scale-105 transition-transform duration-300"
             onError={(e) => {
-              e.target.onerror = null
-              e.target.src = PLACEHOLDER_SVG
+              e.target.src = `https://picsum.photos/seed/${product.name?.replace(/\s+/g, '') || 'product'}/300x300.jpg`
             }}
           />
         </Link>
