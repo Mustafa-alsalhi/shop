@@ -18,6 +18,7 @@ import {
   PencilIcon,
   TrashIcon,
   PlusIcon,
+  Bars3Icon,
 } from '@heroicons/react/24/outline'
 import { selectUser, selectIsAuthenticated, updateUser } from '../store/slices/authSlice'
 import { showSuccessNotification, showErrorNotification } from '../store/slices/notificationsSlice'
@@ -32,6 +33,7 @@ const Account = () => {
   const user = useSelector(selectUser)
   const isAuthenticated = useSelector(selectIsAuthenticated)
   const [activeSection, setActiveSection] = useState('overview')
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   
   // Profile editing state
   const [isEditingProfile, setIsEditingProfile] = useState(false)
@@ -335,27 +337,27 @@ const Account = () => {
   ]
 
   const renderOverview = () => (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Profile Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-6">
-            <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-              <UserIcon className="h-12 w-12 text-white" />
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 text-white">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center space-x-4 sm:space-x-6">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm flex-shrink-0">
+              <UserIcon className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 text-white" />
             </div>
-            <div className="flex-1">
-              <h2 className="text-3xl font-bold mb-2">
+            <div className="flex-1 min-w-0">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1 sm:mb-2 truncate">
                 {user?.first_name} {user?.last_name}
               </h2>
-              <p className="text-blue-100 mb-4">{user?.email}</p>
-              <div className="flex items-center space-x-4">
+              <p className="text-blue-100 mb-2 sm:mb-4 text-sm sm:text-base truncate">{user?.email}</p>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4">
                 {user?.role === 'admin' && (
-                  <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                  <span className="bg-purple-500 text-white px-2 py-1 sm:px-3 rounded-full text-xs sm:text-sm font-medium">
                     مستخدم مدير
                   </span>
                 )}
-                <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium flex items-center">
-                  <CheckCircleIcon className="h-4 w-4 mr-1" />
+                <span className="bg-green-500 text-white px-2 py-1 sm:px-3 rounded-full text-xs sm:text-sm font-medium flex items-center">
+                  <CheckCircleIcon className="h-3 w-3 sm:h-4 sm:w-4 ml-1" />
                   موثق
                 </span>
               </div>
@@ -363,7 +365,7 @@ const Account = () => {
           </div>
           <button
             onClick={() => setIsEditingProfile(true)}
-            className="bg-white/20 hover:bg-white/30 backdrop-blur-sm px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center"
+            className="bg-white/20 hover:bg-white/30 backdrop-blur-sm px-3 py-2 sm:px-4 rounded-lg sm:rounded-xl font-medium transition-all duration-200 flex items-center text-sm sm:text-base w-full sm:w-auto justify-center"
           >
             <PencilIcon className="h-4 w-4 mr-2" />
             تعديل الملف الشخصي
@@ -373,9 +375,9 @@ const Account = () => {
 
       {/* Profile Edit Form */}
       {isEditingProfile && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">تعديل الملف الشخصي</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 sm:mb-6">تعديل الملف الشخصي</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">الاسم الأول</label>
               <input
@@ -476,95 +478,25 @@ const Account = () => {
         </div>
       )}
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <ShoppingBagIcon className="h-8 w-8 text-blue-600" />
-            <span className="text-2xl font-bold text-gray-900">{orders.length}</span>
-          </div>
-          <h3 className="text-gray-900 font-semibold">إجمالي الطلبات</h3>
-          <p className="text-gray-600 text-sm mt-1">تتبع طلباتك</p>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <HeartIcon className="h-8 w-8 text-pink-600" />
-            <span className="text-2xl font-bold text-gray-900">{wishlist.length}</span>
-          </div>
-          <h3 className="text-gray-900 font-semibold">عناصر قائمة الرغبات</h3>
-          <p className="text-gray-600 text-sm mt-1">العناصر التي تحبها</p>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <MapPinIcon className="h-8 w-8 text-green-600" />
-            <span className="text-2xl font-bold text-gray-900">{addresses.length}</span>
-          </div>
-          <h3 className="text-gray-900 font-semibold">العناوين المحفوظة</h3>
-          <p className="text-gray-600 text-sm mt-1">الدفع السريع</p>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <button
-          onClick={() => {
-            setActiveSection('orders')
-            fetchOrders()
-          }}
-          className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-200 text-left group"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2">عرض جميع الطلبات</h3>
-              <p className="text-sm text-gray-600">تتبع وإدارة طلباتك</p>
-            </div>
-            <ArrowRightOnRectangleIcon className="h-5 w-5 text-gray-400 group-hover:text-blue-600 transition-colors" />
-          </div>
-        </button>
-        <button
-          onClick={() => {
-            setActiveSection('wishlist')
-            fetchWishlist()
-          }}
-          className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-200 text-left group"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2">عرض قائمة الرغبات</h3>
-              <p className="text-sm text-gray-600">تصفح عناصرك المحفوظة</p>
-            </div>
-            <ArrowRightOnRectangleIcon className="h-5 w-5 text-gray-400 group-hover:text-pink-600 transition-colors" />
-          </div>
-        </button>
-      </div>
     </div>
   )
 
   const renderOrders = () => (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="text-xl font-semibold text-gray-900">سجل الطلبات</h3>
-        <button
-          onClick={() => navigate('/orders')}
-          className="text-blue-600 hover:text-blue-800 font-medium flex items-center"
-        >
-          عرض جميع الطلبات
-          <ArrowRightOnRectangleIcon className="h-4 w-4 ml-1" />
-        </button>
-      </div>
+    <div className="space-y-4 sm:space-y-6">
+      <h3 className="text-lg sm:text-xl font-semibold text-gray-900">سجل الطلبات</h3>
       
       {loading.orders ? (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">جاري تحميل الطلبات...</p>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+          <div className="text-center py-8 sm:py-12">
+            <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-blue-600 mx-auto mb-3 sm:mb-4"></div>
+            <p className="text-gray-600 text-sm sm:text-base">جاري تحميل الطلبات...</p>
           </div>
         </div>
       ) : orders.length > 0 ? (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="space-y-4">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+          <div className="space-y-3 sm:space-y-4">
             {orders.map((order) => (
-              <div key={order.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+              <div key={order.id} className="border border-gray-200 rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-medium text-gray-900">Order #{order.id}</p>
@@ -605,40 +537,31 @@ const Account = () => {
   )
 
   const renderWishlist = () => (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="text-xl font-semibold text-gray-900">قائمة الرغبات</h3>
-        <button
-          onClick={() => navigate('/wishlist')}
-          className="text-blue-600 hover:text-blue-800 font-medium flex items-center"
-        >
-          عرض جميع قائمة الرغبات
-          <ArrowRightOnRectangleIcon className="h-4 w-4 ml-1" />
-        </button>
-      </div>
+    <div className="space-y-4 sm:space-y-6">
+      <h3 className="text-lg sm:text-xl font-semibold text-gray-900">قائمة الرغبات</h3>
       
       {loading.wishlist ? (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">جاري تحميل قائمة الرغبات...</p>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+          <div className="text-center py-8 sm:py-12">
+            <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-pink-600 mx-auto mb-3 sm:mb-4"></div>
+            <p className="text-gray-600 text-sm sm:text-base">جاري تحميل قائمة الرغبات...</p>
           </div>
         </div>
       ) : wishlist.length > 0 ? (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {wishlist.map((item) => (
-              <div key={item.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+              <div key={item.id} className="border border-gray-200 rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow">
                 <img
                   src={item.product?.image || '/placeholder.jpg'}
                   alt={item.product?.name}
-                  className="w-full h-48 object-cover rounded-lg mb-4"
+                  className="w-full h-32 sm:h-40 lg:h-48 object-cover rounded-lg mb-3 sm:mb-4"
                 />
-                <h4 className="font-medium text-gray-900 mb-2">{item.product?.name}</h4>
-                <p className="text-lg font-bold text-blue-600 mb-4">${item.product?.price}</p>
+                <h4 className="font-medium text-gray-900 mb-2 text-sm sm:text-base truncate">{item.product?.name}</h4>
+                <p className="text-base sm:text-lg font-bold text-blue-600 mb-3 sm:mb-4">${item.product?.price}</p>
                 <button
                   onClick={() => navigate(`/products/${item.product_id}`)}
-                  className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                  className="w-full bg-blue-600 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm sm:text-base"
                 >
                   عرض المنتج
                 </button>
@@ -647,14 +570,14 @@ const Account = () => {
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="text-center py-12">
-            <HeartIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h4 className="text-lg font-medium text-gray-900 mb-2">قائمة الرغبات فارغة</h4>
-            <p className="text-gray-600 mb-6">احفظ العناصر التي تحبها لوقت لاحق</p>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+          <div className="text-center py-8 sm:py-12">
+            <HeartIcon className="h-12 w-12 sm:h-16 sm:w-16 text-gray-300 mx-auto mb-3 sm:mb-4" />
+            <h4 className="text-base sm:text-lg font-medium text-gray-900 mb-2">قائمة الرغبات فارغة</h4>
+            <p className="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">احفظ العناصر التي تحبها لوقت لاحق</p>
             <button
               onClick={() => navigate('/products')}
-              className="bg-pink-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-pink-700 transition-colors"
+              className="bg-pink-600 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl font-semibold hover:bg-pink-700 transition-colors text-sm sm:text-base"
             >
               تصفح المنتجات
             </button>
@@ -1190,34 +1113,50 @@ const Account = () => {
   
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">حسابي</h1>
-          <p className="text-gray-600 mt-2">إدارة إعدادات وتفضيلات حسابك</p>
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-6 sm:py-8">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">حسابي</h1>
+          <p className="text-gray-600 mt-2 text-sm sm:text-base">إدارة إعدادات وتفضيلات حسابك</p>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar Menu */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <nav className="space-y-2">
+        {/* Mobile Menu Toggle */}
+        <div className="lg:hidden mb-6">
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="w-full bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex items-center justify-between"
+          >
+            <span className="font-medium text-gray-900">
+              {menuItems.find(item => item.id === activeSection)?.name || 'القائمة'}
+            </span>
+            <Bars3Icon className="h-5 w-5 text-gray-500" />
+          </button>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
+          {/* Sidebar Menu - Hidden on mobile, shown when toggled */}
+          <div className={`${mobileMenuOpen ? 'block' : 'hidden'} lg:block lg:col-span-1`}>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+              <nav className="space-y-1 sm:space-y-2">
                 {menuItems.map((item) => {
                   const Icon = item.icon
                   return (
                     <button
                       key={item.id}
-                      onClick={() => setActiveSection(item.id)}
-                      className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-200 ${
+                      onClick={() => {
+                        setActiveSection(item.id)
+                        setMobileMenuOpen(false)
+                      }}
+                      className={`w-full text-left px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl transition-all duration-200 ${
                         activeSection === item.id
                           ? 'bg-blue-50 text-blue-600 font-medium'
                           : 'text-gray-700 hover:bg-gray-50'
                       }`}
                     >
-                      <div className="flex items-center space-x-3">
-                        <Icon className="h-5 w-5" />
-                        <div>
-                          <div className="font-medium">{item.name}</div>
-                          <div className="text-xs text-gray-500 mt-1">{item.description}</div>
+                      <div className="flex items-center space-x-2 sm:space-x-3">
+                        <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm sm:text-base truncate">{item.name}</div>
+                          <div className="text-xs text-gray-500 mt-0.5 sm:mt-1 hidden sm:block">{item.description}</div>
                         </div>
                       </div>
                     </button>
@@ -1227,13 +1166,13 @@ const Account = () => {
               
               {/* Admin Dashboard Link */}
               {user?.role === 'admin' && (
-                <div className="mt-6 pt-6 border-t border-gray-200">
+                <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200">
                   <button
                     onClick={() => navigate('/admin/dashboard')}
-                    className="w-full bg-purple-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-purple-700 transition-colors flex items-center justify-center"
+                    className="w-full bg-purple-600 text-white px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold hover:bg-purple-700 transition-colors flex items-center justify-center text-sm sm:text-base"
                   >
-                    <CogIcon className="h-5 w-5 mr-2" />
-                    لوحة تحكم المدير
+                    <CogIcon className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                    <span className="truncate">لوحة تحكم المدير</span>
                   </button>
                 </div>
               )}
@@ -1242,7 +1181,9 @@ const Account = () => {
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-            {renderContent()}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+              {renderContent()}
+            </div>
           </div>
         </div>
       </div>
