@@ -147,7 +147,7 @@ const MobileMenu = ({ isOpen }) => {
 
               <li>
                 <button
-                  onClick={() => handleLinkClick('/deals')}
+                  onClick={() => handleLinkClick('/products')}
                   className="w-full flex items-center justify-between p-4 text-gray-700 hover:bg-gradient-to-r hover:from-amber-50 hover:to-orange-50 hover:text-amber-700 rounded-xl transition-all duration-200 group shadow-sm hover:shadow-md"
                 >
                   <div className="flex items-center space-x-reverse space-x-3">
@@ -349,7 +349,7 @@ const MobileMenu = ({ isOpen }) => {
               <ul className="space-y-2">
                 <li>
                   <button
-                    onClick={() => handleLinkClick('/contact')}
+                    onClick={() => handleLinkClick('/contact-us')}
                     className="w-full flex items-center justify-between p-4 text-gray-700 hover:bg-gradient-to-r hover:from-amber-50 hover:to-orange-50 hover:text-amber-700 rounded-xl transition-all duration-200 group shadow-sm hover:shadow-md"
                   >
                     <div className="flex items-center space-x-reverse space-x-3">
@@ -365,7 +365,7 @@ const MobileMenu = ({ isOpen }) => {
                 </li>
                 <li>
                   <button
-                    onClick={() => handleLinkClick('/faq')}
+                    onClick={() => handleLinkClick('/contact-us#faq')}
                     className="w-full flex items-center justify-between p-4 text-gray-700 hover:bg-gradient-to-r hover:from-amber-50 hover:to-orange-50 hover:text-amber-700 rounded-xl transition-all duration-200 group shadow-sm hover:shadow-md"
                   >
                     <div className="flex items-center space-x-reverse space-x-3">
@@ -381,7 +381,7 @@ const MobileMenu = ({ isOpen }) => {
                 </li>
                 <li>
                   <button
-                    onClick={() => handleLinkClick('/about')}
+                    onClick={() => handleLinkClick('/about-us')}
                     className="w-full flex items-center justify-between p-4 text-gray-700 hover:bg-gradient-to-r hover:from-amber-50 hover:to-orange-50 hover:text-amber-700 rounded-xl transition-all duration-200 group shadow-sm hover:shadow-md"
                   >
                     <div className="flex items-center space-x-reverse space-x-3">
