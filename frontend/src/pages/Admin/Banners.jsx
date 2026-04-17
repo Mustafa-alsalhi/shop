@@ -233,7 +233,7 @@ const Banners = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="relative">
                         <img
-                          src={banner.full_image_url || (banner.image_url.startsWith('http') ? banner.image_url : `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-d82a.up.railway.app'}${banner.image_url}`)}
+                          src={banner.full_image_url || (banner.image_url.startsWith('http') ? banner.image_url : `http://localhost:8000${banner.image_url}`)}
                           alt={banner.title}
                           className="h-16 w-24 object-cover rounded-xl shadow-md"
                           onError={(e) => {
@@ -376,7 +376,7 @@ const Banners = () => {
                   <div className="flex items-center space-x-reverse space-x-4">
                     {formData.image_url && (
                       <img
-                        src={formData.image_url.startsWith('http') ? formData.image_url : `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-d82a.up.railway.app'}${formData.image_url}`}
+                        src={formData.image_url.startsWith('http') ? formData.image_url : `http://localhost:8000${formData.image_url}`}
                         alt="Preview"
                         className="h-20 w-32 object-cover rounded-xl shadow-md"
                         onError={(e) => {
