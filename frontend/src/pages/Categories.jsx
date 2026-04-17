@@ -146,9 +146,13 @@ const AdminCategories = () => {
   const getImageUrl = (imagePath, imageField = null) => {
     if (!imagePath) return 'https://picsum.photos/seed/category/200/200.jpg'
     
+    // Get base URL from environment or fallback to Railway production
+    const baseUrl = import.meta.env.VITE_API_URL || 'https://shop-production-d82a.up.railway.app/api'
+    const publicUrl = baseUrl.replace('/api', '')
+    
     // If it's a relative path starting with /images/, convert to full URL
     if (imagePath.startsWith('/images/')) {
-      return `http://localhost:8000${imagePath}`
+      return `${publicUrl}${imagePath}`
     }
     
     // If it's already a full URL, use it as is
@@ -157,7 +161,7 @@ const AdminCategories = () => {
     }
     
     // Otherwise, treat as relative path
-    return `http://localhost:8000${imagePath.startsWith('/') ? '' : '/'}${imagePath}`
+    return `${publicUrl}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`
   }
 
   if (loading) {
