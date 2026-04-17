@@ -34,24 +34,24 @@ const Checkout = () => {
   const getImageUrl = (imageUrl, productName, size = 80) => {
     console.log('🖼️ Checkout getImageUrl called:', { imageUrl, productName, size })
     
+    // Get base URL from environment or fallback to Railway production
+    const baseUrl = import.meta.env.VITE_API_URL || 'https://shop-production-d82a.up.railway.app/api'
+    const publicUrl = baseUrl.replace('/api', '')
+    
     if (imageUrl && imageUrl !== 'null' && imageUrl !== 'undefined' && imageUrl !== null) {
       if (imageUrl.startsWith('http')) {
-        console.log('✅ Using absolute URL:', imageUrl)
         return imageUrl
       }
-      if (imageUrl.startsWith('/')) {
-        const absoluteUrl = `http://localhost:8000${imageUrl}`
-        console.log('🔗 Converting relative to absolute:', absoluteUrl)
-        return absoluteUrl
+      // If it's a relative path starting with /images/, convert to full URL
+      if (imageUrl.startsWith('/images/')) {
+        return `${publicUrl}${imageUrl}`
       }
-      console.log('✅ Using URL as-is:', imageUrl)
-      return imageUrl
+      // Otherwise, treat as relative path
+      return `${publicUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`
     }
     
-    const seed = productName ? encodeURIComponent(productName.substring(0, 20)) : 'product'
-    const fallbackUrl = `https://picsum.photos/seed/${seed}/${size}/${size}.jpg`
-    console.log('⚠️ Using fallback URL:', fallbackUrl)
-    return fallbackUrl
+    // Fallback to placeholder
+    return `https://picsum.photos/seed/${productName?.replace(/\s+/g, '') || 'product'}/${size}x${size}.jpg`
   }
 
   const [formData, setFormData] = useState({
