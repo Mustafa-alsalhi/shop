@@ -1,102 +1,79 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { useDispatch, useSelector } from 'react-redux'
-import { forgotPassword, selectIsLoading, selectError, clearError } from '../../store/slices/authSlice'
-import { showSuccessNotification, showErrorNotification } from '../../store/slices/uiSlice'
+import { PhoneIcon, ChatBubbleLeftRightIcon, EnvelopeIcon } from '@heroicons/react/24/outline'
 
 const ForgotPassword = () => {
-  const dispatch = useDispatch()
-  
-  const isLoading = useSelector(selectIsLoading)
-  const error = useSelector(selectError)
-  
-  const [formData, setFormData] = useState({
-    email: '',
-  })
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  const [validationErrors, setValidationErrors] = useState({})
+  const [showSupport, setShowSupport] = useState(false)
 
-  useEffect(() => {
-    // Clear any previous errors
-    dispatch(clearError())
-  }, [dispatch])
-
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-    
-    // Clear validation error for this field
-    if (validationErrors[name]) {
-      setValidationErrors(prev => ({ ...prev, [name]: '' }))
-    }
+  const handleWhatsAppClick = () => {
+    const phoneNumber = '00967776780551'
+    const message = encodeURIComponent('مرحباً، لقد نسيت كلمة المرور وأحتاج مساعدة')
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`
+    window.open(whatsappUrl, '_blank')
   }
 
-  const validateForm = () => {
-    const errors = {}
-    
-    if (!formData.email) {
-      errors.email = 'البريد الإلكتروني مطلوب'
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = 'البريد الإلكتروني غير صالح'
-    }
-    
-    setValidationErrors(errors)
-    return Object.keys(errors).length === 0
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    
-    if (!validateForm()) {
-      return
-    }
-
-    try {
-      const result = await dispatch(forgotPassword(formData.email))
-      if (result.meta.requestStatus === 'fulfilled') {
-        setIsSubmitted(true)
-        dispatch(showSuccessNotification('تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني!'))
-      }
-    } catch (error) {
-      dispatch(showErrorNotification('فشل في إرسال رابط إعادة تعيين كلمة المرور'))
-    }
-  }
-
-  if (isSubmitted) {
+  if (showSupport) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full">
-          <div className="text-center">
-            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-              <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-amber-100 mb-4">
+                <PhoneIcon className="h-8 w-8 text-amber-600" />
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+                مساعدة الدعم الفني
+              </h2>
+              <p className="text-gray-600">
+                فريق الدعم جاهز لمساعدتك في استعادة حسابك
+              </p>
             </div>
-            <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-              تحقق من بريدك الإلكتروني
-            </h2>
-            <p className="mt-2 text-sm text-gray-600">
-              لقد أرسلنا رابط إعادة تعيين كلمة المرور إلى {' '}
-              <span className="font-medium">{formData.email}</span>
-            </p>
-            <p className="mt-4 text-sm text-gray-600">
-              ستنتهي صلاحية الرابط خلال 60 دقيقة.
-            </p>
-            <div className="mt-6">
-              <Link
-                to="/login"
-                className="btn btn-primary"
-              >
-                العودة لتسجيل الدخول
-              </Link>
-            </div>
-            <div className="mt-4 text-sm text-gray-600">
-              هل لم تستلم البريد الإلكتروني؟{' '}
+
+            {/* Support Information */}
+            <div className="space-y-6">
+              {/* Phone Number */}
+              <div className="bg-gray-50 rounded-lg p-4 text-center">
+                <div className="flex items-center justify-center space-x-2 space-x-reverse mb-2">
+                  <PhoneIcon className="h-5 w-5 text-gray-600" />
+                  <span className="text-sm font-medium text-gray-600">رقم الدعم</span>
+                </div>
+                <p className="text-xl font-bold text-gray-900" dir="ltr">
+                  +967 776 780 551
+                </p>
+                <p className="text-sm text-gray-500 mt-1" dir="ltr">
+                  00967776780551
+                </p>
+              </div>
+
+              {/* WhatsApp Button */}
               <button
-                onClick={() => setIsSubmitted(false)}
-                className="font-medium text-primary-600 hover:text-primary-500"
+                onClick={handleWhatsAppClick}
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 space-x-reverse"
               >
-                حاول مرة أخرى
+                <ChatBubbleLeftRightIcon className="h-5 w-5" />
+                <span>تواصل عبر الواتساب</span>
+              </button>
+
+              {/* Back Button */}
+              <button
+                onClick={() => setShowSupport(false)}
+                className="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 px-4 rounded-lg transition-colors duration-200"
+              >
+                العودة
+              </button>
+            </div>
+
+            {/* Additional Info */}
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <p className="text-center text-sm text-gray-500">
+                يمكنك أيضاً إعادة تعيين كلمة المرور عبر البريد الإلكتروني
+              </p>
+              <button
+                onClick={() => setShowSupport(false)}
+                className="w-full mt-3 text-center text-sm text-amber-600 hover:text-amber-700 font-medium"
+              >
+                إعادة تعيين عبر البريد الإلكتروني
               </button>
             </div>
           </div>
@@ -107,75 +84,61 @@ const ForgotPassword = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+      <div className="max-w-md w-full">
         {/* Header */}
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
             هل نسيت كلمة المرور؟
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور.
+            اختر الطريقة التي تفضلها لاستعادة حسابك
           </p>
         </div>
 
-        {/* Forgot Password Form */}
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {/* Error Message */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-              {error}
-            </div>
-          )}
-
-          {/* Email */}
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              عنوان البريد الإلكتروني
-            </label>
-            <div className="mt-1">
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className={`input ${validationErrors.email ? 'input-error' : ''}`}
-                placeholder="أدخل بريدك الإلكتروني"
-              />
-              {validationErrors.email && (
-                <p className="mt-1 text-sm text-red-600">
-                  {validationErrors.email}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Submit Button */}
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full btn btn-primary"
-            >
-              {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <div className="spinner h-5 w-5 mr-2"></div>
-                  جاري الإرسال...
+        {/* Options */}
+        <div className="mt-8 space-y-4">
+          {/* Email Reset Option */}
+          <Link
+            to="/forgot-password-email"
+            className="block w-full bg-white border border-gray-300 rounded-lg p-6 hover:bg-gray-50 transition-colors duration-200"
+          >
+            <div className="flex items-center space-x-4 space-x-reverse">
+              <div className="flex-shrink-0">
+                <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
+                  <EnvelopeIcon className="h-6 w-6 text-blue-600" />
                 </div>
-              ) : (
-                'إرسال رابط إعادة التعيين'
-              )}
-            </button>
-          </div>
-        </form>
+              </div>
+              <div className="flex-1 text-right">
+                <h3 className="text-lg font-medium text-gray-900">إعادة تعيين عبر البريد</h3>
+                <p className="text-sm text-gray-600">استلام رابط إعادة التعيين على بريدك</p>
+              </div>
+            </div>
+          </Link>
+
+          {/* Support Option */}
+          <button
+            onClick={() => setShowSupport(true)}
+            className="w-full bg-white border border-gray-300 rounded-lg p-6 hover:bg-gray-50 transition-colors duration-200 text-left"
+          >
+            <div className="flex items-center space-x-4 space-x-reverse">
+              <div className="flex-shrink-0">
+                <div className="h-12 w-12 bg-amber-100 rounded-full flex items-center justify-center">
+                  <PhoneIcon className="h-6 w-6 text-amber-600" />
+                </div>
+              </div>
+              <div className="flex-1 text-right">
+                <h3 className="text-lg font-medium text-gray-900">الدعم الفني</h3>
+                <p className="text-sm text-gray-600">تواصل مع فريق الدعم للمساعدة</p>
+              </div>
+            </div>
+          </button>
+        </div>
 
         {/* Back to Login */}
-        <div className="text-center">
+        <div className="mt-8 text-center">
           <Link
             to="/login"
-            className="font-medium text-primary-600 hover:text-primary-500"
+            className="font-medium text-amber-600 hover:text-amber-500"
           >
             العودة لتسجيل الدخول
           </Link>
