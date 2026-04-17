@@ -17,7 +17,7 @@ import {
   selectIsInWishlist
 } from '../../store/slices/wishlistSlice'
 import { showSuccessNotification } from '../../store/slices/uiSlice'
-import { getImageUrl } from '../../../utils/imageUtils'
+import { getImageUrl } from '../../utils/imageUtils'
 
 const ProductCard = ({ product }) => {
   const dispatch = useDispatch()
