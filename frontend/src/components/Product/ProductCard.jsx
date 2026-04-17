@@ -17,6 +17,7 @@ import {
   selectIsInWishlist
 } from '../../store/slices/wishlistSlice'
 import { showSuccessNotification } from '../../store/slices/uiSlice'
+import { getImageUrl } from '../../utils/imageUtils'
 
 const ProductCard = ({ product }) => {
   const dispatch = useDispatch()
@@ -24,29 +25,6 @@ const ProductCard = ({ product }) => {
   
   // Check if product is in wishlist
   const isWishlisted = wishlistItems.some(item => item.id === product.id)
-
-  // Helper function to get correct image URL
-  const getImageUrl = (imagePath) => {
-    if (!imagePath) return 'https://picsum.photos/seed/product/300x300.jpg'
-    
-    // If it's a relative path starting with /images/, convert to full URL
-    if (imagePath.startsWith('/images/')) {
-      return `http://localhost:8000${imagePath}`
-    }
-    
-    // If it's already a full URL, use it as is
-    if (imagePath.startsWith('http')) {
-      return imagePath
-    }
-    
-    // If it's a placeholder URL, use fallback
-    if (imagePath.includes('via.placeholder.com')) {
-      return `https://picsum.photos/seed/${product.name?.replace(/\s+/g, '') || 'product'}/300x300.jpg`
-    }
-    
-    // Otherwise, treat as relative path
-    return `http://localhost:8000${imagePath.startsWith('/') ? '' : '/'}${imagePath}`
-  }
 
   const handleAddToCart = () => {
     console.log('View product details:', product.id, product.name)
