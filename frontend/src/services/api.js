@@ -47,9 +47,9 @@ api.interceptors.response.use(
 
       switch (status) {
         case 401:
-          // Unauthorized - clear token and redirect to login
+          // Unauthorized - clear token but don't redirect automatically
           localStorage.removeItem('token')
-          window.location.href = '/login'
+          console.warn('Unauthorized access - token cleared')
           break
         case 403:
           // Forbidden
