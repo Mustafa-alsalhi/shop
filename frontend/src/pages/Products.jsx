@@ -1,398 +1,315 @@
-import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, ChevronDownIcon, MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline'
-import api from '../../services/api'
+import React, { useState, useEffect, useCallback } from 'react'
+import { useSearchParams, useNavigate } from 'react-router-dom'
+import { useSelector, useDispatch } from 'react-redux'
+import {
+  MagnifyingGlassIcon,
+  CogIcon,
+  XMarkIcon,
+  FunnelIcon,
+  ChatBubbleLeftRightIcon,
+} from '@heroicons/react/24/outline'
+import {
+  fetchProducts,
+  setFilters,
+  clearFilters,
+  fetchCategories,
+  selectProducts,
+  selectPagination,
+  selectIsLoading,
+  selectFilters,
+  selectCategories,
+  updatePagination,
+} from '../store/slices/productsSlice'
+import ProductCard from '../components/Product/ProductCard'
+import ProductFilters from '../components/Product/ProductFilters'
+import LoadingSpinner from '../components/UI/LoadingSpinner'
 
-const AdminProducts = () => {
+const Products = () => {
+  const dispatch = useDispatch()
   const navigate = useNavigate()
-  const [products, setProducts] = useState([])
-  const [categories, setCategories] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [filters, setFilters] = useState({
-    search: '',
-    category: '',
-    status: ''
-  })
-  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false)
+  const [searchParams, setSearchParams] = useSearchParams()
+  
+  const products = useSelector(selectProducts)
+  const pagination = useSelector(selectPagination)
+  const isLoading = useSelector(selectIsLoading)
+  const filters = useSelector(selectFilters)
+  const categories = useSelector(selectCategories)
+  
+  const [showFilters, setShowFilters] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
+  // Fetch categories on component mount
   useEffect(() => {
-    fetchProducts()
-    fetchCategories()
-  }, [])
+    dispatch(fetchCategories())
+  }, [dispatch])
 
+  // Initialize filters from URL params
   useEffect(() => {
-    fetchFilteredProducts()
-  }, [filters])
+    const urlFilters = {
+      search: searchParams.get('search') || '',
+      category_id: searchParams.get('category') ? parseInt(searchParams.get('category')) : null,
+      min_price: searchParams.get('min_price') ? parseFloat(searchParams.get('min_price')) : null,
+      max_price: searchParams.get('max_price') ? parseFloat(searchParams.get('max_price')) : null,
+      sortBy: searchParams.get('sort') || 'created_at',
+      sortOrder: searchParams.get('order') || 'desc',
+      featured: searchParams.get('featured') === 'true' ? true : null,
+      page: parseInt(searchParams.get('page')) || 1,
+    }
+    
+    dispatch(setFilters(urlFilters))
+    setSearchQuery(urlFilters.search)
+  }, [searchParams, dispatch])
 
-  const fetchCategories = async () => {
-    try {
-      const response = await api.get('/admin/categories')
-      setCategories(response.data || [])
-    } catch (err) {
-      setError('فشل في جلب الفئات: ' + err.message)
+  // Fetch products when filters change - simplified
+  const fetchProductsData = useCallback(() => {
+    console.log('Products.jsx: Fetching products with filters:', JSON.stringify(filters, null, 2))
+    
+    // Build API params
+    const params = {
+      ...filters,
+      per_page: 12,
+    }
+    
+    // Convert array category_id to comma-separated string for API
+    if (Array.isArray(params.category_id)) {
+      params.category_id = params.category_id.join(',')
+    }
+    
+    // Remove page from params if not specified
+    if (!params.page) {
+      delete params.page
+    }
+    
+    // Remove featured=false to prevent infinite rendering
+    if (params.featured === false) {
+      delete params.featured
+    }
+    
+    console.log('Products.jsx: API params:', JSON.stringify(params, null, 2))
+    
+    // Use the imported fetchProducts action
+    dispatch(fetchProducts(params))
+  }, [JSON.stringify(filters)])
+
+  // Only run fetchProductsData when filters actually change
+  useEffect(() => {
+    fetchProductsData()
+  }, [fetchProductsData])
+
+  // Initialize filters on component mount - only run once
+  useEffect(() => {
+    console.log('Products.jsx: Component mounted, initial fetch')
+    dispatch(fetchProducts({ per_page: 12 }))
+  }, []) // Empty dependency array - only run once
+
+  const handleSearch = (e) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      dispatch(setFilters({ ...filters, search: searchQuery.trim(), page: 1 }))
     }
   }
 
-  const fetchProducts = async () => {
-    try {
-      const response = await api.get('/admin/products')
-      setProducts(response.data)
-      setLoading(false)
-    } catch (err) {
-      setError('فشل في جلب المنتجات: ' + err.message)
-      setLoading(false)
-    }
+  const handleFilterChange = (newFilters) => {
+    console.log('Products.jsx: handleFilterChange called with:', newFilters)
+    console.log('Products.jsx: Current filters:', filters)
+    
+    // Simple update - no complex comparison logic
+    const updatedFilters = { ...filters, ...newFilters, page: 1 }
+    console.log('Products.jsx: Updated filters:', updatedFilters)
+    dispatch(setFilters(updatedFilters))
   }
 
-  const fetchFilteredProducts = async () => {
-    try {
-      let url = '/admin/products'
-      const params = new URLSearchParams()
-      
-      if (filters.search) {
-        params.append('search', filters.search)
-      }
-      if (filters.category) {
-        params.append('category', filters.category)
-      }
-      if (filters.status) {
-        params.append('status', filters.status)
-      }
-      
-      if (params.toString()) {
-        url += `?${params.toString()}`
-      }
-      
-      const response = await api.get(url)
-      setProducts(response.data)
-    } catch (err) {
-      setError('فشل في جلب المنتجات: ' + err.message)
-    }
+  const handlePageChange = (page) => {
+    dispatch(setFilters({ ...filters, page }))
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const handleFilterChange = (filterType, value) => {
-    setFilters(prev => ({
-      ...prev,
-      [filterType]: value
+  const clearFilters = () => {
+    dispatch(setFilters({
+      search: '',
+      category_id: null,
+      min_price: null,
+      max_price: null,
+      sortBy: 'created_at',
+      sortOrder: 'desc',
+      featured: null,
+      rating: null,
+      in_stock: null,
+      page: 1,
     }))
+    setSearchQuery('')
   }
 
-  const getCategoryName = (categoryId) => {
-    if (!categoryId) return 'جميع الفئات'
-    const category = categories.find(cat => cat.id === categoryId)
-    return category ? category.name : 'جميع الفئات'
-  }
-
-  const handleDelete = async (id) => {
-    if (window.confirm('هل أنت متأكد من أنك تريد حذف هذا المنتج؟')) {
-      try {
-        await api.delete(`/admin/products/${id}`)
-        setProducts(products.filter(p => p.id !== id))
-        alert('تم حذف المنتج بنجاح!')
-      } catch (err) {
-        setError('فشل في حذف المنتج: ' + err.message)
-      }
-    }
-  }
-
-  const handleAddProduct = () => {
-    navigate('/admin/products/new')
-  }
-
-  const handleEditProduct = (product) => {
-    navigate(`/admin/products/${product.id}/edit`)
-  }
-
-  const handleViewProduct = (product) => {
-    const saleInfo = product.sale_price ? 
-      `\nالسعر الترويجي: ${product.currency || 'USD'} ${product.sale_price}` : 
-      '';
-    
-    const datesInfo = product.sale_start_date || product.sale_end_date ?
-      `\nفترة العرض: ${product.sale_start_date ? new Date(product.sale_start_date).toLocaleDateString() : 'بداية'} - ${product.sale_end_date ? new Date(product.sale_end_date).toLocaleDateString() : 'نهاية'}` : 
-      '';
-    
-    const variantsInfo = product.variants && product.variants.length > 0 ?
-      `\nالطرازات: ${product.variants.map(v => `${v.name}: ${v.value}`).join(', ')}` : 
-      '';
-    
-    const galleryInfo = product.gallery_images && product.gallery_images.length > 0 ?
-      `\nصور المعرض: ${product.gallery_images.length} صورة` : 
-      '';
-
-    alert(`تفاصيل المنتج:\n\nالاسم: ${product.name}\nالسعر: ${product.currency || 'USD'} ${product.price}${saleInfo}\nالمخزون: ${product.stock}\nالفئة: ${product.category?.name || 'لا توجد فئة'}\nالحالة: ${product.condition || 'N/A'}\nالحالة: ${product.is_active ? 'نشط' : 'غير نشط'}\nمميز: ${product.is_featured ? 'نعم' : 'لا'}${datesInfo}${variantsInfo}${galleryInfo}`)
-  }
-
-  // Fallback image function
-  const getFallbackImage = (product) => {
-    if (product.image_url) {
-      // If it's a relative path starting with /images/, convert to full URL
-      if (product.image_url.startsWith('/images/')) {
-        return `http://localhost:8000${product.image_url}`
-      }
-      // If it's already a full URL, use it as is
-      if (product.image_url.startsWith('http')) {
-        return product.image_url
-      }
-      // If it's a placeholder URL, use fallback
-      if (product.image_url.includes('via.placeholder.com')) {
-        return `https://picsum.photos/seed/${product.name.replace(/\s+/g, '')}/400/400.jpg`
-      }
-      // Otherwise, treat as relative path
-      return `http://localhost:8000${product.image_url.startsWith('/') ? '' : '/'}${product.image_url}`
-    }
-    // Use a reliable image service as fallback
-    return `https://picsum.photos/seed/${product.name.replace(/\s+/g, '')}/400/400.jpg`
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="spinner h-12 w-12"></div>
-      </div>
-    )
-  }
+  const activeFiltersCount = Object.entries(filters).filter(
+    ([key, value]) => 
+      key !== 'page' && 
+      key !== 'sortBy' && 
+      key !== 'sortOrder' && 
+      value !== null && 
+      value !== '' && 
+      !(key === 'featured' && value === false)
+  ).length
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50" dir="rtl">
-      <div className="max-w-7xl mx-auto py-6">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50" dir="rtl">
+      <div className="container-custom py-8">
         {/* Header */}
-        <div className="bg-white shadow-xl rounded-2xl border border-gray-100 p-6 mb-6">
-          <div className="flex justify-between items-center" dir="rtl">
-            <div className="flex items-center space-x-reverse space-x-3">
-              <div className="p-3 bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl">
-                <PlusIcon className="h-6 w-6 text-white" />
-              </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-                إدارة المنتجات
-              </h1>
-            </div>
-            <button
-              onClick={handleAddProduct}
-              className="flex items-center px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105"
-            >
-              <PlusIcon className="h-5 w-5 ml-2" />
-              إضافة منتج جديد
-            </button>
-          </div>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent mb-2">
+            {filters.search ? `نتائج البحث لـ "${filters.search}"` : 'جميع المنتجات'}
+          </h1>
+          <p className="text-gray-600">
+            {pagination.total} منتج تم العثور عليه
+          </p>
         </div>
 
-        {/* Error Alert */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-800 px-6 py-4 rounded-xl mb-6 shadow-lg">
-            <div className="flex items-center space-x-reverse space-x-3">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <PlusIcon className="h-5 w-5 text-red-600" />
-              </div>
-              <span className="font-medium">{error}</span>
-            </div>
-          </div>
-        )}
-
-        {/* Filters */}
-        <div className="bg-white shadow-xl rounded-2xl border border-gray-100 p-6 mb-6">
-          <div className="flex items-center space-x-reverse space-x-3 mb-4">
-            <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg">
-              <FunnelIcon className="h-5 w-5 text-white" />
-            </div>
-            <h3 className="text-lg font-bold text-gray-900">
-              الفلاتر
-            </h3>
-          </div>
-          <div className="flex flex-wrap gap-4" dir="rtl">
-            <div className="flex-1 min-w-0 relative">
-              <MagnifyingGlassIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+        {/* Search and Filters Bar */}
+        <div className="mb-8 flex flex-col lg:flex-row-reverse gap-4">
+          {/* Search */}
+          <form onSubmit={handleSearch} className="flex-1">
+            <div className="relative">
+              <MagnifyingGlassIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-amber-400" />
               <input
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="البحث في المنتجات..."
-                value={filters.search}
-                onChange={(e) => handleFilterChange('search', e.target.value)}
-                className="w-full pr-10 pl-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-50"
+                className="w-full pr-10 pl-4 py-3 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 backdrop-blur-sm"
               />
             </div>
-            
-            {/* Category Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
-                className="flex items-center px-6 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white hover:bg-gray-50 transition-colors"
-              >
-                <span className="ml-2">
-                  {getCategoryName(filters.category)}
-                </span>
-                <ChevronDownIcon className="h-4 w-4" />
-              </button>
-              
-              {showCategoryDropdown && (
-                <div className="absolute top-full right-0 mt-1 w-48 bg-white border border-gray-300 rounded-md shadow-lg z-10">
-                  <button
-                    onClick={() => {
-                      handleFilterChange('category', '')
-                      setShowCategoryDropdown(false)
-                    }}
-                    className="block w-full text-right px-4 py-2 hover:bg-gray-100 text-gray-700"
-                  >
-                    جميع الفئات
-                  </button>
-                  {categories.map((category) => (
-                    <button
-                      key={category.id}
-                      onClick={() => {
-                        handleFilterChange('category', category.id)
-                        setShowCategoryDropdown(false)
-                      }}
-                      className="block w-full text-right px-4 py-2 hover:bg-gray-100 text-gray-700"
-                    >
-                      {category.name}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            
-            <select 
-              value={filters.status}
-              onChange={(e) => handleFilterChange('status', e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="">جميع الحالات</option>
-              <option value="active">نشط</option>
-              <option value="inactive">غير نشط</option>
-              <option value="draft">مسودة</option>
-              <option value="featured">مميز</option>
-            </select>
-          </div>
+          </form>
+
+          {/* Sort */}
+          <select
+            value={`${filters.sortBy}-${filters.sortOrder}`}
+            onChange={(e) => {
+              const [sortBy, sortOrder] = e.target.value.split('-')
+              handleFilterChange({ sortBy, sortOrder })
+            }}
+            className="px-4 py-3 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 backdrop-blur-sm"
+          >
+            <option value="created_at-desc">الأحدث أولاً</option>
+            <option value="created_at-asc">الأقدم أولاً</option>
+            <option value="name-asc">الاسم: أ-ي</option>
+            <option value="name-desc">الاسم: ي-أ</option>
+            <option value="price-asc">السعر: منخفض للمرتفع</option>
+            <option value="price-desc">السعر: مرتفع للمنخفض</option>
+            <option value="rating-desc">الأعلى تقييماً</option>
+            <option value="sales-desc">الأكثر مبيعاً</option>
+          </select>
+
+          {/* Filter Toggle */}
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center px-4 py-3 border border-amber-300 rounded-lg hover:bg-amber-50 transition-colors bg-white/80 backdrop-blur-sm"
+          >
+            <FunnelIcon className="h-5 w-5 ml-2 text-amber-600" />
+            الترشيحات
+            {activeFiltersCount > 0 && (
+              <span className="mr-2 bg-amber-600 text-white text-xs px-2 py-1 rounded-full">
+                {activeFiltersCount}
+              </span>
+            )}
+          </button>
         </div>
 
-        {/* Products Table */}
-        <div className="bg-white shadow-xl rounded-2xl border border-gray-100" dir="rtl">
-          <div className="px-6 py-5 border-b border-gray-100">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900">
-                المنتجات ({products.length})
-              </h2>
-              <div className="flex items-center space-x-reverse space-x-2">
-                <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                <span className="text-sm text-gray-600">متصل بقاعدة البيانات</span>
-              </div>
-            </div>
+        <div className="flex gap-8">
+          {/* Filters Sidebar */}
+          <div className={`${showFilters ? 'block' : 'hidden'} lg:block lg:w-64 flex-shrink-0`}>
+            <ProductFilters
+              filters={filters}
+              onFilterChange={handleFilterChange}
+              onClearFilters={clearFilters}
+            />
           </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    المنتج
-                  </th>
-                  <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    SKU
-                  </th>
-                  <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    السعر
-                  </th>
-                  <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    المخزون
-                  </th>
-                  <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    الحالة
-                  </th>
-                  <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    الإجراءات
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {products.map((product) => (
-                  <tr key={product.id} className="hover:bg-gray-50 transition-colors duration-200">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 flex-shrink-0">
-                          <img 
-                            className="h-10 w-10 rounded-full object-cover" 
-                            src={getFallbackImage(product)}
-                            alt={product.name}
-                            onError={(e) => {
-                              e.target.src = `https://picsum.photos/seed/default${product.id}/40/40.jpg`
-                            }}
-                          />
-                        </div>
-                        <div className="mr-4">
-                          <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                          <div className="text-sm text-gray-500">{product.category?.name || 'لا توجد فئة'}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-                      {product.sku}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-                      <div>
-                        <div className="font-medium">{product.currency || 'USD'} {product.price}</div>
-                        {product.sale_price && (
-                          <div className="text-green-600 font-medium">{product.currency || 'USD'} {product.sale_price}</div>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-                      {product.stock}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        product.condition === 'new' 
-                          ? 'bg-blue-100 text-blue-800' 
-                          : product.condition === 'used'
-                          ? 'bg-gray-100 text-gray-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {product.condition || 'N/A'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex space-x-reverse space-x-2">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          product.is_active 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {product.is_active ? 'نشط' : 'غير نشط'}
-                        </span>
-                        {product.is_featured && (
-                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
-                            مميز
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center space-x-reverse space-x-2">
-                        <button
-                          onClick={() => handleViewProduct(product)}
-                          className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
-                          title="عرض التفاصيل"
-                        >
-                          <EyeIcon className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => handleEditProduct(product)}
-                          className="p-2 bg-amber-100 text-amber-600 rounded-lg hover:bg-amber-200 transition-colors"
-                          title="تعديل المنتج"
-                        >
-                          <PencilIcon className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteProduct(product)}
-                          className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
-                          title="حذف المنتج"
-                        >
-                          <TrashIcon className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+
+          {/* Products Grid */}
+          <div className="flex-1">
+            {isLoading ? (
+              <div className="flex justify-center py-12">
+                <LoadingSpinner size="large" />
+              </div>
+            ) : products.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-amber-400 mb-4">
+                  <MagnifyingGlassIcon className="h-16 w-16 mx-auto" />
+                </div>
+                <h3 className="text-xl font-semibold text-amber-900 mb-2">
+                  لم يتم العثور على منتجات
+                </h3>
+                <p className="text-amber-700 mb-6">
+                  حاول تعديل الفلاتر أو كلمات البحث
+                </p>
+                <button
+                  onClick={clearFilters}
+                  className="px-6 py-3 border-2 border-amber-600 text-amber-600 rounded-lg hover:bg-amber-600 hover:text-white transition-all duration-300 font-semibold"
+                >
+                  مسح الفلاتر
+                </button>
+              </div>
+            ) : (
+              <>
+                {/* Products Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+                  {products.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                    />
+                  ))}
+                </div>
+
+                {/* Pagination */}
+                {pagination.totalPages > 1 && (
+                  <div className="flex justify-center items-center space-x-2">
+                    <button
+                      onClick={() => handlePageChange(pagination.currentPage - 1)}
+                      disabled={pagination.currentPage <= 1}
+                      className="px-3 py-2 border border-amber-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-amber-50 bg-white/80 backdrop-blur-sm"
+                    >
+                      السابق
+                    </button>
+
+                    <div className="flex space-x-1">
+                      {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                        let pageNum
+                        if (pagination.totalPages <= 5) {
+                          pageNum = i + 1
+                        } else if (pagination.currentPage <= 3) {
+                          pageNum = i + 1
+                        } else if (pagination.currentPage >= pagination.totalPages - 2) {
+                          pageNum = pagination.totalPages - 4 + i
+                        } else {
+                          pageNum = pagination.currentPage - 2 + i
+                        }
+
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => handlePageChange(pageNum)}
+                            className={`px-3 py-2 border rounded-md transition-all duration-300 ${
+                              pageNum === pagination.currentPage
+                                ? 'bg-amber-600 text-white border-amber-600 shadow-lg'
+                                : 'border-amber-300 hover:bg-amber-50 bg-white/80 backdrop-blur-sm'
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        )
+                      })}
+                    </div>
+
+                    <button
+                      onClick={() => handlePageChange(pagination.currentPage + 1)}
+                      disabled={pagination.currentPage >= pagination.totalPages}
+                      className="px-3 py-2 border border-amber-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-amber-50 bg-white/80 backdrop-blur-sm"
+                    >
+                      التالي
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -400,4 +317,4 @@ const AdminProducts = () => {
   )
 }
 
-export default AdminProducts
+export default Products
