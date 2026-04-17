@@ -72,7 +72,9 @@ const Categories = () => {
         return category.image
       }
       // Otherwise, use backend URL with correct path
-      return `http://localhost:8000/storage/images/categories/${category.image}`
+      const baseUrl = import.meta.env.VITE_API_URL || 'https://shop-production-d82a.up.railway.app/api'
+      const publicUrl = baseUrl.replace('/api', '')
+      return `${publicUrl}/storage/images/categories/${category.image}`
     }
     return null
   }
