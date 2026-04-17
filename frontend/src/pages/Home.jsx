@@ -1362,16 +1362,16 @@ const Home = () => {
       <CategoryBanner />
 
       {/* Featured Products */}
-      <section className="py-16 bg-white/60 backdrop-blur-sm">
+      <section className="py-8 bg-white/60 backdrop-blur-sm">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-12">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">المنتجات المميزة</h2>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">المنتجات المميزة</h2>
             <Link 
               to="/products?featured=true" 
-              className="inline-flex items-center text-amber-600 hover:text-amber-700 font-medium transition-colors"
+              className="inline-flex items-center text-amber-600 hover:text-amber-700 font-medium transition-colors text-xs sm:text-sm md:text-base"
             >
               <span>عرض جميع المنتجات المميزة</span>
-              <ChevronRightIcon className="h-5 w-5 ml-1" />
+              <ChevronRightIcon className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 mr-1" />
             </Link>
           </div>
           
@@ -1386,18 +1386,18 @@ const Home = () => {
                 {/* Scroll Buttons */}
                 <button
                   onClick={goToPreviousClothing}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -ml-6"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-2 sm:p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -ml-4 sm:-ml-6"
                   aria-label="Scroll left"
                 >
-                  <ChevronLeftIcon className="h-6 w-6" />
+                  <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
                 </button>
                 
                 <button
                   onClick={goToNextClothing}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -mr-6"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-2 sm:p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -mr-4 sm:-mr-6"
                   aria-label="Scroll right"
                 >
-                  <ChevronRightIcon className="h-6 w-6" />
+                  <ChevronRightIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
                 </button>
 
                 {/* Products Container */}
@@ -1412,25 +1412,13 @@ const Home = () => {
                   {Array.isArray(featuredProducts) && featuredProducts.map((product, index) => (
                     <div 
                       key={product.id} 
-                      className="flex-none w-48 sm:w-56 md:w-64 lg:w-72 xl:w-80"
+                      className="flex-none w-36 sm:w-44 md:w-52 lg:w-60 xl:w-72 2xl:w-80"
                     >
                       <ProductCard product={product} />
                     </div>
                   ))}
                 </div>
               </div>
-            </div>
-          )}
-          
-          {!isLoading && Array.isArray(featuredProducts) && featuredProducts.length > 0 && (
-            <div className="text-center mt-8">
-              <Link 
-                to="/products?featured=true" 
-                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-lg font-semibold hover:from-amber-700 hover:to-amber-800 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-              >
-                عرض جميع المنتجات المميزة
-                <ChevronRightIcon className="h-5 w-5 ml-2" />
-              </Link>
             </div>
           )}
           
@@ -1450,16 +1438,16 @@ const Home = () => {
 
 
       {/* New Products */}
-      <section className="py-16 bg-amber-50/50">
+      <section className="py-8 bg-amber-50/50">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-12">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">المنتجات الجديدة</h2>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">المنتجات الجديدة</h2>
             <Link 
               to="/products?sort=newest" 
-              className="inline-flex items-center text-amber-600 hover:text-amber-700 font-medium transition-colors"
+              className="inline-flex items-center text-amber-600 hover:text-amber-700 font-medium transition-colors text-xs sm:text-sm md:text-base"
             >
               <span>عرض جميع المنتجات الجديدة</span>
-              <ChevronRightIcon className="h-5 w-5 ml-1" />
+              <ChevronRightIcon className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 mr-1" />
             </Link>
           </div>
 
@@ -1474,18 +1462,18 @@ const Home = () => {
                 {/* Scroll Buttons */}
                 <button
                   onClick={goToPreviousNew}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -ml-6"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-2 sm:p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -ml-4 sm:-ml-6"
                   aria-label="Scroll left"
                 >
-                  <ChevronLeftIcon className="h-6 w-6" />
+                  <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
                 </button>
                 
                 <button
                   onClick={goToNextNew}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -mr-6"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-2 sm:p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -mr-4 sm:-mr-6"
                   aria-label="Scroll right"
                 >
-                  <ChevronRightIcon className="h-6 w-6" />
+                  <ChevronRightIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
                 </button>
 
                 {/* Products Container */}
@@ -1500,7 +1488,7 @@ const Home = () => {
                   {Array.isArray(latestProducts) && latestProducts.map((product, index) => (
                     <div 
                       key={product.id} 
-                      className="flex-none w-48 sm:w-56 md:w-64 lg:w-72 xl:w-80"
+                      className="flex-none w-36 sm:w-44 md:w-52 lg:w-60 xl:w-72 2xl:w-80"
                     >
                       <ProductCard product={product} />
                     </div>
@@ -1517,16 +1505,16 @@ const Home = () => {
       </section>
 
       {/* Clothing Section */}
-      <section className="py-16 bg-white/80 backdrop-blur-sm">
+      <section className="py-8 bg-white/80 backdrop-blur-sm">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-12">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">{clothingCategoryName}</h2>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">{clothingCategoryName}</h2>
             <Link 
               to="/products?category=clothing" 
-              className="inline-flex items-center text-amber-600 hover:text-amber-700 font-medium transition-colors"
+              className="inline-flex items-center text-amber-600 hover:text-amber-700 font-medium transition-colors text-xs sm:text-sm md:text-base"
             >
               <span>عرض جميع {clothingCategoryName}</span>
-              <ChevronRightIcon className="h-5 w-5 ml-1" />
+              <ChevronRightIcon className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 mr-1" />
             </Link>
           </div>
 
@@ -1535,18 +1523,18 @@ const Home = () => {
               <div className="relative">
                 <button
                   onClick={goToPreviousClothing}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -ml-6"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-2 sm:p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -ml-4 sm:-ml-6"
                   aria-label="Scroll left"
                 >
-                  <ChevronLeftIcon className="h-6 w-6" />
+                  <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
                 </button>
                 
                 <button
                   onClick={goToNextClothing}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -mr-6"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-2 sm:p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -mr-4 sm:-mr-6"
                   aria-label="Scroll right"
                 >
-                  <ChevronRightIcon className="h-6 w-6" />
+                  <ChevronRightIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
                 </button>
 
                 <div 
@@ -1560,7 +1548,7 @@ const Home = () => {
                   {Array.isArray(clothingProducts) && clothingProducts.map((product, index) => (
                     <div 
                       key={product.id} 
-                      className="flex-none w-48 sm:w-56 md:w-64 lg:w-72 xl:w-80"
+                      className="flex-none w-36 sm:w-44 md:w-52 lg:w-60 xl:w-72 2xl:w-80"
                     >
                       <ProductCard product={product} />
                     </div>
@@ -1577,16 +1565,16 @@ const Home = () => {
       </section>
 
       {/* Kids Section */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-8 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-12">
-            <h2 className="text-3xl font-bold">{kidsCategoryName}</h2>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold">{kidsCategoryName}</h2>
             <Link 
               to="/products?category=kids" 
-              className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium"
+              className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-xs sm:text-sm md:text-base"
             >
               <span>عرض جميع {kidsCategoryName}</span>
-              <ChevronRightIcon className="h-5 w-5 ml-1" />
+              <ChevronRightIcon className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 mr-1" />
             </Link>
           </div>
 
@@ -1595,18 +1583,18 @@ const Home = () => {
               <div className="relative">
                 <button
                   onClick={goToPreviousKids}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg transition-all duration-200 -ml-6"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white text-gray-800 p-2 sm:p-3 rounded-full shadow-lg transition-all duration-200 -ml-4 sm:-ml-6"
                   aria-label="Scroll left"
                 >
-                  <ChevronLeftIcon className="h-6 w-6" />
+                  <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
                 </button>
                 
                 <button
                   onClick={goToNextKids}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg transition-all duration-200 -mr-6"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white text-gray-800 p-2 sm:p-3 rounded-full shadow-lg transition-all duration-200 -mr-4 sm:-mr-6"
                   aria-label="Scroll right"
                 >
-                  <ChevronRightIcon className="h-6 w-6" />
+                  <ChevronRightIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
                 </button>
 
                 <div 
@@ -1620,7 +1608,7 @@ const Home = () => {
                   {Array.isArray(kidsProducts) && kidsProducts.map((product, index) => (
                     <div 
                       key={product.id} 
-                      className="flex-none w-48 sm:w-56 md:w-64 lg:w-72 xl:w-80"
+                      className="flex-none w-36 sm:w-44 md:w-52 lg:w-60 xl:w-72 2xl:w-80"
                     >
                       <ProductCard product={product} />
                     </div>
@@ -1637,16 +1625,16 @@ const Home = () => {
       </section>
 
       {/* Electronics Section */}
-      <section className="py-16 bg-amber-50/30">
+      <section className="py-8 bg-amber-50/30">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-12">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">{electronicsCategoryName}</h2>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">{electronicsCategoryName}</h2>
             <Link 
               to="/products?category=electronics" 
-              className="inline-flex items-center text-amber-600 hover:text-amber-700 font-medium transition-colors"
+              className="inline-flex items-center text-amber-600 hover:text-amber-700 font-medium transition-colors text-xs sm:text-sm md:text-base"
             >
               <span>عرض جميع {electronicsCategoryName}</span>
-              <ChevronRightIcon className="h-5 w-5 ml-1" />
+              <ChevronRightIcon className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 mr-1" />
             </Link>
           </div>
 
@@ -1655,18 +1643,18 @@ const Home = () => {
               <div className="relative">
                 <button
                   onClick={goToPreviousElectronics}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -ml-6"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-2 sm:p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -ml-4 sm:-ml-6"
                   aria-label="Scroll left"
                 >
-                  <ChevronLeftIcon className="h-6 w-6" />
+                  <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
                 </button>
                 
                 <button
                   onClick={goToNextElectronics}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -mr-6"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-2 sm:p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -mr-4 sm:-mr-6"
                   aria-label="Scroll right"
                 >
-                  <ChevronRightIcon className="h-6 w-6" />
+                  <ChevronRightIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
                 </button>
 
                 <div 
@@ -1680,7 +1668,7 @@ const Home = () => {
                   {Array.isArray(electronicsProducts) && electronicsProducts.map((product, index) => (
                     <div 
                       key={product.id} 
-                      className="flex-none w-48 sm:w-56 md:w-64 lg:w-72 xl:w-80"
+                      className="flex-none w-36 sm:w-44 md:w-52 lg:w-60 xl:w-72 2xl:w-80"
                     >
                       <ProductCard product={product} />
                     </div>
@@ -1705,26 +1693,26 @@ const Home = () => {
               id="security-features-container"
               className="flex overflow-x-auto scrollbar-hide gap-4 pb-4 scroll-smooth cursor-grab"
             >
-              <div className="text-center flex-none w-64">
-                <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <TruckIcon className="h-6 w-6 text-amber-600" />
+              <div className="text-center flex-none w-56 sm:w-64">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3">
+                  <TruckIcon className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">الشحن المجاني</h3>
-                <p className="text-sm text-amber-700">الشحن المجاني على جميع الطلبات فوق 50 ريال</p>
+                <h3 className="text-base sm:text-lg font-semibold mb-1 sm:mb-2">الشحن المجاني</h3>
+                <p className="text-xs sm:text-sm text-amber-700">الشحن المجاني على جميع الطلبات فوق 50 ريال</p>
               </div>
-              <div className="text-center flex-none w-64">
-                <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <ShieldCheckIcon className="h-6 w-6 text-emerald-600" />
+              <div className="text-center flex-none w-56 sm:w-64">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3">
+                  <ShieldCheckIcon className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-600" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">الدفع الآمن</h3>
-                <p className="text-sm text-amber-700">عملية دفع آمنة بنسبة 100%</p>
+                <h3 className="text-base sm:text-lg font-semibold mb-1 sm:mb-2">الدفع الآمن</h3>
+                <p className="text-xs sm:text-sm text-amber-700">عملية دفع آمنة بنسبة 100%</p>
               </div>
-              <div className="text-center flex-none w-64">
-                <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <ArrowPathIcon className="h-6 w-6 text-orange-600" />
+              <div className="text-center flex-none w-56 sm:w-64">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3">
+                  <ArrowPathIcon className="h-5 w-5 sm:h-6 sm:w-6 text-orange-600" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">إرجاع سهل</h3>
-                <p className="text-sm text-amber-700">سياسة إرجاع 30 يوم</p>
+                <h3 className="text-base sm:text-lg font-semibold mb-1 sm:mb-2">إرجاع سهل</h3>
+                <p className="text-xs sm:text-sm text-amber-700">سياسة إرجاع 30 يوم</p>
               </div>
             </div>
           </div>
