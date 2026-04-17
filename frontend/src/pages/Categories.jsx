@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import api from '../../services/api'
 import { PhotoIcon, PlusIcon, PencilIcon, TrashIcon, FolderIcon } from '@heroicons/react/24/outline'
 
 const AdminCategories = () => {
@@ -18,9 +19,8 @@ const AdminCategories = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/admin/categories`)
-      const data = await response.json()
-      setCategories(data || [])
+      const response = await api.get('/admin/categories')
+      setCategories(response.data || [])
       setLoading(false)
     } catch (err) {
       setError('فشل في جلب الفئات: ' + err.message)
@@ -77,22 +77,18 @@ const AdminCategories = () => {
       }
 
       if (editingCategory) {
-        await fetch(`${import.meta.env.VITE_API_URL}/admin/categories/${editingCategory.id}?_method=PUT`, {
-          method: 'POST',
+        await api.post(`/admin/categories/${editingCategory.id}?_method=PUT`, submitData, {
           headers: {
             'Content-Type': 'multipart/form-data'
-          },
-          body: submitData
+          }
         })
         alert('تم تحديث الفئة بنجاح!')
         setEditingCategory(null)
       } else {
-        await fetch(`${import.meta.env.VITE_API_URL}/admin/categories`, {
-          method: 'POST',
+        await api.post('/admin/categories', submitData, {
           headers: {
             'Content-Type': 'multipart/form-data'
-          },
-          body: submitData
+          }
         })
         alert('تم إضافة الفئة بنجاح!')
       }
@@ -130,9 +126,7 @@ const AdminCategories = () => {
   const handleDelete = async (id) => {
     if (window.confirm('هل أنت متأكد من أنك تريد حذف هذه الفئة؟')) {
       try {
-        await fetch(`${import.meta.env.VITE_API_URL}/admin/categories/${id}`, {
-          method: 'DELETE'
-        })
+        await api.delete(`/admin/categories/${id}`)
         fetchCategories() // Refresh categories list
         alert('تم حذف الفئة بنجاح!')
       } catch (err) {
@@ -152,13 +146,9 @@ const AdminCategories = () => {
   const getImageUrl = (imagePath, imageField = null) => {
     if (!imagePath) return 'https://picsum.photos/seed/category/200/200.jpg'
     
-    // Get base URL from environment or fallback to Railway production
-    const baseUrl = import.meta.env.VITE_API_URL || 'https://shop-production-d82a.up.railway.app/api'
-    const publicUrl = baseUrl.replace('/api', '')
-    
     // If it's a relative path starting with /images/, convert to full URL
     if (imagePath.startsWith('/images/')) {
-      return `${publicUrl}${imagePath}`
+      return `http://localhost:8000${imagePath}`
     }
     
     // If it's already a full URL, use it as is
@@ -167,7 +157,7 @@ const AdminCategories = () => {
     }
     
     // Otherwise, treat as relative path
-    return `${publicUrl}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`
+    return `http://localhost:8000${imagePath.startsWith('/') ? '' : '/'}${imagePath}`
   }
 
   if (loading) {
