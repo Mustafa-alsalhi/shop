@@ -101,7 +101,7 @@ const cartService = {
           product_name: itemData.product_name || `Product ${itemData.product_id}`,
           price: parseFloat(itemData.price) || 0,
           quantity: itemData.quantity,
-          image_url: itemData.image_url || itemData.main_image_url || null,
+          image_url: itemData.image_url || itemData.main_image_url || `/images/products/product-${itemData.product_id}.jpg`,
           variant_id: itemData.variant_id || null,
           variant_attributes: null,
           created_at: new Date().toISOString(),
