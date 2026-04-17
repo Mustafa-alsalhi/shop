@@ -25,12 +25,12 @@ const ProductCard = ({ product }) => {
   // Check if product is in wishlist
   const isWishlisted = wishlistItems.some(item => item.id === product.id)
 
-  // Inline SVG placeholder used when no real image is available
-  const PLACEHOLDER_SVG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Crect width='300' height='300' fill='%23f3f4f6'/%3E%3Crect x='90' y='80' width='120' height='90' rx='6' fill='%23d1d5db'/%3E%3Ccircle cx='150' cy='210' r='18' fill='%23d1d5db'/%3E%3C/svg%3E`
+  // Inline SVG placeholder — gray box with a simple image icon
+  const PLACEHOLDER_SVG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23e5e7eb'/%3E%3Crect x='120' y='110' width='160' height='130' rx='8' fill='%239ca3af'/%3E%3Ccircle cx='165' cy='152' r='18' fill='%23e5e7eb'/%3E%3Cpolygon points='120%2C240%20185%2C175%20225%2C210%20265%2C165%20280%2C240' fill='%236b7280'/%3E%3C/svg%3E`
 
   // Helper function to get correct image URL
   const getImageUrl = (imagePath) => {
-    // No path supplied, or path points to an external placeholder service
+    // No path supplied, or path points to an unreliable external placeholder service
     if (
       !imagePath ||
       imagePath.includes('via.placeholder.com') ||
@@ -39,13 +39,18 @@ const ProductCard = ({ product }) => {
       return PLACEHOLDER_SVG
     }
 
-    // Already a full URL (but not a placeholder service) — use as-is
+    // Full URL (real CDN / backend absolute URL) — use as-is
     if (imagePath.startsWith('http')) {
       return imagePath
     }
 
-    // Relative path — prefix with the backend origin
-    return `http://localhost:8000${imagePath.startsWith('/') ? '' : '/'}${imagePath}`
+    // Recognised backend image path — use as-is
+    if (imagePath.startsWith('/images/')) {
+      return imagePath
+    }
+
+    // Anything else is unknown / untrusted — fall back to placeholder
+    return PLACEHOLDER_SVG
   }
 
   const handleAddToCart = () => {
