@@ -246,13 +246,13 @@ const CategoryBanner = () => {
       <div className="bg-white/80 backdrop-blur-sm py-8 border-y border-amber-200/30">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-12">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">تسوق حسب الفئة</h2>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">**</h2>
             <Link 
               to="/categories" 
-              className="inline-flex items-center text-amber-600 hover:text-amber-700 font-medium transition-colors"
+              className="inline-flex items-center text-amber-600 hover:text-amber-700 font-medium transition-colors text-xs sm:text-sm md:text-base"
             >
-              <span>عرض جميع الفئات</span>
-              <ChevronRightIcon className="h-5 w-5 ml-1" />
+              <span>**</span>
+              <ChevronRightIcon className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 mr-1" />
             </Link>
           </div>
           <div className="relative">
@@ -287,13 +287,13 @@ const CategoryBanner = () => {
     <div className="bg-white/80 backdrop-blur-sm py-8 border-y border-amber-200/30">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center mb-12">
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">تسوق حسب الفئة</h2>
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">تسوق حسب الفئة</h2>
           <Link 
             to="/categories" 
-            className="inline-flex items-center text-amber-600 hover:text-amber-700 font-medium transition-colors"
+            className="inline-flex items-center text-amber-600 hover:text-amber-700 font-medium transition-colors text-xs sm:text-sm md:text-base"
           >
             <span>عرض جميع الفئات</span>
-            <ChevronRightIcon className="h-5 w-5 ml-1" />
+            <ChevronRightIcon className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 mr-1" />
           </Link>
         </div>
 
@@ -303,18 +303,18 @@ const CategoryBanner = () => {
               {/* Scroll Buttons */}
               <button
                 onClick={goToPreviousCategories}
-                className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -ml-6"
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-2 sm:p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -ml-4 sm:-ml-6"
                 aria-label="Scroll left"
               >
-                <ChevronLeftIcon className="h-6 w-6" />
+                <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
               </button>
               
               <button
                 onClick={goToNextCategories}
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -mr-6"
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-2 sm:p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -mr-4 sm:-mr-6"
                 aria-label="Scroll right"
               >
-                <ChevronRightIcon className="h-6 w-6" />
+                <ChevronRightIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
               </button>
 
               {/* Categories Container */}
