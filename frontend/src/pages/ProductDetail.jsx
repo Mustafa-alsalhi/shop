@@ -200,27 +200,27 @@ const ProductDetail = () => {
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50" dir="rtl">
       {/* Breadcrumb */}
       <nav className="bg-white/80 backdrop-blur-sm border-b border-amber-200/50">
-        <div className="container-custom py-4">
-          <div className="flex items-center space-x-2 text-sm">
-            <Link to="/" className="text-gray-600 hover:text-amber-600 transition-colors">
+        <div className="container-custom py-3 sm:py-4">
+          <div className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm overflow-x-auto">
+            <Link to="/" className="text-gray-600 hover:text-amber-600 transition-colors whitespace-nowrap">
               الرئيسية
             </Link>
             <span className="text-gray-400">/</span>
-            <Link to="/products" className="text-gray-600 hover:text-amber-600 transition-colors">
+            <Link to="/products" className="text-gray-600 hover:text-amber-600 transition-colors whitespace-nowrap">
               المنتجات
             </Link>
             <span className="text-gray-400">/</span>
-            <span className="text-amber-900 font-medium">{product.name}</span>
+            <span className="text-amber-900 font-medium truncate">{product.name}</span>
           </div>
         </div>
       </nav>
 
-      <div className="container-custom py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="container-custom py-4 sm:py-6 lg:py-8">
+        <div className="flex flex-col xl:flex-row gap-6 lg:gap-8">
           {/* Product Images */}
-          <div className="lg:col-span-1">
-            <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-amber-200/30">
-              <div className="grid grid-cols-1 gap-4">
+          <div className="flex-1">
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-3 sm:p-4 lg:p-6 border border-amber-200/30">
+              <div className="grid grid-cols-1 gap-3 sm:gap-4">
                 {allImages.length > 0 ? allImages.map((image, index) => {
                   const imageUrl = getImageUrl(image);
                   if (!imageUrl) return null; // Don't render if no real image
@@ -236,17 +236,17 @@ const ProductDetail = () => {
                       <img
                         src={imageUrl}
                         alt={`${product.name} - Image ${index + 1}`}
-                        className="w-full h-64 object-cover"
+                        className="w-full h-40 sm:h-48 lg:h-56 xl:h-64 object-cover"
                       />
                     </div>
                   );
                 }) : (
                   // Show message when no real images available
-                  <div className="relative overflow-hidden rounded-lg bg-amber-100 flex items-center justify-center h-64">
-                    <div className="text-center text-amber-600">
-                      <div className="text-4xl mb-2">📷</div>
-                      <p>لا توجد صور حقيقية متاحة</p>
-                      <p className="text-sm">لم يتم إضافة صور لهذا المنتج بعد</p>
+                  <div className="relative overflow-hidden rounded-lg bg-amber-100 flex items-center justify-center h-40 sm:h-48 lg:h-56 xl:h-64">
+                    <div className="text-center text-amber-600 px-4">
+                      <div className="text-2xl sm:text-3xl lg:text-4xl mb-2">📷</div>
+                      <p className="text-xs sm:text-sm lg:text-base">لا توجد صور حقيقية متاحة</p>
+                      <p className="text-xs sm:text-xs lg:text-sm">لم يتم إضافة صور لهذا المنتج بعد</p>
                     </div>
                   </div>
                 )}
@@ -255,33 +255,33 @@ const ProductDetail = () => {
           </div>
 
           {/* Product Info */}
-          <div className="lg:col-span-1">
-            <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-amber-200/30">
+          <div className="flex-1">
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-3 sm:p-4 lg:p-6 border border-amber-200/30">
               {/* Product Title & Price */}
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent mb-2">{product.name}</h1>
-                  <div className="flex items-center space-x-2">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4">
+                <div className="flex-1">
+                  <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent mb-2">{product.name}</h1>
+                  <div className="flex items-center space-x-1 sm:space-x-2 mb-3 sm:mb-0">
                     <div className="flex items-center">
                       {[...Array(5)].map((_, i) => (
                         <StarIconSolid
                           key={i}
-                          className={`h-5 w-5 ${
+                          className={`h-4 w-4 sm:h-5 sm:w-5 ${
                             i < Math.floor(product.rating || 0)
                               ? 'text-amber-400'
                               : 'text-gray-300'
                           }`}
                         />
                       ))}
-                      <span className="ml-2 text-gray-600">
+                      <span className="ml-1 sm:ml-2 text-xs sm:text-sm text-gray-600">
                         {product.rating || 0} ({product.reviews_count || 0} تقييم)
                       </span>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-3xl font-bold text-amber-600">${product.price}</p>
+                  <div className="text-right sm:text-left">
+                    <p className="text-2xl sm:text-3xl font-bold text-amber-600">${product.price}</p>
                     {product.compare_at_price && (
-                      <p className="text-sm text-gray-500 line-through">
+                      <p className="text-xs sm:text-sm text-gray-500 line-through">
                         ${product.compare_at_price}
                       </p>
                     )}
@@ -290,19 +290,19 @@ const ProductDetail = () => {
               </div>
 
               {/* Product Description */}
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-amber-900 mb-2">الوصف</h3>
-                <p className="text-gray-600 leading-relaxed">{product.description}</p>
+              <div className="mb-4 sm:mb-6">
+                <h3 className="text-base sm:text-lg font-semibold text-amber-900 mb-2">الوصف</h3>
+                <p className="text-gray-600 leading-relaxed text-sm sm:text-base">{product.description}</p>
               </div>
 
               {/* Product Variants */}
               {product.variants && product.variants.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-amber-900 mb-4">الخيارات</h3>
+                <div className="mb-4 sm:mb-6">
+                  <h3 className="text-base sm:text-lg font-semibold text-amber-900 mb-3 sm:mb-4">الخيارات</h3>
                   <div className="space-y-4">
                     {product.variants.map((variant) => (
                       <div key={variant.id || variant.name} className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700">
                           {variant.name}
                         </label>
                         <select
@@ -320,7 +320,7 @@ const ProductDetail = () => {
                               });
                             }
                           }}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm sm:text-base"
                         >
                           <option value="">اختر خياراً...</option>
                           {variant.options && variant.options.map((option) => (
@@ -336,74 +336,75 @@ const ProductDetail = () => {
               )}
 
               {/* Quantity & Actions */}
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center space-x-4">
-                  <label className="text-sm font-medium text-gray-700">الكمية:</label>
-                  <div className="flex items-center space-x-2">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
+                <div className="flex items-center space-x-2 sm:space-x-4">
+                  <label className="text-xs sm:text-sm font-medium text-gray-700">الكمية:</label>
+                  <div className="flex items-center space-x-1 sm:space-x-2">
                     <button
                       onClick={() => handleQuantityChange('decrease')}
                       disabled={quantity <= 1}
-                      className="p-2 text-gray-600 hover:text-amber-600 disabled:opacity-50 transition-colors"
+                      className="p-1.5 sm:p-2 text-gray-600 hover:text-amber-600 disabled:opacity-50 transition-colors"
                     >
-                      <MinusIcon className="h-4 w-4" />
+                      <MinusIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                     </button>
-                    <span className="px-4 py-2 font-medium bg-amber-50 rounded-lg border border-amber-200">{quantity}</span>
+                    <span className="px-3 sm:px-4 py-1.5 sm:py-2 font-medium bg-amber-50 rounded-lg border border-amber-200 text-sm sm:text-base">{quantity}</span>
                     <button
                       onClick={() => handleQuantityChange('increase')}
-                      className="p-2 text-gray-600 hover:text-amber-600 transition-colors"
+                      className="p-1.5 sm:p-2 text-gray-600 hover:text-amber-600 transition-colors"
                     >
-                      <PlusIcon className="h-4 w-4" />
+                      <PlusIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                     </button>
                   </div>
                 </div>
 
-                <div className="flex space-x-4">
+                <div className="flex space-x-2 sm:space-x-4">
                   <button
                     onClick={handleToggleWishlist}
-                    className={`p-3 rounded-lg transition-all duration-300 hover:scale-105 ${
+                    className={`p-2 sm:p-3 rounded-lg transition-all duration-300 hover:scale-105 ${
                       isWishlisted
                         ? 'bg-rose-100 text-rose-600 hover:bg-rose-200 shadow-md'
                         : 'bg-amber-100 text-amber-600 hover:bg-amber-200 shadow-md'
                     }`}
                   >
                     <HeartIcon
-                      className={`h-6 w-6 ${
+                      className={`h-4 w-4 sm:h-5 sm:w-5 sm:h-6 sm:w-6 ${
                         isWishlisted ? 'text-rose-600' : 'text-amber-600'
                       }`}
                     />
                   </button>
                   <button
                     onClick={handleAddToCart}
-                    className="flex-1 bg-gradient-to-r from-amber-600 to-amber-700 text-white px-6 py-3 rounded-lg hover:from-amber-700 hover:to-amber-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                    className="flex-1 bg-gradient-to-r from-amber-600 to-amber-700 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg hover:from-amber-700 hover:to-amber-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 text-sm sm:text-base"
                   >
-                    <ShoppingBagIcon className="h-5 w-5 mr-2" />
-                    أضف للسلة
+                    <ShoppingBagIcon className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">أضف للسلة</span>
+                    <span className="sm:hidden">سلة</span>
                   </button>
                 </div>
               </div>
 
               {/* Product Features */}
-              <div className="border-t border-amber-200/50 pt-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="flex items-center space-x-3">
-                    <TruckIcon className="h-6 w-6 text-amber-600" />
+              <div className="border-t border-amber-200/50 pt-4 sm:pt-6">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6">
+                  <div className="flex items-center space-x-2 sm:space-x-3">
+                    <TruckIcon className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600" />
                     <div>
-                      <p className="font-medium text-amber-900">الشحن المجاني</p>
-                      <p className="text-sm text-gray-600">عند الطلبات فوق 50 ريال</p>
+                      <p className="text-xs sm:text-sm font-medium text-amber-900">الشحن المجاني</p>
+                      <p className="text-xs text-gray-600">عند الطلبات فوق 50 ريال</p>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    <ShieldCheckIcon className="h-6 w-6 text-amber-600" />
+                  <div className="flex items-center space-x-2 sm:space-x-3">
+                    <ShieldCheckIcon className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600" />
                     <div>
-                      <p className="font-medium text-amber-900">الدفع الآمن</p>
-                      <p className="text-sm text-gray-600">SSL encrypted</p>
+                      <p className="text-xs sm:text-sm font-medium text-amber-900">الدفع الآمن</p>
+                      <p className="text-xs text-gray-600">SSL encrypted</p>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    <ShoppingBagIcon className="h-6 w-6 text-amber-600" />
+                  <div className="flex items-center space-x-2 sm:space-x-3">
+                    <ShoppingBagIcon className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600" />
                     <div>
-                      <p className="font-medium text-amber-900">إرجاع سهل</p>
-                      <p className="text-sm text-gray-600">سياسة إرجاع 30 يوم</p>
+                      <p className="text-xs sm:text-sm font-medium text-amber-900">إرجاع سهل</p>
+                      <p className="text-xs text-gray-600">سياسة إرجاع 30 يوم</p>
                     </div>
                   </div>
                 </div>
@@ -411,10 +412,10 @@ const ProductDetail = () => {
             </div>
 
             {/* Related Products */}
-            <div className="lg:col-span-1">
-              <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-amber-200/30">
-                <h3 className="text-lg font-semibold text-amber-900 mb-6">منتجات ذات صلة</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="flex-1 mt-6 lg:mt-8">
+              <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-3 sm:p-4 lg:p-6 border border-amber-200/30">
+                <h3 className="text-base sm:text-lg font-semibold text-amber-900 mb-4 sm:mb-6">منتجات ذات صلة</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
                   {relatedProducts.map((relatedProduct) => {
                     console.log('Rendering related product:', relatedProduct)
                     return (
@@ -428,19 +429,19 @@ const ProductDetail = () => {
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                               />
                             </div>
-                            <div className="p-4">
-                              <h4 className="font-medium text-amber-900 mb-2">{relatedProduct.name}</h4>
+                            <div className="p-3 sm:p-4">
+                              <h4 className="text-sm sm:text-base font-medium text-amber-900 mb-2 truncate">{relatedProduct.name}</h4>
                               <div className="flex items-center">
-                                <p className="text-lg font-bold text-amber-600">${parseFloat(relatedProduct.price || 0).toFixed(2)}</p>
+                                <p className="text-base sm:text-lg font-bold text-amber-600">${parseFloat(relatedProduct.price || 0).toFixed(2)}</p>
                                 {relatedProduct.compare_at_price && (
-                                  <p className="text-sm text-gray-500 line-through">
+                                  <p className="text-xs sm:text-sm text-gray-500 line-through mr-2">
                                     ${parseFloat(relatedProduct.compare_at_price).toFixed(2)}
                                   </p>
                                 )}
                               </div>
                               <div className="flex items-center space-x-1">
-                                <StarIcon className="h-4 w-4 text-amber-400" />
-                                <span className="text-sm text-gray-600">
+                                <StarIcon className="h-3 w-3 sm:h-4 sm:w-4 text-amber-400" />
+                                <span className="text-xs sm:text-sm text-gray-600">
                         ({relatedProduct.rating || 0})
                                 </span>
                               </div>
