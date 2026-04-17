@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import api from '../../services/api'
 import { PhotoIcon, PlusIcon, PencilIcon, TrashIcon, FolderIcon } from '@heroicons/react/24/outline'
 
 const AdminCategories = () => {
@@ -19,8 +18,9 @@ const AdminCategories = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await api.get('/admin/categories')
-      setCategories(response.data || [])
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/admin/categories`)
+      const data = await response.json()
+      setCategories(data || [])
       setLoading(false)
     } catch (err) {
       setError('فشل في جلب الفئات: ' + err.message)
@@ -77,18 +77,22 @@ const AdminCategories = () => {
       }
 
       if (editingCategory) {
-        await api.post(`/admin/categories/${editingCategory.id}?_method=PUT`, submitData, {
+        await fetch(`${import.meta.env.VITE_API_URL}/admin/categories/${editingCategory.id}?_method=PUT`, {
+          method: 'POST',
           headers: {
             'Content-Type': 'multipart/form-data'
-          }
+          },
+          body: submitData
         })
         alert('تم تحديث الفئة بنجاح!')
         setEditingCategory(null)
       } else {
-        await api.post('/admin/categories', submitData, {
+        await fetch(`${import.meta.env.VITE_API_URL}/admin/categories`, {
+          method: 'POST',
           headers: {
             'Content-Type': 'multipart/form-data'
-          }
+          },
+          body: submitData
         })
         alert('تم إضافة الفئة بنجاح!')
       }
@@ -126,7 +130,9 @@ const AdminCategories = () => {
   const handleDelete = async (id) => {
     if (window.confirm('هل أنت متأكد من أنك تريد حذف هذه الفئة؟')) {
       try {
-        await api.delete(`/admin/categories/${id}`)
+        await fetch(`${import.meta.env.VITE_API_URL}/admin/categories/${id}`, {
+          method: 'DELETE'
+        })
         fetchCategories() // Refresh categories list
         alert('تم حذف الفئة بنجاح!')
       } catch (err) {
