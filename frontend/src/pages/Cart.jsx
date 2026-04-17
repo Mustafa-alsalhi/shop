@@ -25,6 +25,27 @@ import { showSuccessNotification, showErrorNotification } from '../store/slices/
 import LoadingSpinner from '../components/UI/LoadingSpinner'
 
 const Cart = () => {
+  // Helper function to get correct image URL
+  const getImageUrl = (imageUrl, productName, size = 80) => {
+    // Get base URL from environment or fallback to Railway production
+    const baseUrl = import.meta.env.VITE_API_URL || 'https://shop-production-d82a.up.railway.app/api'
+    const publicUrl = baseUrl.replace('/api', '')
+    
+    if (imageUrl && imageUrl !== 'null' && imageUrl !== 'undefined' && imageUrl !== null) {
+      if (imageUrl.startsWith('http')) {
+        return imageUrl
+      }
+      // If it's a relative path starting with /images/, convert to full URL
+      if (imageUrl.startsWith('/images/')) {
+        return `${publicUrl}${imageUrl}`
+      }
+      // Otherwise, treat as relative path
+      return `${publicUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`
+    }
+    
+    // Fallback to placeholder
+    return `https://picsum.photos/seed/${productName?.replace(/\s+/g, '') || 'product'}/${size}x${size}.jpg`
+  }
   const dispatch = useDispatch()
   const navigate = useNavigate()
   
@@ -57,28 +78,6 @@ const Cart = () => {
     }
   }
 
-  // Utility function for image URLs
-  const getImageUrl = (imageUrl, productName, size = 80) => {
-    // Get base URL from environment or fallback to Railway production
-    const baseUrl = import.meta.env.VITE_API_URL || 'https://shop-production-d82a.up.railway.app/api'
-    const publicUrl = baseUrl.replace('/api', '')
-    
-    if (imageUrl && imageUrl !== 'null' && imageUrl !== 'undefined' && imageUrl !== null) {
-      if (imageUrl.startsWith('http')) {
-        return imageUrl
-      }
-      // If it's a relative path starting with /images/, convert to full URL
-      if (imageUrl.startsWith('/images/')) {
-        return `${publicUrl}${imageUrl}`
-      }
-      // Otherwise, treat as relative path
-      return `${publicUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`
-    }
-    
-    // Fallback to placeholder
-    return `https://picsum.photos/seed/${productName?.replace(/\s+/g, '') || 'product'}/${size}x${size}.jpg`
-  }
-
   const handleCheckout = () => {
     console.log('=== CART CHECKOUT ===')
     console.log('Navigating to checkout...')
@@ -86,19 +85,19 @@ const Cart = () => {
     console.log('Cart total:', cartTotal)
     
     if (cartItems.length === 0) {
-      console.log('=== Cart is empty, cannot proceed to checkout')
-      dispatch(showErrorNotification('Your cart is empty. Add products before proceeding to checkout.'))
+      console.log('❌ Cart is empty, cannot proceed to checkout')
+      dispatch(showErrorNotification('سلتك فارغة. أضف منتجات قبل الدفع.'))
       return
     }
     
     if (!isAuthenticated) {
-      console.log('=== User not authenticated, redirecting to login')
-      dispatch(showErrorNotification('Please log in to proceed to checkout'))
+      console.log('❌ User not authenticated, redirecting to login')
+      dispatch(showErrorNotification('يرجى تسجيل الدخول للمتابعة للدفع'))
       navigate('/login')
       return
     }
     
-    console.log('=== Proceeding to checkout')
+    console.log('✅ Proceeding to checkout')
     navigate('/checkout')
   }
 
