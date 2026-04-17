@@ -19,6 +19,7 @@ import Account from './pages/Account'
 import Login from './pages/Auth/Login'
 import Register from './pages/Auth/Register'
 import ForgotPassword from './pages/Auth/ForgotPassword'
+import ForgotPasswordEmail from './pages/Auth/ForgotPasswordEmail'
 import ResetPassword from './pages/Auth/ResetPassword'
 import ProtectedRoute from './components/Auth/ProtectedRoute'
 import AdminRoute from './components/Auth/AdminRoute'
@@ -79,6 +80,7 @@ function App() {
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
           <Route path="forgot-password" element={<ForgotPassword />} />
+          <Route path="forgot-password-email" element={<ForgotPasswordEmail />} />
           <Route path="reset-password" element={<ResetPassword />} />
         </Route>
 
