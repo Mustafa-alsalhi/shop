@@ -14,9 +14,20 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return File::get(public_path('index.html'));
+    return response()->json([
+        'message' => 'ShopHub API is working successfully!',
+        'status' => 'success',
+        'version' => '1.0.0',
+        'timestamp' => now()
+    ]);
 });
 
 Route::get('/{any}', function ($any) {
-    return File::get(public_path('index.html'));
+    return response()->json([
+        'message' => 'ShopHub API is working successfully!',
+        'status' => 'success',
+        'version' => '1.0.0',
+        'timestamp' => now(),
+        'path' => $any
+    ]);
 })->where('any', '.*');
