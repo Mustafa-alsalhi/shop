@@ -102,29 +102,29 @@ const ProductFilters = ({ filters, onFilterChange, onClearFilters }) => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6" dir="rtl">
-      <div className="flex items-center justify-between mb-6" dir="rtl">
-        <h3 className="text-lg font-semibold flex items-center">
-          <AdjustmentsHorizontalIcon className="h-5 w-5 ml-2" />
+    <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 lg:p-6" dir="rtl">
+      <div className="flex items-center justify-between mb-4 sm:mb-6" dir="rtl">
+        <h3 className="text-base sm:text-lg font-semibold flex items-center">
+          <AdjustmentsHorizontalIcon className="h-4 w-4 sm:h-5 sm:w-5 ml-2" />
           مميزات
         </h3>
         <button
           onClick={onClearFilters}
-          className="text-sm text-primary-600 hover:text-primary-700 transition-colors"
+          className="text-xs sm:text-sm text-primary-600 hover:text-primary-700 transition-colors"
         >
           مسح الكل
         </button>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Sort Options */}
         <div>
-          <h4 className="font-medium mb-3">ترتيب حسب</h4>
+          <h4 className="font-medium mb-2 sm:mb-3 text-sm sm:text-base">ترتيب حسب</h4>
           <div className="space-y-2">
             <select
               value={`${filters.sortBy || 'created_at'}-${filters.sortOrder || 'desc'}`}
               onChange={(e) => handleSortChange(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+              className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
             >
               <option value="created_at-desc">الأحدث أولاً</option>
               <option value="created_at-asc">الأقدم أولاً</option>
@@ -140,16 +140,16 @@ const ProductFilters = ({ filters, onFilterChange, onClearFilters }) => {
 
         {/* Categories */}
         <div>
-          <div className="flex items-center justify-between mb-3" dir="rtl">
-            <h4 className="font-medium">الفئة</h4>
+          <div className="flex items-center justify-between mb-2 sm:mb-3" dir="rtl">
+            <h4 className="font-medium text-sm sm:text-base">الفئة</h4>
             <button
               onClick={() => handleCategoryChange('all')}
-              className="text-xs text-primary-600 hover:text-primary-700 transition-colors"
+              className="text-xs sm:text-sm text-primary-600 hover:text-primary-700 transition-colors"
             >
               تحديد الكل
             </button>
           </div>
-          <div className="space-y-2 max-h-48 overflow-y-auto">
+          <div className="space-y-1.5 sm:space-y-2 max-h-40 sm:max-h-48 overflow-y-auto">
             {/* All Categories Option */}
             <label className="flex items-center cursor-pointer">
               <input
@@ -188,10 +188,10 @@ const ProductFilters = ({ filters, onFilterChange, onClearFilters }) => {
 
         {/* Price Range */}
         <div>
-          <h4 className="font-medium mb-3">نطاق السعر</h4>
-          <div className="space-y-3">
+          <h4 className="font-medium mb-2 sm:mb-3 text-sm sm:text-base">نطاق السعر</h4>
+          <div className="space-y-2 sm:space-y-3">
             <div>
-              <label className="block text-sm text-gray-600 mb-1">
+              <label className="block text-xs sm:text-sm text-gray-600 mb-1">
                 أقل سعر: ${priceRange.min}
               </label>
               <input
@@ -201,11 +201,11 @@ const ProductFilters = ({ filters, onFilterChange, onClearFilters }) => {
                 step="10"
                 value={priceRange.min}
                 onChange={(e) => handlePriceChange('min', parseFloat(e.target.value))}
-                className="w-full"
+                className="w-full h-2 sm:h-2.5"
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-600 mb-1">
+              <label className="block text-xs sm:text-sm text-gray-600 mb-1">
                 أعلى سعر: ${priceRange.max}
               </label>
               <input
@@ -215,7 +215,7 @@ const ProductFilters = ({ filters, onFilterChange, onClearFilters }) => {
                 step="10"
                 value={priceRange.max}
                 onChange={(e) => handlePriceChange('max', parseFloat(e.target.value))}
-                className="w-full"
+                className="w-full h-2 sm:h-2.5"
               />
             </div>
             <div className="flex justify-between text-xs text-gray-500" dir="rtl">
@@ -227,17 +227,17 @@ const ProductFilters = ({ filters, onFilterChange, onClearFilters }) => {
 
         {/* Rating */}
         <div>
-          <h4 className="font-medium mb-3">التقييم</h4>
-          <div className="space-y-2">
+          <h4 className="font-medium mb-2 sm:mb-3 text-sm sm:text-base">التقييم</h4>
+          <div className="space-y-1.5 sm:space-y-2">
             {[4, 3, 2, 1].map((rating) => (
-              <label key={rating} className="flex items-center cursor-pointer">
+              <label key={rating} className="flex items-center cursor-pointer py-1">
                 <input
                   type="checkbox"
                   checked={filters.rating === rating}
                   onChange={() => handleRatingChange(rating)}
                   className="ml-3 h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                 />
-                <span className="text-gray-700">
+                <span className="text-gray-700 text-sm sm:text-base">
                   {rating} نجوم فما فوق
                 </span>
               </label>
@@ -247,32 +247,32 @@ const ProductFilters = ({ filters, onFilterChange, onClearFilters }) => {
 
         {/* Stock Status */}
         <div>
-          <h4 className="font-medium mb-3">التوفر</h4>
-          <div className="space-y-2">
-            <label className="flex items-center cursor-pointer">
+          <h4 className="font-medium mb-2 sm:mb-3 text-sm sm:text-base">التوفر</h4>
+          <div className="space-y-1.5 sm:space-y-2">
+            <label className="flex items-center cursor-pointer py-1">
               <input
                 type="checkbox"
                 checked={filters.in_stock === true}
                 onChange={handleInStockChange}
                 className="ml-3 h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
               />
-              <span className="text-gray-700">متوفر فقط</span>
+              <span className="text-gray-700 text-sm sm:text-base">متوفر فقط</span>
             </label>
           </div>
         </div>
 
         {/* Featured */}
         <div>
-          <h4 className="font-medium mb-3">مميز</h4>
-          <div className="space-y-2">
-            <label className="flex items-center cursor-pointer">
+          <h4 className="font-medium mb-2 sm:mb-3 text-sm sm:text-base">مميز</h4>
+          <div className="space-y-1.5 sm:space-y-2">
+            <label className="flex items-center cursor-pointer py-1">
               <input
                 type="checkbox"
                 checked={filters.featured === true}
                 onChange={handleFeaturedChange}
                 className="ml-3 h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
               />
-              <span className="text-gray-700">المنتجات المميزة</span>
+              <span className="text-gray-700 text-sm sm:text-base">المنتجات المميزة</span>
             </label>
           </div>
         </div>
