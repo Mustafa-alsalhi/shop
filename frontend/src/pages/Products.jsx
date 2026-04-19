@@ -117,6 +117,10 @@ const Products = () => {
     const updatedFilters = { ...filters, ...newFilters, page: 1 }
     console.log('Products.jsx: Updated filters:', updatedFilters)
     dispatch(setFilters(updatedFilters))
+    // Auto-close filters on mobile after selection
+    if (window.innerWidth < 1024) {
+      setShowFilters(false)
+    }
   }
 
   const handlePageChange = (page) => {
