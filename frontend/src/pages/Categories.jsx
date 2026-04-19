@@ -201,7 +201,7 @@ const Categories = () => {
       </Helmet>
       
       <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-8 sm:py-12" dir="rtl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full mx-auto px-0 sm:px-2 md:px-4 lg:px-6">
           {/* Header */}
           <motion.div 
             initial={{ opacity: 0, y: -20 }}
