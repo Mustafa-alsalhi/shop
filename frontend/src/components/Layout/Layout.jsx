@@ -48,7 +48,7 @@ const Layout = () => {
       <MobileMenu isOpen={isMobileMenuOpen} />
 
       {/* Main Content */}
-      <main className="flex-1 pt-20 sm:pt-24">
+      <main className="flex-1 pt-0 sm:pt-0">
         <Outlet />
       </main>
 
