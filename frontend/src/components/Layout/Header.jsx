@@ -295,38 +295,36 @@ const Header = () => {
   return (
     <>
       {/* Top Bar */}
-      <div className="fixed top-0 left-0 right-0 bg-gradient-to-r from-indigo-700 via-purple-700 to-pink-700 text-white py-2 px-4 z-50" dir="rtl">
+      <div className="bg-gradient-to-r from-indigo-700 via-purple-700 to-pink-700 text-white py-1 sm:py-2 px-2 sm:px-4" dir="rtl">
         <div className="container-custom">
           <div className="flex justify-between items-center">
             {/* Store Name */}
-            <div className="flex items-center space-x-reverse space-x-2">
-              <ShoppingBagIcon className="h-4 w-4 text-yellow-300" />
-              <span className="text-sm font-semibold text-yellow-300">متجر أصالة</span>
+            <div className="flex items-center space-x-reverse space-x-1 sm:space-x-2">
+              <ShoppingBagIcon className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-300" />
+              <span className="text-xs sm:text-sm font-semibold text-yellow-300 hidden xs:block">متجر أصالة</span>
             </div>
             
-            {/* Phone Number */}
-            <a 
-              href="tel:+9667776780551" 
-              className="flex items-center space-x-reverse space-x-2 hover:text-yellow-300 transition-colors duration-300 group"
-            >
-              <PhoneIcon className="h-4 w-4 group-hover:scale-110 transition-transform duration-300" />
-              <span className="text-sm font-medium">00967776780551</span>
-            </a>
+            {/* Welcome Message */}
+            <div className="flex items-center space-x-reverse space-x-1 sm:space-x-2">
+              <svg className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+              <span className="text-xs sm:text-sm font-medium text-yellow-300">مرحباً بكم في متجر أصالة</span>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Main Header */}
       <header
-        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
+        className={`sticky top-0 left-0 right-0 z-40 transition-all duration-300 ${
           isScrolled
             ? 'bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 shadow-lg border-b border-amber-200/20'
             : 'bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700/95 backdrop-blur-md border-b border-amber-200/10'
         }`}
-        style={{ top: '32px' }}
       >
       <div className="container-custom">
-        <div className="flex items-center justify-between h-16" dir="rtl">
+        <div className="flex items-center justify-between h-12 sm:h-14 md:h-16" dir="rtl">
           {/* Logo */}
           <Link
             to="/"
@@ -440,12 +438,12 @@ const Header = () => {
             <div className="relative notification-dropdown">
               <button
                 onClick={handleNotificationClick}
-                className="p-2 text-white/80 hover:text-yellow-300 hover:bg-white/20 rounded-lg transition-all duration-300 hover:scale-110 relative"
+                className="p-1.5 sm:p-2 text-white/80 hover:text-yellow-300 hover:bg-white/20 rounded-lg transition-all duration-300 hover:scale-110 relative"
                 aria-label="Notifications"
               >
-                <BellIcon className="h-5 w-5" />
+                <BellIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                 {notifications && notifications.filter(n => !n.read).length > 0 && (
-                  <span className="absolute top-1 right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center animate-pulse">
+                  <span className="absolute top-0.5 sm:top-1 right-0.5 sm:right-1 bg-red-500 text-white text-xs rounded-full h-3 w-3 sm:h-4 sm:w-4 flex items-center justify-center animate-pulse">
                     {notifications.filter(n => !n.read).length > 99 ? '99+' : notifications.filter(n => !n.read).length}
                   </span>
                 )}
@@ -453,10 +451,10 @@ const Header = () => {
 
               {/* Notification Dropdown */}
               {isNotificationDropdownOpen && (
-                <div className="absolute left-0 mt-2 w-80 bg-white/95 backdrop-blur-md rounded-xl shadow-2xl border border-purple-200/30 z-50 notification-dropdown">
-                  <div className="p-4 border-b border-purple-200/30">
+                <div className="absolute left-1/2 transform -translate-x-1/2 sm:right-0 sm:left-auto sm:transform-none mt-2 w-72 sm:w-80 bg-white/95 backdrop-blur-md rounded-xl shadow-2xl border border-purple-200/30 z-50 notification-dropdown">
+                  <div className="p-3 sm:p-4 border-b border-purple-200/30">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-bold text-gray-900">الإشعارات</h3>
+                      <h3 className="text-xs sm:text-sm font-bold text-gray-900">الإشعارات</h3>
                       {notifications && notifications.filter(n => !n.read).length > 0 && (
                         <button
                           onClick={markNotificationsAsRead}
@@ -468,7 +466,7 @@ const Header = () => {
                     </div>
                   </div>
                   
-                  <div className="max-h-96 overflow-y-auto">
+                  <div className="max-h-64 sm:max-h-96 overflow-y-auto">
                     {notifications && notifications.length > 0 ? (
                       [...notifications]
                         .sort((a, b) => b.id - a.id) // Sort by ID (newer notifications have larger IDs)
@@ -476,7 +474,7 @@ const Header = () => {
                         .map((notification) => (
                           <div
                             key={notification.id}
-                            className={`p-4 border-b border-purple-100/30 hover:bg-purple-50/50 transition-all duration-200 cursor-pointer ${
+                            className={`p-3 sm:p-4 border-b border-purple-100/30 hover:bg-purple-50/50 transition-all duration-200 cursor-pointer ${
                               !notification.read ? 'bg-purple-50/80' : ''
                             }`}
                             onClick={() => {
@@ -484,61 +482,61 @@ const Header = () => {
                               markNotificationAsRead(notification)
                             }}
                           >
-                            <div className="flex items-start space-x-3">
+                            <div className="flex items-start space-x-2 sm:space-x-3">
                               <div className="flex-shrink-0">
                                 {notification.type === 'success' && (
-                                  <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
-                                    <span className="text-green-600 text-sm">✓</span>
+                                  <div className="h-6 w-6 sm:h-8 sm:w-8 bg-green-100 rounded-full flex items-center justify-center">
+                                    <span className="text-green-600 text-xs sm:text-sm">✓</span>
                                   </div>
                                 )}
                                 {notification.type === 'error' && (
-                                  <div className="h-8 w-8 bg-red-100 rounded-full flex items-center justify-center">
-                                    <span className="text-red-600 text-sm">!</span>
+                                  <div className="h-6 w-6 sm:h-8 sm:w-8 bg-red-100 rounded-full flex items-center justify-center">
+                                    <span className="text-red-600 text-xs sm:text-sm">!</span>
                                   </div>
                                 )}
                                 {notification.type === 'warning' && (
-                                  <div className="h-8 w-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                                    <span className="text-yellow-600 text-sm">⚠</span>
+                                  <div className="h-6 w-6 sm:h-8 sm:w-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                                    <span className="text-yellow-600 text-xs sm:text-sm">⚠</span>
                                   </div>
                                 )}
                                 {notification.type === 'info' && (
-                                  <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
-                                    <span className="text-purple-600 text-sm">i</span>
+                                  <div className="h-6 w-6 sm:h-8 sm:w-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                    <span className="text-purple-600 text-xs sm:text-sm">i</span>
                                   </div>
                                 )}
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm text-gray-900 font-bold">
+                                <p className="text-xs sm:text-sm text-gray-900 font-bold">
                                   {notification.title || 'Notification'}
                                 </p>
-                                <p className="text-sm text-gray-600 mt-1">
+                                <p className="text-xs sm:text-sm text-gray-600 mt-1">
                                   {notification.message}
                                 </p>
-                                <p className="text-xs text-gray-500 mt-2">
+                                <p className="text-xs text-gray-500 mt-1 sm:mt-2">
                                   {notification.timestamp}
                                 </p>
                               </div>
                               {!notification.read && (
                                 <div className="flex-shrink-0">
-                                  <div className="h-2 w-2 bg-purple-500 rounded-full animate-pulse"></div>
+                                  <div className="h-1.5 w-1.5 sm:h-2 sm:w-2 bg-purple-500 rounded-full animate-pulse"></div>
                                 </div>
                               )}
                             </div>
                           </div>
                         ))
                     ) : (
-                      <div className="p-8 text-center">
-                        <BellIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-600">لا توجد إشعارات بعد</p>
+                      <div className="p-6 sm:p-8 text-center">
+                        <BellIcon className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-3 sm:mb-4" />
+                        <p className="text-sm sm:text-base text-gray-600">لا توجد إشعارات بعد</p>
                       </div>
                     )}
                   </div>
                   
                   {notifications && notifications.length > 0 && (
-                    <div className="p-4 border-t border-purple-200/30">
+                    <div className="p-3 sm:p-4 border-t border-purple-200/30">
                       <button
                         onClick={() => navigate('/notifications')}
-                        className="w-full text-center text-sm text-purple-600 hover:text-purple-700 font-bold"
+                        className="w-full text-center text-xs sm:text-sm text-purple-600 hover:text-purple-700 font-bold py-2 sm:py-0"
                       >
                         عرض جميع الإشعارات
                       </button>
