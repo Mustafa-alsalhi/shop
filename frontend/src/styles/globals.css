@@ -9,8 +9,17 @@
   }
 
   body {
-    @apply bg-gradient-to-br from-amber-50 to-orange-50 text-gray-900 font-sans antialiased;
+    @apply bg-gradient-to-br from-amber-50 to-orange-50 text-gray-900 font-sans antialiased m-0 p-0 w-full overflow-x-hidden;
   }
+
+  #root {
+    @apply w-full min-h-screen;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+}
 
   /* Custom scrollbar with amber theme */
   ::-webkit-scrollbar {
@@ -38,7 +47,6 @@
   :focus-visible {
     @apply outline-2 outline-amber-500 outline-offset-2;
   }
-}
 
 /* Custom component styles */
 @layer components {
@@ -162,7 +170,7 @@
   }
 
   .container-custom {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    @apply w-full mx-auto px-0 sm:px-2 md:px-4 lg:px-6 xl:px-8;
   }
 
   .aspect-video {
