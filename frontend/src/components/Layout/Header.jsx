@@ -42,7 +42,7 @@ import {
   markAllNotificationsAsRead,
   markNotificationAsRead,
 } from '../../store/slices/uiSlice'
-import { selectIsAuthenticated, selectUser } from '../../store/slices/authSlice'
+import { selectIsAuthenticated, selectUser, logoutUser } from '../../store/slices/authSlice'
 import { selectWishlistCount, fetchWishlist } from '../../store/slices/wishlistSlice'
 import { selectCartTotalItems as selectCartItemsCount } from '../../store/slices/cartSlice'
 import { selectCategories, fetchCategories } from '../../store/slices/productsSlice'
@@ -236,7 +236,7 @@ const Header = () => {
     dispatch(toggleSearch())
   }
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     // Get current cart from Redux state first (more reliable)
     const reduxCart = JSON.parse(localStorage.getItem('cart') || '[]')
     
@@ -249,11 +249,11 @@ const Header = () => {
     localStorage.setItem('guest_cart', JSON.stringify(reduxCart))
     localStorage.setItem('last_cart_backup', JSON.stringify(reduxCart))
     
-    // Clear auth token
-    localStorage.removeItem('token')
-    
     // Show notification with item count
     dispatch(showSuccessNotification(`تم تسجيل الخروج! سلتك (${reduxCart.length} عناصر) محفوظة!`))
+    
+    // Dispatch logout action to clear Redux state and localStorage
+    await dispatch(logoutUser())
     
     // Redirect to login
     navigate('/login')
