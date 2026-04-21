@@ -40,8 +40,8 @@ const Wishlist = () => {
     }
   }, [error, dispatch])
 
-  const handleRemoveFromWishlist = (productId) => {
-    dispatch(removeFromWishlist(productId))
+  const handleRemoveFromWishlist = (itemId) => {
+    dispatch(removeFromWishlist(itemId))
     dispatch(showSuccessNotification('تم إزالة العنصر من قائمة الرغبات'))
   }
 
@@ -59,9 +59,9 @@ const Wishlist = () => {
     
     // Create COMPLETE cart item with ALL product data
     const cartItem = {
-      product_id: product.id,
+      product_id: product.product_id || product.id,
       quantity: 1,
-      product_name: product.name || `Product ${product.id}`,
+      product_name: product.product_name || product.name || `Product ${product.product_id || product.id}`,
       price: parseFloat(product.price) || 0,
       image_url: product.image_url || product.main_image_url || null,
       variant_id: null,
@@ -70,8 +70,8 @@ const Wishlist = () => {
       sku: product.sku || null,
       weight: product.weight || null,
       dimensions: product.dimensions || null,
-      category: product.category?.name || null,
-      brand: product.brand?.name || null,
+      category: product.category || null,
+      brand: product.brand || null,
       description: product.description || null,
       short_description: product.short_description || null,
       status: product.status || 'active',
@@ -87,7 +87,7 @@ const Wishlist = () => {
     try {
       // Add to cart (will try database first)
       dispatch(addToCart(cartItem))
-      dispatch(showSuccessNotification(`${product.name} تمت إضافته إلى السلة!`))
+      dispatch(showSuccessNotification(`${product.product_name || product.name} تمت إضافته إلى السلة!`))
       
       // Open cart sidebar to show the added item
       setTimeout(() => {
@@ -121,22 +121,22 @@ const Wishlist = () => {
     let failCount = 0
     
     wishlistItems.forEach((product, index) => {
-      console.log(`Adding item ${index + 1}/${wishlistItems.length}:`, product.name)
+      console.log(`Adding item ${index + 1}/${wishlistItems.length}:`, product.product_name || product.name)
       
       // Ensure product has in_stock field
       const productWithStock = ensureStockStatus(product)
       
       // Skip out of stock items
       if (!productWithStock.in_stock) {
-        console.log(`⚠️ Skipping out of stock item: ${product.name}`)
+        console.log(`⚠️ Skipping out of stock item: ${product.product_name || product.name}`)
         return
       }
       
       // Create COMPLETE cart item with ALL product data
       const cartItem = {
-        product_id: product.id,
+        product_id: product.product_id || product.id,
         quantity: 1,
-        product_name: product.name || `Product ${product.id}`,
+        product_name: product.product_name || product.name || `Product ${product.product_id || product.id}`,
         price: parseFloat(product.price) || 0,
         image_url: product.image_url || product.main_image_url || null,
         variant_id: null,
@@ -145,8 +145,8 @@ const Wishlist = () => {
         sku: product.sku || null,
         weight: product.weight || null,
         dimensions: product.dimensions || null,
-        category: product.category?.name || null,
-        brand: product.brand?.name || null,
+        category: product.category || null,
+        brand: product.brand || null,
         description: product.description || null,
         short_description: product.short_description || null,
         status: product.status || 'active',
@@ -316,13 +316,13 @@ const Wishlist = () => {
             >
               {/* Product Image */}
               <div className="relative overflow-hidden">
-                <Link to={`/products/${item.id}`}>
+                <Link to={`/products/${item.product_id}`}>
                   <img
-                    src={getImageUrl(item.image_url || item.main_image_url, item.name)}
-                    alt={item.name}
+                    src={getImageUrl(item.image_url, item.product_name)}
+                    alt={item.product_name}
                     className="w-full h-32 sm:h-40 md:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                     onError={(e) => {
-                      e.target.src = `https://picsum.photos/seed/${item.name?.replace(/\s+/g, '') || 'product'}/300x300.jpg`
+                      e.target.src = `https://picsum.photos/seed/${item.product_name?.replace(/\s+/g, '') || 'product'}/300x300.jpg`
                     }}
                   />
                 </Link>
@@ -360,17 +360,17 @@ const Wishlist = () => {
                 {/* Category */}
                 {item.category && (
                   <p className="text-xs sm:text-sm text-primary-600 font-medium mb-1.5 sm:mb-2 text-right">
-                    {item.category.name}
+                    {item.category}
                   </p>
                 )}
 
                 {/* Product Name */}
                 <Link
-                  to={`/products/${item.id}`}
+                  to={`/products/${item.product_id}`}
                   className="block mb-2 sm:mb-3"
                 >
                   <h3 className="text-sm sm:text-base font-semibold text-gray-900 line-clamp-2 hover:text-primary-600 transition-colors text-right">
-                    {item.name}
+                    {item.product_name}
                   </h3>
                 </Link>
 
