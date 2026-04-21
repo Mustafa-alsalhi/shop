@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import axios from 'axios'
 
 const AdvertisementBanner = () => {
   const navigate = useNavigate()
@@ -14,7 +15,12 @@ const AdvertisementBanner = () => {
 
   const fetchBanners = async () => {
     try {
-      const response = await api.get('/banners?position=home')
+      const response = await axios.get('https://shop-production-d82a.up.railway.app/api/banners?position=home', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        }
+      })
       const bannerData = response.data.data || []
       setBanners(bannerData)
     } catch (error) {
@@ -116,7 +122,7 @@ const AdvertisementBanner = () => {
         {banners.map((banner, index) => (
           <div key={banner.id} className="relative w-full h-full flex-shrink-0 banner-slide">
             <img
-              src={banner.full_image_url || (banner.image_url.startsWith('http') ? banner.image_url : `http://localhost:8000${banner.image_url}`)}
+              src={banner.full_image_url || (banner.image_url.startsWith('http') ? banner.image_url : `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-d82a.up.railway.app'}${banner.image_url}`)}
               alt={banner.title}
               className="w-full h-full object-cover cursor-pointer"
               onClick={(e) => handleBannerClick(banner.link_url, e)}
