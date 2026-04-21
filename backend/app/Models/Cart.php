@@ -14,6 +14,20 @@ class Cart extends Model
         'product_id',
         'product_variant_id',
         'quantity',
+        'product_name',
+        'price',
+        'image_url',
+        'sku',
+        'weight',
+        'dimensions',
+        'category',
+        'brand',
+        'description',
+        'short_description',
+        'status',
+        'featured',
+        'variant_attributes',
+        'currency',
     ];
 
     protected $casts = [
