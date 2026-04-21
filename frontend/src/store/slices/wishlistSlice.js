@@ -1,15 +1,25 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
+// Helper function to get user-specific wishlist key
+const getWishlistKey = () => {
+  const token = localStorage.getItem('token')
+  if (!token) return 'guest_wishlist'
+  // Use a simple hash of token as user identifier
+  return `wishlist_${token.substring(0, 10)}`
+}
+
 // Mock wishlist service - replace with actual API calls
 const wishlistService = {
   getWishlist: async () => {
     // Simulate API call
-    const storedWishlist = localStorage.getItem('wishlist')
+    const wishlistKey = getWishlistKey()
+    const storedWishlist = localStorage.getItem(wishlistKey)
     return { data: JSON.parse(storedWishlist || '[]') }
   },
   
   addToWishlist: async (product) => {
-    const storedWishlist = localStorage.getItem('wishlist')
+    const wishlistKey = getWishlistKey()
+    const storedWishlist = localStorage.getItem(wishlistKey)
     const wishlist = JSON.parse(storedWishlist || '[]')
     const exists = wishlist.find(item => item.id === product.id)
     
@@ -21,23 +31,25 @@ const wishlistService = {
         added_at: new Date().toISOString()
       }
       wishlist.push(productWithStock)
-      localStorage.setItem('wishlist', JSON.stringify(wishlist))
+      localStorage.setItem(wishlistKey, JSON.stringify(wishlist))
     }
     
     return { data: wishlist }
   },
   
   removeFromWishlist: async (productId) => {
-    const storedWishlist = localStorage.getItem('wishlist')
+    const wishlistKey = getWishlistKey()
+    const storedWishlist = localStorage.getItem(wishlistKey)
     const wishlist = JSON.parse(storedWishlist || '[]')
     const updatedWishlist = wishlist.filter(item => item.id !== productId)
-    localStorage.setItem('wishlist', JSON.stringify(updatedWishlist))
+    localStorage.setItem(wishlistKey, JSON.stringify(updatedWishlist))
     
     return { data: updatedWishlist }
   },
   
   clearWishlist: async () => {
-    localStorage.removeItem('wishlist')
+    const wishlistKey = getWishlistKey()
+    localStorage.removeItem(wishlistKey)
     return { data: [] }
   }
 }
