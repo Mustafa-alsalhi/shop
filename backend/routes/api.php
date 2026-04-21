@@ -9,7 +9,7 @@ use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\WishlistController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\BannerController;
-use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Api\CouponController;
 
 /*
