@@ -10,7 +10,7 @@ use App\Http\Controllers\Api\WishlistController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\BannerController;
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\CouponController;
+use App\Http\Controllers\Api\CouponController;
 
 /*
 |--------------------------------------------------------------------------
