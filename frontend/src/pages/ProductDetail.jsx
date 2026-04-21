@@ -128,6 +128,7 @@ const ProductDetail = () => {
       price: parseFloat(product.price) || 0,
       image_url: product.image_url || product.main_image_url || null,
       variant_id: selectedVariant?.id || null,
+      currency: product.currency || 'USD',
       // Complete product details for database storage
       sku: product.sku || null,
       weight: product.weight || null,
@@ -279,10 +280,10 @@ const ProductDetail = () => {
                     </div>
                   </div>
                   <div className="text-right sm:text-left">
-                    <p className="text-2xl sm:text-3xl font-bold text-amber-600">${product.price}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-amber-600">{product.currency || 'USD'} {product.price}</p>
                     {product.compare_at_price && (
                       <p className="text-xs sm:text-sm text-gray-500 line-through">
-                        ${product.compare_at_price}
+                        {product.currency || 'USD'} {product.compare_at_price}
                       </p>
                     )}
                   </div>
@@ -432,10 +433,10 @@ const ProductDetail = () => {
                             <div className="p-3 sm:p-4">
                               <h4 className="text-sm sm:text-base font-medium text-amber-900 mb-2 truncate">{relatedProduct.name}</h4>
                               <div className="flex items-center">
-                                <p className="text-base sm:text-lg font-bold text-amber-600">${parseFloat(relatedProduct.price || 0).toFixed(2)}</p>
+                                <p className="text-base sm:text-lg font-bold text-amber-600">{relatedProduct.currency || 'USD'} {parseFloat(relatedProduct.price || 0).toFixed(2)}</p>
                                 {relatedProduct.compare_at_price && (
                                   <p className="text-xs sm:text-sm text-gray-500 line-through mr-2">
-                                    ${parseFloat(relatedProduct.compare_at_price).toFixed(2)}
+                                    {relatedProduct.currency || 'USD'} {parseFloat(relatedProduct.compare_at_price).toFixed(2)}
                                   </p>
                                 )}
                               </div>
