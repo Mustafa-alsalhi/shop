@@ -69,6 +69,26 @@ class AuthController extends Controller
         ]);
     }
 
+     public function getCurrentUser(Request $request)
+    {
+        $user = $request->user();
+        
+        return response()->json([
+            'id' => $user->id,
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'name' => $user->name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'address' => $user->address,
+            'city' => $user->city,
+            'country' => $user->country,
+            'postal_code' => $user->postal_code,
+            'role' => $user->role,
+            'is_active' => $user->is_active,
+        ]);
+    }
+    
     public function updateProfile(Request $request)
     {
         $user = Auth::user();
