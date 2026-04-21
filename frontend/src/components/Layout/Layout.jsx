@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
 import Header from './Header'
 import Footer from './Footer'
@@ -14,12 +14,23 @@ import {
   selectIsMobileMenuOpen,
   closeSearch,
 } from '../../store/slices/uiSlice'
+import { getCurrentUser } from '../../store/slices/authSlice'
 
 const Layout = () => {
   const dispatch = useDispatch()
   const isSearchOpen = useSelector(selectIsSearchOpen)
   const isCartOpen = useSelector(selectCartIsOpen)
   const isMobileMenuOpen = useSelector(selectIsMobileMenuOpen)
+  const token = useSelector((state) => state.auth.token)
+  const user = useSelector((state) => state.auth.user)
+
+  useEffect(() => {
+    // Fetch user data if token exists but user data is missing
+    if (token && !user) {
+      console.log('🔄 Auto-fetching user data in Layout...')
+      dispatch(getCurrentUser())
+    }
+  }, [dispatch, token, user])
 
   // Close overlays when clicking outside
   React.useEffect(() => {
