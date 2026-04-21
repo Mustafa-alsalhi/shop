@@ -112,4 +112,19 @@ class WishlistController extends Controller
             'message' => 'Item removed from wishlist'
         ]);
     }
+
+    public function clear(Request $request)
+    {
+        \Log::info('=== WISHLIST CLEAR ===');
+        \Log::info('User ID:', [$request->user()->id]);
+        
+        Wishlist::where('user_id', $request->user()->id)
+            ->delete();
+
+        \Log::info('All wishlist items cleared successfully');
+
+        return response()->json([
+            'message' => 'Wishlist cleared successfully'
+        ]);
+    }
 }
