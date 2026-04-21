@@ -83,7 +83,8 @@ class AuthController extends Controller
             'country' => 'nullable|string|max:255',
             'postal_code' => 'nullable|string|max:20',
             'current_password' => 'nullable|required_with:new_password|string',
-            'new_password' => 'nullable|string|min:6|confirmed',
+            'new_password' => 'nullable|string|min:6',
+            'confirm_password' => 'nullable|required_with:new_password|string|same:new_password',
         ]);
 
         // Update profile data
