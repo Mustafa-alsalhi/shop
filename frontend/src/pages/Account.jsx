@@ -193,8 +193,11 @@ const Account = () => {
 
   // Update profile function
   const updateProfile = async () => {
+    console.log('🔴 updateProfile called!')
+    console.log('🔴 Current profileData:', profileData)
     try {
       setLoading(prev => ({ ...prev, profile: true }))
+      console.log('🔴 Loading set to true')
       
       // Password validation
       if (profileData.new_password && profileData.new_password.length > 0) {
