@@ -159,47 +159,47 @@ const Banners = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 py-8" dir="rtl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 py-4 sm:py-8" dir="rtl">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
         {/* Header */}
-        <div className="bg-white shadow-xl rounded-2xl border border-gray-100 p-6 mb-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-reverse space-x-3">
+        <div className="bg-white shadow-xl rounded-xl sm:rounded-2xl border border-gray-100 p-4 sm:p-6 mb-4 sm:mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center space-x-reverse space-x-2 sm:space-x-3">
               <button
                 onClick={() => navigate('/admin/dashboard')}
-                className="p-3 bg-gray-100 text-gray-600 hover:text-gray-900 rounded-xl transition-colors"
+                className="p-2 sm:p-3 bg-gray-100 text-gray-600 hover:text-gray-900 rounded-lg sm:rounded-xl transition-colors"
               >
-                <ArrowLeftIcon className="h-5 w-5" />
+                <ArrowLeftIcon className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
-              <div className="flex items-center space-x-reverse space-x-3">
-                <div className="p-3 bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl">
-                  <RectangleGroupIcon className="h-6 w-6 text-white" />
+              <div className="flex items-center space-x-reverse space-x-2 sm:space-x-3">
+                <div className="p-2 sm:p-3 bg-gradient-to-r from-amber-500 to-orange-600 rounded-lg sm:rounded-xl">
+                  <RectangleGroupIcon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 </div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                <h1 className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
                   إدارة الإعلانات
                 </h1>
               </div>
             </div>
             <button
               onClick={openAddModal}
-              className="flex items-center px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105"
+              className="flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105"
             >
-              <PlusIcon className="h-5 w-5 ml-2" />
-              إضافة إعلان جديد
+              <PlusIcon className="h-4 w-4 sm:h-5 sm:w-5 ml-2" />
+              <span className="text-xs sm:text-sm">إضافة إعلان جديد</span>
             </button>
           </div>
         </div>
 
         {/* Banners List */}
-        <div className="bg-white shadow-xl rounded-2xl border border-gray-100">
-          <div className="px-6 py-5 border-b border-gray-100">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900">
+        <div className="bg-white shadow-xl rounded-xl sm:rounded-2xl border border-gray-100">
+          <div className="px-4 py-3 sm:px-6 sm:py-5 border-b border-gray-100">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+              <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-900">
                 قائمة الإعلانات ({banners.length})
               </h2>
               <div className="flex items-center space-x-reverse space-x-2">
                 <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                <span className="text-sm text-gray-600">متصل بقاعدة البيانات</span>
+                <span className="text-xs sm:text-sm text-gray-600">متصل بقاعدة البيانات</span>
               </div>
             </div>
           </div>
@@ -207,22 +207,22 @@ const Banners = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-2 sm:py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     الصورة
                   </th>
-                  <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-2 sm:py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     العنوان
                   </th>
-                  <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-2 sm:py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     الموضع
                   </th>
-                  <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-2 sm:py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     الحالة
                   </th>
-                  <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-2 sm:py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     الترتيب
                   </th>
-                  <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-2 sm:py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     الإجراءات
                   </th>
                 </tr>
@@ -230,33 +230,33 @@ const Banners = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {banners.map((banner) => (
                   <tr key={banner.id} className="hover:bg-gray-50 transition-colors duration-200">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                       <div className="relative">
                         <img
-                          src={banner.full_image_url || (banner.image_url.startsWith('http') ? banner.image_url : `http://localhost:8000${banner.image_url}`)}
+                          src={banner.full_image_url || (banner.image_url.startsWith('http') ? banner.image_url : `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-d82a.up.railway.app'}${banner.image_url}`)}
                           alt={banner.title}
-                          className="h-16 w-24 object-cover rounded-xl shadow-md"
+                          className="h-12 w-16 sm:h-16 sm:w-24 object-cover rounded-lg sm:rounded-xl shadow-md"
                           onError={(e) => {
                             e.target.onerror = null;
                             e.target.src = 'https://via.placeholder.com/96x64?text=No+Image';
                           }}
                         />
-                        <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-amber-500 border-2 border-white"></div>
+                        <div className="absolute -top-1 -right-1 h-2 w-2 sm:h-3 sm:w-3 rounded-full bg-amber-500 border-2 border-white"></div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-bold text-gray-900">{banner.title}</div>
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                      <div className="text-xs sm:text-sm font-bold text-gray-900 truncate max-w-24 sm:max-w-none">{banner.title}</div>
                       {banner.description && (
-                        <div className="text-sm text-gray-500 truncate max-w-xs mt-1">{banner.description}</div>
+                        <div className="text-xs sm:text-sm text-gray-500 truncate max-w-24 sm:max-w-xs mt-1">{banner.description}</div>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-3 py-1 text-xs font-bold bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full">
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                      <span className="px-2 sm:px-3 py-1 text-xs font-bold bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full">
                         {banner.position === 'home' ? '🏠 الرئيسية' : banner.position}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-3 py-1 text-xs font-bold rounded-full ${
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                      <span className={`px-2 sm:px-3 py-1 text-xs font-bold rounded-full ${
                         banner.is_active 
                           ? 'bg-green-100 text-green-800' 
                           : 'bg-red-100 text-red-800'
@@ -264,38 +264,38 @@ const Banners = () => {
                         {banner.is_active ? '✅ نشط' : '❌ غير نشط'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                      <div className="flex items-center space-x-reverse space-x-2">
-                        <div className="h-6 w-6 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 flex items-center justify-center text-white font-semibold text-xs">
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-bold text-gray-900">
+                      <div className="flex items-center space-x-reverse space-x-1 sm:space-x-2">
+                        <div className="h-5 w-5 sm:h-6 sm:w-6 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 flex items-center justify-center text-white font-semibold text-xs">
                           {banner.sort_order}
                         </div>
                         <span>{banner.sort_order}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center space-x-reverse space-x-2">
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                        <div className="flex items-center space-x-reverse space-x-1 sm:space-x-2">
                           {banner.link_url && (
                             <button
                               onClick={() => window.open(banner.link_url, '_blank')}
-                              className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
+                              className="p-1.5 sm:p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
                               title="عرض الإعلان"
                             >
-                              <EyeIcon className="h-4 w-4" />
+                              <EyeIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                             </button>
                           )}
                           <button
                             onClick={() => handleEdit(banner)}
-                            className="p-2 bg-amber-100 text-amber-600 rounded-lg hover:bg-amber-200 transition-colors"
+                            className="p-1.5 sm:p-2 bg-amber-100 text-amber-600 rounded-lg hover:bg-amber-200 transition-colors"
                             title="تعديل الإعلان"
                           >
-                            <PencilIcon className="h-4 w-4" />
+                            <PencilIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(banner)}
-                            className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+                            className="p-1.5 sm:p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
                             title="حذف الإعلان"
                           >
-                            <TrashIcon className="h-4 w-4" />
+                            <TrashIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                           </button>
                         </div>
                     </td>
@@ -308,10 +308,10 @@ const Banners = () => {
 
         {/* Add/Edit Modal */}
         {(showAddModal || showEditModal) && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-screen overflow-y-auto shadow-2xl">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4">
+            <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-900">
                   {selectedBanner ? 'تعديل الإعلان' : 'إضافة إعلان جديد'}
                 </h2>
                 <button
@@ -330,16 +330,16 @@ const Banners = () => {
                       position: 'home'
                     })
                   }}
-                  className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
+                  className="p-1.5 sm:p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
                 >
-                  <ArrowLeftIcon className="h-5 w-5" />
+                  <ArrowLeftIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                 </button>
               </div>
               
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                 {/* Title */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                     عنوان الإعلان
                   </label>
                   <input
@@ -348,14 +348,14 @@ const Banners = () => {
                     value={formData.title}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-50"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-50 text-xs sm:text-sm"
                     placeholder="أدخل عنوان الإعلان"
                   />
                 </div>
 
                 {/* Description */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                     الوصف
                   </label>
                   <textarea
@@ -363,22 +363,22 @@ const Banners = () => {
                     value={formData.description}
                     onChange={handleInputChange}
                     rows={3}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-50"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-50 text-xs sm:text-sm"
                     placeholder="أدخل وصف الإعلان"
                   />
                 </div>
 
                 {/* Image Upload */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                     صورة الإعلان
                   </label>
-                  <div className="flex items-center space-x-reverse space-x-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-reverse sm:space-x-4">
                     {formData.image_url && (
                       <img
-                        src={formData.image_url.startsWith('http') ? formData.image_url : `http://localhost:8000${formData.image_url}`}
+                        src={formData.image_url.startsWith('http') ? formData.image_url : `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-d82a.up.railway.app'}${formData.image_url}`}
                         alt="Preview"
-                        className="h-20 w-32 object-cover rounded-xl shadow-md"
+                        className="h-16 w-24 sm:h-20 sm:w-32 object-cover rounded-lg sm:rounded-xl shadow-md"
                         onError={(e) => {
                           e.target.onerror = null;
                           e.target.src = 'https://via.placeholder.com/128x80?text=Preview';
@@ -395,7 +395,7 @@ const Banners = () => {
                       />
                       <label
                         htmlFor="banner-image"
-                        className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer"
+                        className="inline-block px-3 sm:px-4 py-2 sm:py-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer text-xs sm:text-sm"
                       >
                         {uploading ? 'جاري الرفع...' : 'اختر صورة'}
                       </label>
@@ -404,9 +404,9 @@ const Banners = () => {
                 </div>
 
                 {/* Link URL and Text */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                       رابط الإعلان
                     </label>
                     <input
@@ -414,12 +414,12 @@ const Banners = () => {
                       name="link_url"
                       value={formData.link_url}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-50"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-50 text-xs sm:text-sm"
                       placeholder="https://example.com"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                       نص الرابط
                     </label>
                     <input
@@ -427,23 +427,23 @@ const Banners = () => {
                       name="link_text"
                       value={formData.link_text}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-50"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-50 text-xs sm:text-sm"
                       placeholder="اضغط هنا"
                     />
                   </div>
                 </div>
 
                 {/* Position and Sort Order */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                       الموضع
                     </label>
                     <select
                       name="position"
                       value={formData.position}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-50"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-50 text-xs sm:text-sm"
                     >
                       <option value="home">الرئيسية</option>
                       <option value="category">الفئات</option>
@@ -451,7 +451,7 @@ const Banners = () => {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                       الترتيب
                     </label>
                     <input
@@ -460,27 +460,27 @@ const Banners = () => {
                       value={formData.sort_order}
                       onChange={handleInputChange}
                       min="0"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-50"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-50 text-xs sm:text-sm"
                     />
                   </div>
                 </div>
 
                 {/* Active Status */}
                 <div>
-                  <label className="flex items-center space-x-reverse space-x-3">
+                  <label className="flex items-center space-x-reverse space-x-2 sm:space-x-3">
                     <input
                       type="checkbox"
                       name="is_active"
                       checked={formData.is_active}
                       onChange={handleInputChange}
-                      className="h-5 w-5 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
+                      className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
                     />
-                    <span className="text-sm font-medium text-gray-900">نشط</span>
+                    <span className="text-xs sm:text-sm font-medium text-gray-900">نشط</span>
                   </label>
                 </div>
 
                 {/* Form Actions */}
-                <div className="flex justify-end space-x-reverse space-x-4 pt-4 border-t">
+                <div className="flex justify-end space-x-reverse space-x-2 sm:space-x-4 pt-3 sm:pt-4 border-t">
                   <button
                     type="button"
                     onClick={() => {
@@ -498,14 +498,14 @@ const Banners = () => {
                         position: 'home'
                       })
                     }}
-                    className="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="px-4 sm:px-6 py-2 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl text-gray-700 hover:bg-gray-50 transition-colors text-xs sm:text-sm"
                   >
                     إلغاء
                   </button>
                   <button
                     type="submit"
                     disabled={uploading}
-                    className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50"
+                    className="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 text-xs sm:text-sm"
                   >
                     {uploading ? 'جاري الرفع...' : (selectedBanner ? 'تحديث' : 'إضافة')}
                   </button>
