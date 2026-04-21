@@ -87,10 +87,11 @@ export const changePassword = createAsyncThunk(
 )
 
 // Initial state
+const token = localStorage.getItem('token')
 const initialState = {
   user: null,
-  token: localStorage.getItem('token'),
-  isAuthenticated: false,
+  token: token,
+  isAuthenticated: !!token, // Set to true if token exists
   isLoading: false,
   error: null,
 }
@@ -132,6 +133,8 @@ const authSlice = createSlice({
         state.isAuthenticated = true
         state.error = null
         localStorage.setItem('token', action.payload.token)
+        // Clear localStorage wishlist to prevent data leakage between users
+        localStorage.removeItem('wishlist')
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false
@@ -150,6 +153,9 @@ const authSlice = createSlice({
         state.isAuthenticated = true
         state.error = null
         localStorage.setItem('token', action.payload.token)
+        // Clear guest cart and wishlist from localStorage to prevent data leakage to new account
+        localStorage.removeItem('cart')
+        localStorage.removeItem('wishlist')
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false
@@ -167,6 +173,9 @@ const authSlice = createSlice({
         state.isAuthenticated = false
         state.error = null
         localStorage.removeItem('token')
+        // Clear localStorage cart and wishlist on logout
+        localStorage.removeItem('cart')
+        localStorage.removeItem('wishlist')
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.isLoading = false
