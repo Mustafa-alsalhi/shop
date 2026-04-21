@@ -194,9 +194,11 @@ const authSlice = createSlice({
       .addCase(getCurrentUser.rejected, (state, action) => {
         state.isLoading = false
         state.error = action.payload
-        state.isAuthenticated = false
-        state.token = null
-        localStorage.removeItem('token')
+        // Don't logout automatically on getCurrentUser failure
+        // This prevents automatic redirect to login on page refresh
+        // state.isAuthenticated = false
+        // state.token = null
+        // localStorage.removeItem('token')
       })
       // Update profile
       .addCase(updateProfile.pending, (state) => {
