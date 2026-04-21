@@ -578,7 +578,7 @@ const Header = () => {
                 <div className="relative group">
                   <button className="flex items-center space-x-2 p-2 text-white/80 hover:text-amber-200 hover:bg-white/20 rounded-lg transition-all duration-300 hover:scale-105">
                     <UserIcon className="h-5 w-5" />
-                    <span className="text-sm font-bold">{user?.first_name}</span>
+                    <span className="text-sm font-bold">{user?.first_name || user?.name || 'مستخدم'}</span>
                   </button>
                   
                   {/* User Dropdown */}
