@@ -137,13 +137,13 @@ use App\Http\Controllers\Api\CouponController;
         Route::delete('/banners/{id}', [BannerController::class, 'destroy']);
         Route::post('/banners/upload', [BannerController::class, 'uploadImage']);
         
-        // Coupon management routes - temporarily disabled
-        // Route::get('/coupons', [CouponController::class, 'index']);
-        // Route::post('/coupons', [CouponController::class, 'store']);
-        // Route::get('/coupons/{id}', [CouponController::class, 'show']);
-        // Route::put('/coupons/{id}', [CouponController::class, 'update']);
-        // Route::delete('/coupons/{id}', [CouponController::class, 'destroy']);
-        // Route::put('/coupons/{id}/toggle', [CouponController::class, 'toggleStatus']);
-        // Route::get('/coupons/active', [CouponController::class, 'active']);
-        // Route::get('/coupons/statistics', [CouponController::class, 'statistics']);
+        // Coupon management routes
+        Route::get('/coupons', [CouponController::class, 'index']);
+        Route::post('/coupons', [CouponController::class, 'store']);
+        Route::get('/coupons/{id}', [CouponController::class, 'show']);
+        Route::put('/coupons/{id}', [CouponController::class, 'update']);
+        Route::delete('/coupons/{id}', [CouponController::class, 'destroy']);
+        Route::put('/coupons/{id}/toggle', [CouponController::class, 'toggleStatus']);
+        Route::get('/coupons/active', [CouponController::class, 'active']);
+        Route::get('/coupons/statistics', [CouponController::class, 'statistics']);
     });
