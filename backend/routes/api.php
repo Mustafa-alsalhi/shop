@@ -103,11 +103,7 @@
         Route::get('/wishlist', [WishlistController::class, 'index']);
         Route::post('/wishlist', [WishlistController::class, 'store']);
         Route::delete('/wishlist/{id}', [WishlistController::class, 'destroy']);
-        
-        // Order routes
-        Route::get('/orders', [OrderController::class, 'index']);
-        Route::post('/orders', [OrderController::class, 'store']);
-        Route::get('/orders/{id}', [OrderController::class, 'show']);
+        Route::delete('/wishlist', [WishlistController::class, 'clear']);
         
         // Coupon validation routes (for users)
         Route::post('/coupons/validate', [CouponController::class, 'validateCoupon']);
