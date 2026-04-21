@@ -59,7 +59,7 @@ const AdminProductForm = () => {
       // Convert image URL to absolute if needed
       let imageUrl = product.image_url || ''
       if (imageUrl && !imageUrl.startsWith('http')) {
-        imageUrl = `http://localhost:8000${imageUrl.startsWith('/') ? imageUrl : '/' + imageUrl}`
+        imageUrl = `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-d82a.up.railway.app'}${imageUrl.startsWith('/') ? imageUrl : '/' + imageUrl}`
       }
       
       setFormData(prev => ({
@@ -88,7 +88,7 @@ const AdminProductForm = () => {
       const galleryImages = product.gallery_images || []
       const processedGalleryImages = galleryImages.map(img => {
         if (typeof img === 'string' && !img.startsWith('http')) {
-          return `http://localhost:8000${img.startsWith('/') ? img : '/' + img}`
+          return `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-d82a.up.railway.app'}${img.startsWith('/') ? img : '/' + img}`
         }
         return img
       })
