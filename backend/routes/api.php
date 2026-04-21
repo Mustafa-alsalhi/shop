@@ -86,9 +86,7 @@
 
     // Protected routes
     Route::middleware('auth:sanctum')->group(function () {
-        Route::get('/user', function (Request $request) {
-            return $request->user();
-        });
+        Route::get('/user', [AuthController::class, 'getCurrentUser']);
         
         // Profile routes
         Route::put('/user/profile', [AuthController::class, 'updateProfile']);
