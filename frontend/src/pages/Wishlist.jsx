@@ -65,6 +65,7 @@ const Wishlist = () => {
       price: parseFloat(product.price) || 0,
       image_url: product.image_url || product.main_image_url || null,
       variant_id: null,
+      currency: product.currency || 'USD',
       // Complete product details for database storage
       sku: product.sku || null,
       weight: product.weight || null,
@@ -139,6 +140,7 @@ const Wishlist = () => {
         price: parseFloat(product.price) || 0,
         image_url: product.image_url || product.main_image_url || null,
         variant_id: null,
+        currency: product.currency || 'USD',
         // Complete product details for database storage
         sku: product.sku || null,
         weight: product.weight || null,
@@ -376,11 +378,11 @@ const Wishlist = () => {
                 <div className="flex items-center justify-between mb-3 sm:mb-4">
                   <div className="flex items-center">
                     <span className="text-base sm:text-lg md:text-xl font-bold text-primary-600">
-                      ${item.price}
+                      {item.currency || 'USD'} {item.price}
                     </span>
                     {item.compare_price && (
                       <span className="text-xs sm:text-sm text-gray-500 line-through mr-1 sm:mr-2">
-                        ${item.compare_price}
+                        {item.currency || 'USD'} {item.compare_price}
                       </span>
                     )}
                   </div>
@@ -429,7 +431,7 @@ const Wishlist = () => {
                 ملخص قائمة الرغبات
               </h3>
               <p className="text-sm sm:text-base text-gray-600">
-                {wishlistCount} عناصر بقيمة إجمالية ${calculateTotal().toFixed(2)}
+                {wishlistCount} عناصر بقيمة إجمالية {wishlistItems[0]?.currency || 'USD'} {calculateTotal().toFixed(2)}
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-3 sm:mt-0">
@@ -437,7 +439,7 @@ const Wishlist = () => {
                 onClick={handleAddAllToCart}
                 className="btn btn-primary text-sm sm:text-base"
               >
-                <span className="hidden sm:inline">إضافة الكل إلى السلة (${calculateTotal().toFixed(2)})</span>
+                <span className="hidden sm:inline">إضافة الكل إلى السلة ({wishlistItems[0]?.currency || 'USD'} {calculateTotal().toFixed(2)})</span>
                 <span className="sm:hidden">إضافة الكل</span>
               </button>
               <button
