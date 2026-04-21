@@ -4,6 +4,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import { FaEye, FaEyeSlash } from 'react-icons/fa'
 import { loginUser, selectIsLoading, selectError, clearError } from '../../store/slices/authSlice'
 import { showSuccessNotification, showErrorNotification } from '../../store/slices/uiSlice'
+import { fetchCart } from '../../store/slices/cartSlice'
+import { fetchWishlist } from '../../store/slices/wishlistSlice'
 
 const Login = () => {
   const dispatch = useDispatch()
@@ -68,6 +70,9 @@ const Login = () => {
       const result = await dispatch(loginUser(formData))
       if (result.meta.requestStatus === 'fulfilled') {
         dispatch(showSuccessNotification('تم تسجيل الدخول بنجاح!'))
+        // Fetch user's cart and wishlist from server
+        dispatch(fetchCart())
+        dispatch(fetchWishlist())
         navigate(from, { replace: true })
       }
     } catch (error) {
