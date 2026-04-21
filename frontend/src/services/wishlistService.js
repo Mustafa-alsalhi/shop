@@ -20,10 +20,31 @@ const wishlistService = {
     console.log('=== REAL WISHLIST SERVICE - addToWishlist ===')
     console.log('Item data received:', itemData)
     
+    // Extract product data from the product object
+    const wishlistItem = {
+      product_id: itemData.id || itemData.product_id,
+      product_name: itemData.name || itemData.product_name || `Product ${itemData.id || itemData.product_id}`,
+      price: parseFloat(itemData.price) || 0,
+      image_url: itemData.image_url || itemData.main_image_url || null,
+      currency: itemData.currency || 'USD',
+      // Complete product details for database storage
+      sku: itemData.sku || null,
+      weight: itemData.weight || null,
+      dimensions: itemData.dimensions || null,
+      category: itemData.category?.name || itemData.category || null,
+      brand: itemData.brand?.name || itemData.brand || null,
+      description: itemData.description || null,
+      short_description: itemData.short_description || null,
+      status: itemData.status || 'active',
+      featured: itemData.featured || false,
+    }
+    
+    console.log('Wishlist item data to send:', wishlistItem)
+    
     try {
       // Try to add to database first
       console.log('Attempting to add to database via API...')
-      const response = await apiRequest.post('/wishlist', itemData)
+      const response = await apiRequest.post('/wishlist', wishlistItem)
       console.log('✅ SUCCESS: Product added to database!', response.data)
       return response
     } catch (error) {
