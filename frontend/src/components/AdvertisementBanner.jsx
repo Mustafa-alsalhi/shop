@@ -15,12 +15,7 @@ const AdvertisementBanner = () => {
 
   const fetchBanners = async () => {
     try {
-      const response = await axios.get('https://shop-production-d82a.up.railway.app/api/banners?position=home', {
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        }
-      })
+      const response = await api.get('/banners?position=home')
       const bannerData = response.data.data || []
       setBanners(bannerData)
     } catch (error) {
