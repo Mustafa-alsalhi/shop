@@ -200,7 +200,7 @@ const Cart = () => {
                           </p>
                         )}
                         <p className="text-sm text-amber-600 text-right">
-                          SKU: {item.product_sku}
+                          SKU: {item.sku}
                         </p>
                       </div>
 
@@ -208,10 +208,10 @@ const Cart = () => {
                       <div className="flex items-center space-x-reverse space-x-4">
                         <div className="text-left">
                           <p className="font-semibold text-amber-700">
-                            ${item.price}
+                            {item.currency || 'USD'} {item.price}
                           </p>
                           <p className="text-sm text-amber-600">
-                            الإجمالي: ${item.total}
+                            الإجمالي: {item.currency || 'USD'} {item.total}
                           </p>
                         </div>
 
@@ -260,11 +260,11 @@ const Cart = () => {
               <div className="space-y-4">
                 <div className="flex justify-between text-amber-700">
                   <span>المجموع الفرعي</span>
-                  <span>${cartSubtotal.toFixed(2)}</span>
+                  <span>{cartItems[0]?.currency || 'USD'} {cartSubtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-amber-700">
                   <span>الضريبة</span>
-                  <span>${cartTax.toFixed(2)}</span>
+                  <span>{cartItems[0]?.currency || 'USD'} {cartTax.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-amber-700">
                   <span>الشحن</span>
@@ -273,7 +273,7 @@ const Cart = () => {
                 <div className="border-t border-amber-200 pt-4">
                   <div className="flex justify-between text-lg font-semibold text-amber-800">
                     <span>الإجمالي</span>
-                    <span>${cartTotal.toFixed(2)}</span>
+                    <span>{cartItems[0]?.currency || 'USD'} {cartTotal.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
