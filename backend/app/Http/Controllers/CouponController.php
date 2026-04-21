@@ -13,12 +13,20 @@ class CouponController extends Controller
      */
     public function index()
     {
-        $coupons = Coupon::latest()->paginate(10);
-        
-        return response()->json([
-            'status' => 'success',
-            'data' => $coupons
-        ]);
+        try {
+            $coupons = Coupon::latest()->paginate(10);
+            
+            return response()->json([
+                'status' => 'success',
+                'data' => $coupons
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch coupons',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -27,7 +35,10 @@ class CouponController extends Controller
     public function userCoupons()
     {
         $coupons = Coupon::where('is_active', true)
-            ->where('expires_at', '>', now())
+            ->where(function ($query) {
+                $query->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+            })
             ->get(['id', 'code', 'name', 'description', 'type', 'value', 'minimum_amount', 'maximum_discount', 'usage_limit', 'used_count', 'starts_at', 'expires_at', 'is_first_time_only']);
         
         return response()->json([
@@ -41,40 +52,48 @@ class CouponController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'code' => 'required|string|max:50|unique:coupons',
-            'name' => 'nullable|string|max:255',
-            'description' => 'nullable|string',
-            'type' => 'required|in:fixed,percentage',
-            'value' => 'required|numeric|min:0',
-            'minimum_amount' => 'nullable|numeric|min:0',
-            'maximum_discount' => 'nullable|numeric|min:0',
-            'usage_limit' => 'nullable|integer|min:1',
-            'starts_at' => 'nullable|date',
-            'expires_at' => 'nullable|date|after:starts_at',
-            'is_active' => 'boolean',
-            'is_first_time_only' => 'boolean',
-            'applicable_products' => 'nullable|array',
-            'applicable_products.*' => 'integer',
-            'applicable_categories' => 'nullable|array',
-            'applicable_categories.*' => 'integer'
-        ]);
+        try {
+            $validator = Validator::make($request->all(), [
+                'code' => 'required|string|max:50|unique:coupons',
+                'name' => 'nullable|string|max:255',
+                'description' => 'nullable|string',
+                'type' => 'required|in:fixed,percentage',
+                'value' => 'required|numeric|min:0',
+                'minimum_amount' => 'nullable|numeric|min:0',
+                'maximum_discount' => 'nullable|numeric|min:0',
+                'usage_limit' => 'nullable|integer|min:1',
+                'starts_at' => 'nullable|date',
+                'expires_at' => 'nullable|date|after:starts_at',
+                'is_active' => 'boolean',
+                'is_first_time_only' => 'boolean',
+                'applicable_products' => 'nullable|array',
+                'applicable_products.*' => 'integer',
+                'applicable_categories' => 'nullable|array',
+                'applicable_categories.*' => 'integer'
+            ]);
 
-        if ($validator->fails()) {
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $coupon = Coupon::create($request->all());
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Coupon created successfully',
+                'data' => $coupon
+            ], 201);
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()
-            ], 422);
+                'message' => 'Failed to create coupon',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $coupon = Coupon::create($request->all());
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Coupon created successfully',
-            'data' => $coupon
-        ], 201);
     }
 
     /**
@@ -281,7 +300,7 @@ class CouponController extends Controller
     {
         $total = Coupon::count();
         $active = Coupon::where('is_active', true)->count();
-        $expired = Coupon::where('expires_at', '<', now())->count();
+        $expired = Coupon::whereNotNull('expires_at')->where('expires_at', '<', now())->count();
         $used = Coupon::where('used_count', '>', 0)->count();
 
         return response()->json([
