@@ -47,6 +47,9 @@ const Account = () => {
     state: '',
     postal_code: '',
     country: '',
+    current_password: '',
+    new_password: '',
+    confirm_password: '',
   })
   
   // Data states
@@ -193,21 +196,74 @@ const Account = () => {
     try {
       setLoading(prev => ({ ...prev, profile: true }))
       
-      // Log the data being sent
-      console.log('🔍 Profile data being sent:', profileData)
-      console.log('🔍 Profile data keys:', Object.keys(profileData))
-      console.log('🔍 Profile data values:', Object.values(profileData))
+      // Password validation
+      if (profileData.new_password && profileData.new_password.length > 0) {
+        if (!profileData.current_password || profileData.current_password.length === 0) {
+          dispatch(showErrorNotification('يجب إدخال كلمة المرور الحالية لتغيير كلمة المرور'))
+          setLoading(prev => ({ ...prev, profile: false }))
+          return
+        }
+        
+        if (profileData.new_password.length < 6) {
+          dispatch(showErrorNotification('كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل'))
+          setLoading(prev => ({ ...prev, profile: false }))
+          return
+        }
+        
+        if (profileData.new_password !== profileData.confirm_password) {
+          dispatch(showErrorNotification('كلمة المرور الجديدة وتأكيد كلمة المرور غير متطابقين'))
+          setLoading(prev => ({ ...prev, profile: false }))
+          return
+        }
+      }
       
-      const response = await api.put('/user/profile', profileData)
+      // Create data object to send (only include password fields if new password is provided)
+      const dataToSend = {
+        first_name: profileData.first_name,
+        last_name: profileData.last_name,
+        email: profileData.email,
+        phone: profileData.phone,
+        address: profileData.address,
+        city: profileData.city,
+        state: profileData.state,
+        postal_code: profileData.postal_code,
+        country: profileData.country,
+      }
+      
+      // Only include password fields if new password is provided
+      if (profileData.new_password && profileData.new_password.length > 0) {
+        dataToSend.current_password = profileData.current_password
+        dataToSend.new_password = profileData.new_password
+        dataToSend.confirm_password = profileData.confirm_password
+      }
+      
+      // Log the data being sent
+      console.log('🔍 Profile data being sent:', dataToSend)
+      console.log('🔍 Profile data keys:', Object.keys(dataToSend))
+      console.log('🔍 Profile data values:', Object.values(dataToSend))
+      
+      const response = await api.put('/user/profile', dataToSend)
       
       if (response.data) {
         dispatch(updateUser(response.data))
-        dispatch(showSuccessNotification('Profile updated successfully!'))
+        dispatch(showSuccessNotification('تم تحديث الملف الشخصي بنجاح!'))
         setIsEditingProfile(false)
+        
+        // Clear password fields after successful update
+        setProfileData(prev => ({
+          ...prev,
+          current_password: '',
+          new_password: '',
+          confirm_password: '',
+        }))
       }
     } catch (error) {
       console.error('❌ Error updating profile:', error)
-      dispatch(showErrorNotification('Failed to update profile'))
+      if (error.response?.data?.message) {
+        dispatch(showErrorNotification(error.response.data.message))
+      } else {
+        dispatch(showErrorNotification('فشل في تحديث الملف الشخصي'))
+      }
     } finally {
       setLoading(prev => ({ ...prev, profile: false }))
     }
@@ -457,6 +513,36 @@ const Account = () => {
                 value={profileData.country}
                 onChange={(e) => setProfileData(prev => ({ ...prev, country: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">كلمة المرور الحالية</label>
+              <input
+                type="password"
+                value={profileData.current_password || ''}
+                onChange={(e) => setProfileData(prev => ({ ...prev, current_password: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="أدخل كلمة المرور الحالية"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">كلمة المرور الجديدة</label>
+              <input
+                type="password"
+                value={profileData.new_password || ''}
+                onChange={(e) => setProfileData(prev => ({ ...prev, new_password: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="أدخل كلمة المرور الجديدة"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">تأكيد كلمة المرور الجديدة</label>
+              <input
+                type="password"
+                value={profileData.confirm_password || ''}
+                onChange={(e) => setProfileData(prev => ({ ...prev, confirm_password: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="أعد إدخال كلمة المرور الجديدة"
               />
             </div>
           </div>
