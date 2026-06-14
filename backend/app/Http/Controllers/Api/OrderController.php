@@ -53,6 +53,7 @@ class OrderController extends Controller
             'shipping_address' => 'required|array',
             'billing_address' => 'nullable|array',
             'payment_method' => 'required|string',
+            'shipping_company' => 'nullable|string',
             'notes' => 'nullable|string',
         ]);
 
@@ -97,6 +98,7 @@ class OrderController extends Controller
                 'status' => 'pending',
                 'payment_status' => 'pending',
                 'payment_method' => $request->payment_method,
+                'shipping_company' => $request->shipping_company,
                 'shipping_address' => $request->shipping_address,
                 'billing_address' => $request->billing_address ?? $request->shipping_address,
                 'notes' => $request->notes,
@@ -105,17 +107,19 @@ class OrderController extends Controller
             Log::info('Order created:', ['order_id' => $order->id, 'order_number' => $order->order_number]);
 
             foreach ($cartItems as $cartItem) {
-                $imageUrl = $cartItem->product->image_url ?? null;
-                
+                // Use the selected image from cart item, fallback to product image
+                $imageUrl = $cartItem->image_url ?? $cartItem->product->image_url ?? null;
+
                 // Convert relative URL to absolute for storage
                 if ($imageUrl && str_starts_with($imageUrl, '/')) {
                     $imageUrl = url($imageUrl);
                 }
-                
+
                 Log::info('Processing order item:', [
                     'product_id' => $cartItem->product_id,
                     'product_name' => $cartItem->product->name,
-                    'original_image_url' => $cartItem->product->image_url,
+                    'cart_image_url' => $cartItem->image_url,
+                    'product_image_url' => $cartItem->product->image_url,
                     'final_image_url' => $imageUrl,
                     'cart_item_id' => $cartItem->id
                 ]);
@@ -130,10 +134,17 @@ class OrderController extends Controller
                     'price' => $cartItem->product->price,
                     'total' => $cartItem->product->price * $cartItem->quantity,
                     'image_url' => $imageUrl,
+                    'color' => $cartItem->color ?? null,
+                    'color_code' => $cartItem->color_code ?? null,
+                    'size' => $cartItem->size ?? null,
+                    'variant_name' => $cartItem->variant_name ?? null,
+                    'variant_value' => $cartItem->variant_value ?? null,
+                    'selected_image_index' => $cartItem->selected_image_index ?? null,
                 ]);
 
-                // Update product stock
+                // Update product stock and sold count
                 $cartItem->product->decrement('stock', $cartItem->quantity);
+                $cartItem->product->increment('sold_count', $cartItem->quantity);
             }
 
             // Clear cart

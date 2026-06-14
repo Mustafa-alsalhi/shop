@@ -6,87 +6,29 @@ const orderService = {
   createOrder: async (orderData) => {
     console.log('=== ORDER SERVICE - Creating Order ===')
     console.log('Order data:', orderData)
-    
-    try {
-      const response = await apiRequest.post('/orders', orderData)
-      console.log('✅ Order created successfully in database:', response.data)
-      return response
-    } catch (error) {
-      console.error('❌ Failed to create order in database:', error)
-      console.error('Error response:', error.response?.data)
-      
-      // Fallback: Save to localStorage
-      const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]')
-      const newOrder = {
-        ...orderData,
-        id: `ORD-${Date.now()}`,
-        created_at: new Date().toISOString(),
-        status: 'pending',
-        payment_status: 'pending',
-      }
-      
-      existingOrders.push(newOrder)
-      localStorage.setItem('orders', JSON.stringify(existingOrders))
-      
-      console.log('💾 Order saved to localStorage:', newOrder)
-      
-      return {
-        data: newOrder,
-        message: 'Order saved locally (database unavailable)'
-      }
-    }
+
+    const response = await apiRequest.post('/orders', orderData)
+    console.log('✅ Order created successfully in database:', response.data)
+    return response
   },
 
   // Get user orders
   getUserOrders: async () => {
     console.log('=== ORDER SERVICE - Getting User Orders ===')
-    
-    try {
-      const response = await apiRequest.get('/orders')
-      console.log('✅ Orders fetched successfully:', response.data)
-      return response
-    } catch (error) {
-      console.error('❌ Failed to fetch orders:', error)
-      
-      // Fallback: Get from localStorage
-      const orders = JSON.parse(localStorage.getItem('orders') || '[]')
-      console.log('💾 Orders loaded from localStorage:', orders)
-      
-      return {
-        data: {
-          orders: orders,
-          message: 'Orders loaded from localStorage (database unavailable)'
-        }
-      }
-    }
+
+    const response = await apiRequest.get('/orders')
+    console.log('✅ Orders fetched successfully:', response.data)
+    return response
   },
 
   // Get single order
   getOrder: async (orderId) => {
     console.log('=== ORDER SERVICE - Getting Order ===')
     console.log('Order ID:', orderId)
-    
-    try {
-      const response = await apiRequest.get(`/orders/${orderId}`)
-      console.log('✅ Order fetched successfully:', response.data)
-      return response
-    } catch (error) {
-      console.error('❌ Failed to fetch order:', error)
-      
-      // Fallback: Get from localStorage
-      const orders = JSON.parse(localStorage.getItem('orders') || '[]')
-      const order = orders.find(o => o.id === orderId)
-      
-      if (order) {
-        console.log('💾 Order loaded from localStorage:', order)
-        return {
-          data: order,
-          message: 'Order loaded from localStorage (database unavailable)'
-        }
-      }
-      
-      throw new Error('Order not found')
-    }
+
+    const response = await apiRequest.get(`/orders/${orderId}`)
+    console.log('✅ Order fetched successfully:', response.data)
+    return response
   },
 
   // Update order status

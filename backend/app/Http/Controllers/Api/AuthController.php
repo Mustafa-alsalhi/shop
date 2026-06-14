@@ -69,6 +69,26 @@ class AuthController extends Controller
         ]);
     }
 
+    public function getCurrentUser(Request $request)
+    {
+        $user = $request->user();
+        
+        return response()->json([
+            'id' => $user->id,
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'name' => $user->name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'address' => $user->address,
+            'city' => $user->city,
+            'country' => $user->country,
+            'postal_code' => $user->postal_code,
+            'role' => $user->role,
+            'is_active' => $user->is_active,
+        ]);
+    }
+
     public function updateProfile(Request $request)
     {
         $user = Auth::user();
@@ -82,9 +102,12 @@ class AuthController extends Controller
             'city' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
             'postal_code' => 'nullable|string|max:20',
+            'current_password' => 'nullable|required_with:new_password|string',
+            'new_password' => 'nullable|string|min:6|confirmed',
         ]);
 
-        $user->update([
+        // Update profile data
+        $updateData = [
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'name' => $request->first_name . ' ' . $request->last_name,
@@ -94,11 +117,26 @@ class AuthController extends Controller
             'city' => $request->city,
             'country' => $request->country,
             'postal_code' => $request->postal_code,
-        ]);
+        ];
+
+        // Update password if provided
+        if ($request->filled('new_password')) {
+            // Verify current password
+            if (!Hash::check($request->current_password, $user->password)) {
+                return response()->json([
+                    'message' => 'كلمة المرور الحالية غير صحيحة'
+                ], 422);
+            }
+
+            // Update password
+            $updateData['password'] = Hash::make($request->new_password);
+        }
+
+        $user->update($updateData);
 
         return response()->json([
             'user' => $user,
-            'message' => 'Profile updated successfully'
+            'message' => 'تم تحديث الملف الشخصي بنجاح'
         ]);
     }
 

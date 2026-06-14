@@ -11,11 +11,13 @@ const AdminProductForm = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
+    detailed_description: '',
     price: '',
     sale_price: '',
     stock: '',
     sku: '',
     category_id: '',
+    seller_id: '',
     currency: 'USD',
     is_active: true,
     is_featured: false,
@@ -29,6 +31,7 @@ const AdminProductForm = () => {
   })
 
   const [categories, setCategories] = useState([])
+  const [sellers, setSellers] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [previewImage, setPreviewImage] = useState('')
@@ -36,6 +39,7 @@ const AdminProductForm = () => {
 
   useEffect(() => {
     fetchCategories()
+    fetchSellers()
     if (isEditing && id) {
       fetchProduct()
     }
@@ -46,7 +50,19 @@ const AdminProductForm = () => {
       const response = await api.get('/categories')
       setCategories(response.data.data || response.data)
     } catch (err) {
-      console.error('Failed to fetch categories:', err)
+    }
+  }
+
+  const fetchSellers = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      const response = await api.get('/admin/sellers', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      setSellers(response.data || [])
+    } catch (err) {
     }
   }
 
@@ -59,18 +75,20 @@ const AdminProductForm = () => {
       // Convert image URL to absolute if needed
       let imageUrl = product.image_url || ''
       if (imageUrl && !imageUrl.startsWith('http')) {
-        imageUrl = `http://localhost:8000${imageUrl.startsWith('/') ? imageUrl : '/' + imageUrl}`
+        imageUrl = `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-d82a.up.railway.app'}${imageUrl.startsWith('/') ? imageUrl : '/' + imageUrl}`
       }
       
       setFormData(prev => ({
         ...prev,
         name: product.name || '',
         description: product.description || '',
+        detailed_description: product.detailed_description || '',
         price: product.price || '',
         sale_price: product.sale_price || '',
         stock: product.stock || '',
         sku: product.sku || '',
         category_id: product.category_id || '',
+        seller_id: product.seller_id || '',
         currency: product.currency || 'USD',
         is_active: product.is_active !== undefined ? product.is_active : true,
         is_featured: product.is_featured || false,
@@ -88,7 +106,7 @@ const AdminProductForm = () => {
       const galleryImages = product.gallery_images || []
       const processedGalleryImages = galleryImages.map(img => {
         if (typeof img === 'string' && !img.startsWith('http')) {
-          return `http://localhost:8000${img.startsWith('/') ? img : '/' + img}`
+          return `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-d82a.up.railway.app'}${img.startsWith('/') ? img : '/' + img}`
         }
         return img
       })
@@ -203,6 +221,7 @@ const AdminProductForm = () => {
       const submitData = new FormData()
       submitData.append('name', formData.name.trim())
       submitData.append('description', formData.description?.trim() || '')
+      submitData.append('detailed_description', formData.detailed_description?.trim() || '')
       submitData.append('price', parseFloat(formData.price))
       submitData.append('sale_price', formData.sale_price ? parseFloat(formData.sale_price) : '')
       submitData.append('stock', parseInt(formData.stock))
@@ -228,14 +247,13 @@ const AdminProductForm = () => {
         submitData.append(`gallery_images.${index}`, file)
       })
 
+      // Add seller_id if selected
+      if (formData.seller_id) {
+        submitData.append('seller_id', parseInt(formData.seller_id))
+      }
+
       // Add variants
       submitData.append('variants', JSON.stringify(formData.variants))
-
-      console.log('Submitting product data:', submitData)
-      console.log('FormData contents:')
-      for (let [key, value] of submitData.entries()) {
-        console.log(key, value)
-      }
 
       if (isEditing) {
         await api.post(`/admin/products/${id}?_method=PUT`, submitData, {
@@ -255,7 +273,6 @@ const AdminProductForm = () => {
       
       navigate('/admin/products')
     } catch (err) {
-      console.error('Submission error:', err)
       let errorMessage = err.message
       
       if (err.response?.data?.errors) {
@@ -390,6 +407,7 @@ const AdminProductForm = () => {
                   <option value="GBP">جنيه إسترليني (£)</option>
                   <option value="SAR">ريال سعودي (ر.س)</option>
                   <option value="AED">درهم إماراتي (د.إ)</option>
+                  <option value="YER">ريال يمني (ر.ي)</option>
                 </select>
               </div>
 
@@ -426,6 +444,26 @@ const AdminProductForm = () => {
                   {categories.map((category) => (
                     <option key={category.id} value={category.id}>
                       {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Seller */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  البائع
+                </label>
+                <select
+                  name="seller_id"
+                  value={formData.seller_id}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">اختر بائع (اختياري)</option>
+                  {sellers.map((seller) => (
+                    <option key={seller.id} value={seller.id}>
+                      {seller.store_name}
                     </option>
                   ))}
                 </select>
@@ -518,9 +556,24 @@ const AdminProductForm = () => {
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
-                  rows={6}
+                  rows={4}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="أدخل وصف المنتج"
+                  placeholder="أدخل وصف موجز للمنتج"
+                />
+              </div>
+
+              {/* Detailed Description */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  الوصف التفصيلي
+                </label>
+                <textarea
+                  name="detailed_description"
+                  value={formData.detailed_description}
+                  onChange={handleChange}
+                  rows={8}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="أدخل وصف تفصيلي للمنتج (المواصفات، المميزات، الاستخدامات، إلخ)"
                 />
               </div>
 

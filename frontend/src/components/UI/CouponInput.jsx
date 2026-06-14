@@ -129,6 +129,8 @@ const CouponInput = ({ totalAmount, onCouponApplied, onCouponRemoved }) => {
               <TagIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 type="text"
+                id="coupon-code"
+                name="coupon-code"
                 value={couponCode}
                 onChange={(e) => {
                   setCouponCode(e.target.value)

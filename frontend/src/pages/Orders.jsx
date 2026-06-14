@@ -69,22 +69,26 @@ const Orders = () => {
   }
 
   const getImageUrl = (imageUrl, productName, size = 80) => {
-    // Try to use the provided image URL first (from order_item)
+    // Get base URL from environment or fallback to Railway production
+    const baseUrl = import.meta.env.VITE_API_URL || 'https://shop-production-d82a.up.railway.app/api'
+    const publicUrl = baseUrl.replace('/api', '')
+    
+    // Try to use provided image URL first (from order_item)
     if (imageUrl && imageUrl !== 'null' && imageUrl !== 'undefined' && imageUrl !== null) {
       // If it's already an absolute URL, use it directly
       if (imageUrl.startsWith('http')) {
         return imageUrl
       }
-      // If it's a relative path, make it absolute
-      if (imageUrl.startsWith('/')) {
-        return `http://localhost:8000${imageUrl}`
+      // If it's a relative path starting with /images/, convert to full URL
+      if (imageUrl.startsWith('/images/')) {
+        return `${publicUrl}${imageUrl}`
       }
-      return imageUrl
+      // Otherwise, treat as relative path
+      return `${publicUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`
     }
     
-    // Generate a placeholder with product name as last resort
-    const seed = productName ? encodeURIComponent(productName.substring(0, 20)) : 'product'
-    return `https://picsum.photos/seed/${seed}/${size}/${size}.jpg`
+    // Fallback to placeholder
+    return `https://picsum.photos/seed/${productName?.replace(/\s+/g, '') || 'product'}/${size}x${size}.jpg`
   }
 
   const getStatusColor = (status) => {
@@ -240,7 +244,7 @@ const Orders = () => {
   return (
     <>
       <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-8" dir="rtl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full mx-auto px-0 sm:px-2 md:px-4 lg:px-6 py-8">
           {/* Header */}
           <motion.div 
             initial={{ opacity: 0, y: -20 }}

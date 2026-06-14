@@ -115,7 +115,7 @@ const ShippingInfo = () => {
           transition={{ duration: 0.6 }}
           className="bg-gradient-to-r from-amber-600 to-orange-600 text-white py-16"
         >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="w-full mx-auto px-0 sm:px-2 md:px-4 lg:px-6">
             <div className="text-center">
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
@@ -137,7 +137,7 @@ const ShippingInfo = () => {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
+          className="px-0 sm:px-2 md:px-4 lg:px-6 py-12"
         >
           
           {/* Shipping Options */}

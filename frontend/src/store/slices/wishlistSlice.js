@@ -1,46 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-
-// Mock wishlist service - replace with actual API calls
-const wishlistService = {
-  getWishlist: async () => {
-    // Simulate API call
-    const storedWishlist = localStorage.getItem('wishlist')
-    return { data: JSON.parse(storedWishlist || '[]') }
-  },
-  
-  addToWishlist: async (product) => {
-    const storedWishlist = localStorage.getItem('wishlist')
-    const wishlist = JSON.parse(storedWishlist || '[]')
-    const exists = wishlist.find(item => item.id === product.id)
-    
-    if (!exists) {
-      // Ensure product has in_stock field, default to true if not present
-      const productWithStock = {
-        ...product,
-        in_stock: product.in_stock !== undefined ? product.in_stock : true,
-        added_at: new Date().toISOString()
-      }
-      wishlist.push(productWithStock)
-      localStorage.setItem('wishlist', JSON.stringify(wishlist))
-    }
-    
-    return { data: wishlist }
-  },
-  
-  removeFromWishlist: async (productId) => {
-    const storedWishlist = localStorage.getItem('wishlist')
-    const wishlist = JSON.parse(storedWishlist || '[]')
-    const updatedWishlist = wishlist.filter(item => item.id !== productId)
-    localStorage.setItem('wishlist', JSON.stringify(updatedWishlist))
-    
-    return { data: updatedWishlist }
-  },
-  
-  clearWishlist: async () => {
-    localStorage.removeItem('wishlist')
-    return { data: [] }
-  }
-}
+import wishlistService from '../../services/wishlistService'
 
 // Async thunks
 export const fetchWishlist = createAsyncThunk(
@@ -64,7 +23,9 @@ export const addToWishlist = createAsyncThunk(
     try {
       const response = await wishlistService.addToWishlist(product)
       console.log('Wishlist service response:', response)
-      return response.data
+      // Fetch updated wishlist after adding
+      const updatedWishlist = await wishlistService.getWishlist()
+      return updatedWishlist.data
     } catch (error) {
       console.error('Wishlist service error:', error)
       return rejectWithValue(
@@ -76,10 +37,13 @@ export const addToWishlist = createAsyncThunk(
 
 export const removeFromWishlist = createAsyncThunk(
   'wishlist/removeFromWishlist',
-  async (productId, { rejectWithValue }) => {
+  async (itemId, { rejectWithValue }) => {
     try {
-      const response = await wishlistService.removeFromWishlist(productId)
-      return { productId, wishlist: response.data }
+      const response = await wishlistService.removeFromWishlist(itemId)
+      console.log('Wishlist service response:', response)
+      // Fetch updated wishlist after removing
+      const updatedWishlist = await wishlistService.getWishlist()
+      return updatedWishlist.data
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || 'Failed to remove from wishlist'
@@ -120,26 +84,20 @@ const wishlistSlice = createSlice({
     },
     // Check if product is in wishlist
     isInWishlist: (state, productId) => {
-      return state.items.some(item => item.id === productId)
+      return state.items.some(item => item.product_id === productId)
     },
     // Optimistic updates
     optimisticAddToWishlist: (state, action) => {
       const product = action.payload
-      const exists = state.items.find(item => item.id === product.id)
+      const exists = state.items.find(item => item.product_id === product.product_id)
       if (!exists) {
-        // Ensure product has in_stock field, default to true if not present
-        const productWithStock = {
-          ...product,
-          in_stock: product.in_stock !== undefined ? product.in_stock : true,
-          added_at: new Date().toISOString()
-        }
-        state.items.push(productWithStock)
+        state.items.push(product)
         state.totalCount = state.items.length
       }
     },
     optimisticRemoveFromWishlist: (state, action) => {
       const productId = action.payload
-      state.items = state.items.filter(item => item.id !== productId)
+      state.items = state.items.filter(item => item.product_id !== productId)
       state.totalCount = state.items.length
     },
   },
@@ -177,8 +135,7 @@ const wishlistSlice = createSlice({
         state.error = null
       })
       .addCase(removeFromWishlist.fulfilled, (state, action) => {
-        const { productId, wishlist } = action.payload
-        state.items = wishlist || []
+        state.items = action.payload || []
         state.totalCount = state.items.length
         state.error = null
       })
@@ -215,6 +172,6 @@ export const selectWishlistCount = (state) => state.wishlist.totalCount
 export const selectWishlistIsLoading = (state) => state.wishlist.isLoading
 export const selectWishlistError = (state) => state.wishlist.error
 export const selectIsInWishlist = (state, productId) => 
-  state.wishlist.items.some(item => item.id === productId)
+  state.wishlist.items.some(item => item.product_id === productId)
 
 export default wishlistSlice.reducer

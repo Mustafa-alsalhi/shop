@@ -9,6 +9,8 @@ import {
   PaperAirplaneIcon
 } from '@heroicons/react/24/outline'
 import { Helmet } from 'react-helmet-async'
+import api from '../services/api'
+import { showSuccessNotification, showErrorNotification } from '../store/slices/uiSlice'
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({
@@ -34,8 +36,10 @@ const ContactUs = () => {
     setSubmitStatus('')
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Send data to API
+      const response = await api.post('/contact-us', formData)
+      
+      console.log('Contact form submitted successfully:', response.data)
       
       setSubmitStatus('success')
       setFormData({
@@ -45,8 +49,15 @@ const ContactUs = () => {
         subject: '',
         message: ''
       })
+      
+      // Show success notification
+      showSuccessNotification('تم إرسال رسالتك بنجاح! سنتواصل معك قريباً.')
     } catch (error) {
+      console.error('Error submitting contact form:', error)
       setSubmitStatus('error')
+      
+      // Show error notification
+      showErrorNotification('فشل في إرسال الرسالة. يرجى المحاولة مرة أخرى.')
     } finally {
       setIsSubmitting(false)
     }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import axios from 'axios'
 
 const AdvertisementBanner = () => {
   const navigate = useNavigate()
@@ -116,7 +117,7 @@ const AdvertisementBanner = () => {
         {banners.map((banner, index) => (
           <div key={banner.id} className="relative w-full h-full flex-shrink-0 banner-slide">
             <img
-              src={banner.full_image_url || (banner.image_url.startsWith('http') ? banner.image_url : `http://localhost:8000${banner.image_url}`)}
+              src={banner.full_image_url || (banner.image_url.startsWith('http') ? banner.image_url : `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-d82a.up.railway.app'}${banner.image_url}`)}
               alt={banner.title}
               className="w-full h-full object-cover cursor-pointer"
               onClick={(e) => handleBannerClick(banner.link_url, e)}
@@ -140,7 +141,7 @@ const AdvertisementBanner = () => {
                     </svg>
                   </h2>
                   {banner.description && (
-                    <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl mb-3 sm:mb-4 md:mb-6 text-white/90 line-clamp-2 sm:line-clamp-3 banner-description">
+                    <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl mb-3 sm:mb-4 md:mb-6 text-white/90 line-clamp-2 sm:line-clamp-3 banner-description text-right">
                       {banner.description}
                     </p>
                   )}

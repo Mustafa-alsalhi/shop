@@ -4,6 +4,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import { FaEye, FaEyeSlash } from 'react-icons/fa'
 import { registerUser, selectIsLoading, selectError, clearError } from '../../store/slices/authSlice'
 import { showSuccessNotification, showErrorNotification } from '../../store/slices/uiSlice'
+import { fetchCart } from '../../store/slices/cartSlice'
+import { fetchWishlist } from '../../store/slices/wishlistSlice'
 
 const Register = () => {
   const dispatch = useDispatch()
@@ -21,7 +23,6 @@ const Register = () => {
     phone: '',
     address: '',
     city: '',
-    country: '',
     postal_code: '',
   })
   const [showPassword, setShowPassword] = useState(false)
@@ -87,6 +88,9 @@ const Register = () => {
       const result = await dispatch(registerUser(formData))
       if (result.meta.requestStatus === 'fulfilled') {
         dispatch(showSuccessNotification('تم التسجيل بنجاح!'))
+        // Fetch user's cart and wishlist from server
+        dispatch(fetchCart())
+        dispatch(fetchWishlist())
         navigate('/login')
       }
     } catch (error) {

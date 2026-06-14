@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
+import { createNotification } from './notificationsSlice'
 
 // Initial state
 const initialState = {
@@ -262,12 +263,13 @@ export const showSuccessNotification = (message, options = {}) => {
       ...options,
     }))
     
-    // Also add to dropdown notifications (for persistent storage)
-    dispatch(addNotification({
+    // Also add to dropdown notifications using notificationsSlice (for database storage)
+    dispatch(createNotification({
       type: 'success',
-      title: options.title || 'Success',
+      title: options.title || 'نجاح',
       message,
-      ...options,
+      data: options.data || null,
+      link: options.link || null,
     }))
   }
 }
@@ -281,12 +283,13 @@ export const showErrorNotification = (message, options = {}) => {
       ...options,
     }))
     
-    // Also add to dropdown notifications (for persistent storage)
-    dispatch(addNotification({
+    // Also add to dropdown notifications using notificationsSlice (for database storage)
+    dispatch(createNotification({
       type: 'error',
-      title: options.title || 'Error',
+      title: options.title || 'خطأ',
       message,
-      ...options,
+      data: options.data || null,
+      link: options.link || null,
     }))
   }
 }
@@ -300,12 +303,13 @@ export const showInfoNotification = (message, options = {}) => {
       ...options,
     }))
     
-    // Also add to dropdown notifications (for persistent storage)
-    dispatch(addNotification({
+    // Also add to dropdown notifications using notificationsSlice (for database storage)
+    dispatch(createNotification({
       type: 'info',
-      title: options.title || 'Info',
+      title: options.title || 'معلومة',
       message,
-      ...options,
+      data: options.data || null,
+      link: options.link || null,
     }))
   }
 }
@@ -319,12 +323,13 @@ export const showWarningNotification = (message, options = {}) => {
       ...options,
     }))
     
-    // Also add to dropdown notifications (for persistent storage)
-    dispatch(addNotification({
+    // Also add to dropdown notifications using notificationsSlice (for database storage)
+    dispatch(createNotification({
       type: 'warning',
-      title: options.title || 'Warning',
+      title: options.title || 'تحذير',
       message,
-      ...options,
+      data: options.data || null,
+      link: options.link || null,
     }))
   }
 }

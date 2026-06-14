@@ -25,6 +25,27 @@ import { showSuccessNotification, showErrorNotification } from '../store/slices/
 import LoadingSpinner from '../components/UI/LoadingSpinner'
 
 const Cart = () => {
+  // Helper function to get correct image URL
+  const getImageUrl = (imageUrl, productName, size = 80) => {
+    // Get base URL from environment or fallback to Railway production
+    const baseUrl = import.meta.env.VITE_API_URL || 'https://shop-production-d82a.up.railway.app/api'
+    const publicUrl = baseUrl.replace('/api', '')
+    
+    if (imageUrl && imageUrl !== 'null' && imageUrl !== 'undefined' && imageUrl !== null) {
+      if (imageUrl.startsWith('http')) {
+        return imageUrl
+      }
+      // If it's a relative path starting with /images/, convert to full URL
+      if (imageUrl.startsWith('/images/')) {
+        return `${publicUrl}${imageUrl}`
+      }
+      // Otherwise, treat as relative path
+      return `${publicUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`
+    }
+    
+    // Fallback to placeholder
+    return `https://picsum.photos/seed/${productName?.replace(/\s+/g, '') || 'product'}/${size}x${size}.jpg`
+  }
   const dispatch = useDispatch()
   const navigate = useNavigate()
   
@@ -58,26 +79,30 @@ const Cart = () => {
   }
 
   const handleCheckout = () => {
-    console.log('=== CART CHECKOUT ===')
-    console.log('Navigating to checkout...')
-    console.log('Cart items:', cartItems)
-    console.log('Cart total:', cartTotal)
-    
-    if (cartItems.length === 0) {
-      console.log('❌ Cart is empty, cannot proceed to checkout')
+    // Check if cart is empty
+    if (!cartItems || cartItems.length === 0) {
       dispatch(showErrorNotification('سلتك فارغة. أضف منتجات قبل الدفع.'))
       return
     }
     
+    // Check if user is authenticated
     if (!isAuthenticated) {
-      console.log('❌ User not authenticated, redirecting to login')
       dispatch(showErrorNotification('يرجى تسجيل الدخول للمتابعة للدفع'))
-      navigate('/login')
+      navigate('/login', { replace: true })
       return
     }
     
-    console.log('✅ Proceeding to checkout')
-    navigate('/checkout')
+    // Show loading state
+    dispatch(showSuccessNotification('جاري الانتقال إلى صفحة الدفع...'))
+    
+    // Navigate to checkout with a small delay to ensure state is updated
+    setTimeout(() => {
+      try {
+        navigate('/checkout', { replace: false })
+      } catch (error) {
+        dispatch(showErrorNotification('حدث خطأ في التوجيه'))
+      }
+    }, 100)
   }
 
   if (!isAuthenticated) {
@@ -158,9 +183,12 @@ const Cart = () => {
                     <div className="flex items-center space-x-reverse space-x-4">
                       {/* Product Image */}
                       <img
-                        src={item.image_url || 'https://via.placeholder.com/80x80'}
+                        src={getImageUrl(item.image_url, item.product_name, 80)}
                         alt={item.product_name}
                         className="h-20 w-20 object-cover rounded-md border border-amber-200/50"
+                        onError={(e) => {
+                          e.target.src = `https://picsum.photos/seed/${item.product_name?.replace(/\s+/g, '') || 'product'}/80x80.jpg`
+                        }}
                       />
 
                       {/* Product Details */}
@@ -176,7 +204,7 @@ const Cart = () => {
                           </p>
                         )}
                         <p className="text-sm text-amber-600 text-right">
-                          SKU: {item.product_sku}
+                          SKU: {item.sku}
                         </p>
                       </div>
 
@@ -184,10 +212,10 @@ const Cart = () => {
                       <div className="flex items-center space-x-reverse space-x-4">
                         <div className="text-left">
                           <p className="font-semibold text-amber-700">
-                            ${item.price}
+                            {item.currency || 'USD'} {item.price}
                           </p>
                           <p className="text-sm text-amber-600">
-                            الإجمالي: ${item.total}
+                            الإجمالي: {item.currency || 'USD'} {item.total}
                           </p>
                         </div>
 
@@ -236,11 +264,11 @@ const Cart = () => {
               <div className="space-y-4">
                 <div className="flex justify-between text-amber-700">
                   <span>المجموع الفرعي</span>
-                  <span>${cartSubtotal.toFixed(2)}</span>
+                  <span>{cartItems[0]?.currency || 'USD'} {cartSubtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-amber-700">
                   <span>الضريبة</span>
-                  <span>${cartTax.toFixed(2)}</span>
+                  <span>{cartItems[0]?.currency || 'USD'} {cartTax.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-amber-700">
                   <span>الشحن</span>
@@ -249,7 +277,7 @@ const Cart = () => {
                 <div className="border-t border-amber-200 pt-4">
                   <div className="flex justify-between text-lg font-semibold text-amber-800">
                     <span>الإجمالي</span>
-                    <span>${cartTotal.toFixed(2)}</span>
+                    <span>{cartItems[0]?.currency || 'USD'} {cartTotal.toFixed(2)}</span>
                   </div>
                 </div>
               </div>

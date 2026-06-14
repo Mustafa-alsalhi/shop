@@ -13,6 +13,34 @@ import './styles/globals.css'
 import WhatsAppButton from './components/UI/WhatsAppButton.jsx'
 import { WHATSAPP_NUMBER, WHATSAPP_MESSAGES } from './config/whatsapp.js'
 
+// Security: Disable console in production to prevent data leakage
+if (process.env.NODE_ENV === 'production') {
+  const noop = () => {}
+  const consoleMethods = ['log', 'info', 'warn', 'error', 'debug', 'trace']
+  
+  consoleMethods.forEach(method => {
+    console[method] = noop
+  })
+  
+  // Also disable console.table, console.group, etc.
+  console.table = noop
+  console.group = noop
+  console.groupEnd = noop
+  console.groupCollapsed = noop
+  console.time = noop
+  console.timeEnd = noop
+  console.timeLog = noop
+  console.count = noop
+  console.countReset = noop
+  console.assert = noop
+  console.clear = noop
+  console.dir = noop
+  console.dirxml = noop
+  console.profile = noop
+  console.profileEnd = noop
+  console.timeStamp = noop
+}
+
 // Create a client for React Query
 const queryClient = new QueryClient({
   defaultOptions: {

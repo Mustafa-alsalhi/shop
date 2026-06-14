@@ -13,6 +13,7 @@ class Product extends Model
         'name',
         'slug',
         'description',
+        'detailed_description',
         'price',
         'sale_price',
         'currency',
@@ -26,9 +27,15 @@ class Product extends Model
         'gallery_images',
         'variants',
         'category_id',
+        'seller_id',
+        'seller_name',
+        'seller_avatar',
+        'seller_rating',
+        'seller_reviews_count',
         'is_active',
         'is_featured',
         'stock',
+        'sold_count',
         'rating',
         'reviews_count',
     ];
@@ -50,6 +57,11 @@ class Product extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function seller()
+    {
+        return $this->belongsTo(Seller::class);
     }
 
     public function variants()
@@ -75,5 +87,35 @@ class Product extends Model
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    /**
+     * العلاقة مع العروض (Many to Many)
+     * المنتج الواحد يمكن أن يدخل في أكثر من عرض
+     */
+    public function offers()
+    {
+        return $this->belongsToMany(Offer::class, 'offer_products')
+            ->withPivot('special_price', 'sort_order')
+            ->withTimestamps()
+            ->orderBy('offer_products.sort_order');
+    }
+
+    /**
+     * الحصول على العروض النشطة للمنتج
+     */
+    public function activeOffers()
+    {
+        return $this->offers()->where('status', 'active')
+            ->where(function ($query) {
+                $now = now();
+                $query->whereNull('start_date')
+                    ->orWhere('start_date', '<=', $now);
+            })
+            ->where(function ($query) {
+                $now = now();
+                $query->whereNull('end_date')
+                    ->orWhere('end_date', '>=', $now);
+            });
     }
 }

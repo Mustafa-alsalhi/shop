@@ -8,6 +8,8 @@ const CategoryBanner = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
+  const [isPausedCategories, setIsPausedCategories] = useState(false)
+  const categoriesIntervalRef = useRef(null)
 
   // Navigation functions
   const goToNextCategories = () => {
@@ -72,6 +74,7 @@ const CategoryBanner = () => {
   // Auto-play functionality
   useEffect(() => {
     if (!isAutoPlaying || categories.length === 0) return
+    if (isPausedCategories) return
 
     const interval = setInterval(() => {
       const container = document.getElementById('categories-banner-container')
@@ -102,7 +105,7 @@ const CategoryBanner = () => {
     }, 4000) // Auto-play every 4 seconds
 
     return () => clearInterval(interval)
-  }, [isAutoPlaying, categories])
+  }, [isAutoPlaying, categories, isPausedCategories])
 
   // Handle mouse drag/swipe functionality
   useEffect(() => {
@@ -246,13 +249,13 @@ const CategoryBanner = () => {
       <div className="bg-white/80 backdrop-blur-sm py-8 border-y border-amber-200/30">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-12">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">تسوق حسب الفئة</h2>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">**</h2>
             <Link 
               to="/categories" 
-              className="inline-flex items-center text-amber-600 hover:text-amber-700 font-medium transition-colors"
+              className="inline-flex items-center text-amber-600 hover:text-amber-700 font-medium transition-colors text-xs sm:text-sm md:text-base"
             >
-              <span>عرض جميع الفئات</span>
-              <ChevronRightIcon className="h-5 w-5 ml-1" />
+              <span>**</span>
+              <ChevronRightIcon className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 mr-1" />
             </Link>
           </div>
           <div className="relative">
@@ -287,34 +290,52 @@ const CategoryBanner = () => {
     <div className="bg-white/80 backdrop-blur-sm py-8 border-y border-amber-200/30">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center mb-12">
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">تسوق حسب الفئة</h2>
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">تسوق حسب الفئة</h2>
           <Link 
             to="/categories" 
-            className="inline-flex items-center text-amber-600 hover:text-amber-700 font-medium transition-colors"
+            className="inline-flex items-center text-amber-600 hover:text-amber-700 font-medium transition-colors text-xs sm:text-sm md:text-base"
           >
             <span>عرض جميع الفئات</span>
-            <ChevronRightIcon className="h-5 w-5 ml-1" />
+            <ChevronRightIcon className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 mr-1" />
           </Link>
         </div>
 
         {Array.isArray(categories) && categories.length > 0 ? (
-          <div className="relative">
+          <div className="relative"
+            onMouseEnter={() => {
+              console.log('Categories section mouse enter - STOPPING AUTOPLAY')
+              setIsPausedCategories(true)
+              setIsAutoPlaying(false)
+              if (categoriesIntervalRef.current) {
+                clearInterval(categoriesIntervalRef.current)
+                console.log('Categories interval cleared directly')
+              }
+            }}
+            onMouseLeave={() => {
+              console.log('Categories section mouse leave - RESUMING AUTOPLAY IN 2 SECONDS')
+              setIsPausedCategories(false)
+              setTimeout(() => {
+                console.log('Timeout - RESUMING AUTOPLAY')
+                setIsAutoPlaying(true)
+              }, 2000)
+            }}
+          >
             <div className="relative">
               {/* Scroll Buttons */}
               <button
                 onClick={goToPreviousCategories}
-                className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -ml-6"
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-2 sm:p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -ml-4 sm:-ml-6"
                 aria-label="Scroll left"
               >
-                <ChevronLeftIcon className="h-6 w-6" />
+                <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
               </button>
               
               <button
                 onClick={goToNextCategories}
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -mr-6"
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-2 sm:p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 -mr-4 sm:-mr-6"
                 aria-label="Scroll right"
               >
-                <ChevronRightIcon className="h-6 w-6" />
+                <ChevronRightIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
               </button>
 
               {/* Categories Container */}
@@ -332,7 +353,7 @@ const CategoryBanner = () => {
                     className="flex-none w-32 sm:w-36 md:w-40 lg:w-44 xl:w-48"
                   >
                     <Link 
-                      to={`/products?category=${category.slug}`}
+                      to={`/products?category=${category.id}`}
                       className="block bg-white/80 backdrop-blur-sm rounded-lg shadow-lg overflow-hidden hover:shadow-amber-200/50 transition-all duration-300 transform hover:scale-105 border border-amber-200/30 hover:border-amber-300/60"
                     >
                       <div className="h-32 sm:h-36 md:h-40 lg:h-44 xl:h-48 bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center relative overflow-hidden">

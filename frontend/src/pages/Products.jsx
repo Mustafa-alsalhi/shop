@@ -117,6 +117,10 @@ const Products = () => {
     const updatedFilters = { ...filters, ...newFilters, page: 1 }
     console.log('Products.jsx: Updated filters:', updatedFilters)
     dispatch(setFilters(updatedFilters))
+    // Auto-close filters on mobile after selection
+    if (window.innerWidth < 1024) {
+      setShowFilters(false)
+    }
   }
 
   const handlePageChange = (page) => {
@@ -164,7 +168,7 @@ const Products = () => {
         </div>
 
         {/* Search and Filters Bar */}
-        <div className="mb-8 flex flex-col lg:flex-row-reverse gap-4">
+        <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row lg:flex-row-reverse gap-3 sm:gap-4">
           {/* Search */}
           <form onSubmit={handleSearch} className="flex-1">
             <div className="relative">
@@ -174,7 +178,7 @@ const Products = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="البحث في المنتجات..."
-                className="w-full pr-10 pl-4 py-3 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 backdrop-blur-sm"
+                className="w-full pr-10 pl-4 py-2 sm:py-3 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 backdrop-blur-sm text-sm sm:text-base"
               />
             </div>
           </form>
@@ -186,7 +190,7 @@ const Products = () => {
               const [sortBy, sortOrder] = e.target.value.split('-')
               handleFilterChange({ sortBy, sortOrder })
             }}
-            className="px-4 py-3 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 backdrop-blur-sm"
+            className="px-3 sm:px-4 py-2 sm:py-3 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 backdrop-blur-sm text-sm sm:text-base"
           >
             <option value="created_at-desc">الأحدث أولاً</option>
             <option value="created_at-asc">الأقدم أولاً</option>
@@ -201,10 +205,10 @@ const Products = () => {
           {/* Filter Toggle */}
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center px-4 py-3 border border-amber-300 rounded-lg hover:bg-amber-50 transition-colors bg-white/80 backdrop-blur-sm"
+            className="flex items-center justify-center px-3 sm:px-4 py-2 sm:py-3 border border-amber-300 rounded-lg hover:bg-amber-50 transition-colors bg-white/80 backdrop-blur-sm"
           >
             <FunnelIcon className="h-5 w-5 ml-2 text-amber-600" />
-            الترشيحات
+            <span className="text-sm sm:text-base">الترشيحات</span>
             {activeFiltersCount > 0 && (
               <span className="mr-2 bg-amber-600 text-white text-xs px-2 py-1 rounded-full">
                 {activeFiltersCount}
@@ -213,7 +217,7 @@ const Products = () => {
           </button>
         </div>
 
-        <div className="flex gap-8">
+        <div className="flex flex-col lg:flex-row gap-6">
           {/* Filters Sidebar */}
           <div className={`${showFilters ? 'block' : 'hidden'} lg:block lg:w-64 flex-shrink-0`}>
             <ProductFilters
@@ -250,7 +254,7 @@ const Products = () => {
             ) : (
               <>
                 {/* Products Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
                   {products.map((product) => (
                     <ProductCard
                       key={product.id}
@@ -261,11 +265,11 @@ const Products = () => {
 
                 {/* Pagination */}
                 {pagination.totalPages > 1 && (
-                  <div className="flex justify-center items-center space-x-2">
+                  <div className="flex justify-center items-center space-x-1 sm:space-x-2">
                     <button
                       onClick={() => handlePageChange(pagination.currentPage - 1)}
                       disabled={pagination.currentPage <= 1}
-                      className="px-3 py-2 border border-amber-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-amber-50 bg-white/80 backdrop-blur-sm"
+                      className="px-2 sm:px-3 py-2 border border-amber-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-amber-50 bg-white/80 backdrop-blur-sm text-sm sm:text-base"
                     >
                       السابق
                     </button>
@@ -287,7 +291,7 @@ const Products = () => {
                           <button
                             key={pageNum}
                             onClick={() => handlePageChange(pageNum)}
-                            className={`px-3 py-2 border rounded-md transition-all duration-300 ${
+                            className={`px-2 sm:px-3 py-2 border rounded-md transition-all duration-300 text-sm sm:text-base ${
                               pageNum === pagination.currentPage
                                 ? 'bg-amber-600 text-white border-amber-600 shadow-lg'
                                 : 'border-amber-300 hover:bg-amber-50 bg-white/80 backdrop-blur-sm'
@@ -302,7 +306,7 @@ const Products = () => {
                     <button
                       onClick={() => handlePageChange(pagination.currentPage + 1)}
                       disabled={pagination.currentPage >= pagination.totalPages}
-                      className="px-3 py-2 border border-amber-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-amber-50 bg-white/80 backdrop-blur-sm"
+                      className="px-2 sm:px-3 py-2 border border-amber-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-amber-50 bg-white/80 backdrop-blur-sm text-sm sm:text-base"
                     >
                       التالي
                     </button>

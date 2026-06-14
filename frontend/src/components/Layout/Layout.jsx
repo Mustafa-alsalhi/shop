@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
 import Header from './Header'
 import Footer from './Footer'
@@ -14,12 +14,22 @@ import {
   selectIsMobileMenuOpen,
   closeSearch,
 } from '../../store/slices/uiSlice'
+import { getCurrentUser } from '../../store/slices/authSlice'
 
 const Layout = () => {
   const dispatch = useDispatch()
   const isSearchOpen = useSelector(selectIsSearchOpen)
   const isCartOpen = useSelector(selectCartIsOpen)
   const isMobileMenuOpen = useSelector(selectIsMobileMenuOpen)
+  const token = useSelector((state) => state.auth.token)
+  const user = useSelector((state) => state.auth.user)
+
+  useEffect(() => {
+    // Fetch user data if token exists but user data is missing
+    if (token && !user) {
+      dispatch(getCurrentUser())
+    }
+  }, [dispatch, token, user])
 
   // Close overlays when clicking outside
   React.useEffect(() => {
@@ -48,7 +58,7 @@ const Layout = () => {
       <MobileMenu isOpen={isMobileMenuOpen} />
 
       {/* Main Content */}
-      <main className="flex-1 pt-20 sm:pt-24">
+      <main className="flex-1 pt-0 sm:pt-0">
         <Outlet />
       </main>
 

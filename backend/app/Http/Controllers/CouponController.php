@@ -13,12 +13,20 @@ class CouponController extends Controller
      */
     public function index()
     {
-        $coupons = Coupon::latest()->paginate(10);
-        
-        return response()->json([
-            'status' => 'success',
-            'data' => $coupons
-        ]);
+        try {
+            $coupons = Coupon::latest()->paginate(10);
+            
+            return response()->json([
+                'status' => 'success',
+                'data' => $coupons
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch coupons',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -279,20 +287,28 @@ class CouponController extends Controller
      */
     public function statistics()
     {
-        $total = Coupon::count();
-        $active = Coupon::where('is_active', true)->count();
-        $expired = Coupon::where('expires_at', '<', now())->count();
-        $used = Coupon::where('used_count', '>', 0)->count();
+        try {
+            $total = Coupon::count();
+            $active = Coupon::where('is_active', true)->count();
+            $expired = Coupon::where('expires_at', '<', now())->count();
+            $used = Coupon::where('used_count', '>', 0)->count();
 
-        return response()->json([
-            'status' => 'success',
-            'data' => [
-                'total' => $total,
-                'active' => $active,
-                'expired' => $expired,
-                'used' => $used,
-                'unused' => $total - $used
-            ]
-        ]);
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'total' => $total,
+                    'active' => $active,
+                    'expired' => $expired,
+                    'used' => $used,
+                    'unused' => $total - $used
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch coupon statistics',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

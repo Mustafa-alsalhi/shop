@@ -201,20 +201,38 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  to="/shipping-info"
+                  to="/policy/return_policy"
                   className="text-gray-300 hover:text-amber-400 transition-all duration-300 hover:translate-x-1 flex items-center space-x-reverse space-x-2"
                 >
                   <ChevronRightIcon className="h-4 w-4" />
-                  <span>معلومات الشحن</span>
+                  <span>سياسة الاسترجاع</span>
                 </Link>
               </li>
               <li>
                 <Link
-                  to="/returns"
+                  to="/policy/exchange_policy"
                   className="text-gray-300 hover:text-amber-400 transition-all duration-300 hover:translate-x-1 flex items-center space-x-reverse space-x-2"
                 >
                   <ChevronRightIcon className="h-4 w-4" />
-                  <span>الإرجاع والاسترداد</span>
+                  <span>سياسة الاستبدال</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/policy/cancellation_policy"
+                  className="text-gray-300 hover:text-amber-400 transition-all duration-300 hover:translate-x-1 flex items-center space-x-reverse space-x-2"
+                >
+                  <ChevronRightIcon className="h-4 w-4" />
+                  <span>سياسة الإلغاء</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/policy/shipping_policy"
+                  className="text-gray-300 hover:text-amber-400 transition-all duration-300 hover:translate-x-1 flex items-center space-x-reverse space-x-2"
+                >
+                  <ChevronRightIcon className="h-4 w-4" />
+                  <span>سياسة الشحن</span>
                 </Link>
               </li>
               <li>
@@ -311,19 +329,19 @@ const Footer = () => {
             </div>
             <div className="flex flex-wrap justify-center md:justify-end space-x-reverse space-x-4 text-sm">
               <Link
-                to="/privacy"
+                to="/policy/privacy_policy"
                 className="text-gray-300 hover:text-amber-400 transition-all duration-300 px-2 py-1"
               >
                 سياسة الخصوصية
               </Link>
               <Link
-                to="/terms"
+                to="/policy/terms_of_service"
                 className="text-gray-300 hover:text-amber-400 transition-all duration-300 px-2 py-1"
               >
                 شروط الخدمة
               </Link>
               <Link
-                to="/cookies"
+                to="/policy/cookies_policy"
                 className="text-gray-300 hover:text-amber-400 transition-all duration-300 px-2 py-1"
               >
                 سياسة الكوكيز

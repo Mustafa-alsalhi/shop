@@ -19,6 +19,12 @@ class OrderItem extends Model
         'price',
         'total',
         'image_url',
+        'color',
+        'color_code',
+        'size',
+        'variant_name',
+        'variant_value',
+        'selected_image_index',
     ];
 
     protected $casts = [
