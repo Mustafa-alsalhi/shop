@@ -1,36 +1,33 @@
 #!/bin/bash
 
-# Delete old .env
+# Delete any old file
 rm -f .env
 
-# Create .env file
+# Create clean file without encoding issues using Railway References
 cat > .env << EOF
 APP_NAME=E_Commerce_Store
 APP_ENV=production
 APP_KEY=base64:J7sWlYpYg0sXk9F2YlQvZzFqV0ZkZ0VqR2tqU2FqWkE=
 APP_DEBUG=false
-APP_URL=${APP_URL}
-
+APP_URL=\${RAILWAY_PUBLIC_DOMAIN}
 LOG_CHANNEL=stack
 LOG_DEPRECATIONS_CHANNEL=null
 LOG_LEVEL=error
-
 DB_CONNECTION=mysql
-DB_HOST=${DB_HOST}
-DB_PORT=${DB_PORT}
-DB_DATABASE=${DB_DATABASE}
-DB_USERNAME=${DB_USERNAME}
-DB_PASSWORD=${DB_PASSWORD}
-
+DB_HOST=\${MYSQLHOST}
+DB_PORT=\${MYSQLPORT}
+DB_DATABASE=\${MYSQLDATABASE}
+DB_USERNAME=\${MYSQLUSER}
+DB_PASSWORD=\${MYSQLPASSWORD}
 BROADCAST_DRIVER=log
-
-CACHE_DRIVER=file
+CACHE_DRIVER=redis
 FILESYSTEM_DRIVER=local
 QUEUE_CONNECTION=sync
-SESSION_DRIVER=file
+SESSION_DRIVER=redis
 SESSION_LIFETIME=120
-
-MEMCACHED_HOST=127.0.0.1
+REDIS_HOST=\${REDISHOST}
+REDIS_PASSWORD=\${REDISPASSWORD}
+REDIS_PORT=\${REDISPORT}
 EOF
 
 echo "Environment file created successfully!"
@@ -38,4 +35,20 @@ echo "=== DEBUG: Content of .env file ==="
 cat .env
 echo "=== DEBUG: End of .env file ==="
 
-php artisan optimize:clear || true
+# Create a custom bootstrap to bypass ENV loading
+cat > bootstrap/custom_env.php << 'EOF'
+<?php
+
+return [
+    'name' => 'E_Commerce_Store',
+    'env' => 'production',
+    'debug' => false,
+    'url' => 'https://your-app-name.railway.app',
+    'timezone' => 'UTC',
+    'locale' => 'en',
+    'fallback_locale' => 'en',
+    'key' => 'base64:J7sWlYpYg0sXk9F2YlQvZzFqV0ZkZ0VqR2tqU2FqWkE=',
+];
+EOF
+
+echo "Custom environment configuration created!"
