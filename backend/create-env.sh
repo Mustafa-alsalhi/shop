@@ -17,7 +17,7 @@ LOG_CHANNEL=stack
 LOG_DEPRECATIONS_CHANNEL=null
 LOG_LEVEL=error
 
-DB_CONNECTION=mysql
+DB_CONNECTION=${DB_CONNECTION}
 DB_HOST=${DB_HOST}
 DB_PORT=${DB_PORT}
 DB_DATABASE=${DB_DATABASE}
@@ -33,6 +33,3 @@ SESSION_LIFETIME=120
 EOF
 
 echo "Environment file created successfully!"
-php artisan optimize:clear
-php artisan config:clear
-php artisan cache:clear
