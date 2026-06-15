@@ -1,7 +1,7 @@
 {
   "build": {
     "builder": "RAILPACK",
-    "buildCommand": "chmod +x create-env.sh && ./create-env.sh && composer install --no-dev --optimize-autoloader --no-scripts && php artisan config:clear && php artisan cache:clear"
+    "buildCommand": "chmod +x create-env.sh && ./create-env.sh && composer install --no-dev --optimize-autoloader --no-scripts && composer dump-autoload --optimize"
   },
   "deploy": {
     "runtime": "V2",
