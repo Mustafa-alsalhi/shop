@@ -23,6 +23,8 @@ import {
   DocumentTextIcon
 } from '@heroicons/react/24/outline'
 
+import NotificationBell from '../Notifications/NotificationBell'
+
 const AdminLayout = () => {
   const user = useSelector(selectUser)
   const dispatch = useDispatch()
@@ -37,9 +39,15 @@ const AdminLayout = () => {
 
   const menuItems = [
     {
+      name: 'العودة للرئيسية',
+      path: '/',
+      icon: HomeIcon,
+      description: 'العودة للمتجر الرئيسي'
+    },
+    {
       name: 'لوحة التحكم',
       path: '/admin/dashboard',
-      icon: HomeIcon,
+      icon: ChartBarIcon,
       description: 'نظرة عامة وإحصائيات'
     },
     {
@@ -97,6 +105,12 @@ const AdminLayout = () => {
       description: 'إدارة شركات التوصيل'
     },
     {
+      name: 'مناديب التوصيل',
+      path: '/admin/drivers',
+      icon: TruckIcon,
+      description: 'إدارة وتعديل المناديب'
+    },
+    {
       name: 'طرق الدفع',
       path: '/admin/payment-methods',
       icon: CreditCardIcon,
@@ -125,6 +139,12 @@ const AdminLayout = () => {
       path: '/admin/policies',
       icon: DocumentTextIcon,
       description: 'إدارة سياسات المتجر'
+    },
+    {
+      name: 'الضرائب',
+      path: '/admin/taxes',
+      icon: TagIcon,
+      description: 'إدارة الضرائب'
     },
     {
       name: 'الفئات',
@@ -247,6 +267,7 @@ const AdminLayout = () => {
                 </h1>
               </div>
               <div className="flex items-center space-x-reverse space-x-2 sm:space-x-4">
+                <NotificationBell />
                 <span className="hidden sm:block text-xs sm:text-sm text-gray-600 truncate">
                   مرحباً، {user?.name || 'مدير'}
                 </span>

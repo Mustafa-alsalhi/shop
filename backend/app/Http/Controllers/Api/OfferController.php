@@ -7,6 +7,7 @@ use App\Models\Offer;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class OfferController extends Controller
@@ -41,25 +42,30 @@ class OfferController extends Controller
      */
     public function active(Request $request)
     {
-        $now = now();
+        $page = $request->get('page', 1);
+        $showInHome = $request->has('show_in_home') && $request->boolean('show_in_home') ? '1' : '0';
+        $cacheKey = "api_offers_active_home_{$showInHome}_page_{$page}";
 
-        $query = Offer::withCount('products')
-            ->where('status', 'active')
-            ->where(function ($q) use ($now) {
-                $q->whereNull('start_date')->orWhere('start_date', '<=', $now);
-            })
-            ->where(function ($q) use ($now) {
-                $q->whereNull('end_date')->orWhere('end_date', '>=', $now);
-            });
+        $offers = Cache::remember($cacheKey, 600, function () use ($request, $showInHome) {
+            $now = now();
+            $query = Offer::withCount('products')
+                ->where('status', 'active')
+                ->where(function ($q) use ($now) {
+                    $q->whereNull('start_date')->orWhere('start_date', '<=', $now);
+                })
+                ->where(function ($q) use ($now) {
+                    $q->whereNull('end_date')->orWhere('end_date', '>=', $now);
+                });
 
-        // العروض في الصفحة الرئيسية
-        if ($request->has('show_in_home') && $request->boolean('show_in_home')) {
-            $query->where('show_in_home', true);
-        }
+            // العروض في الصفحة الرئيسية
+            if ($showInHome === '1') {
+                $query->where('show_in_home', true);
+            }
 
-        $query->orderBy('sort_order')->orderBy('created_at', 'desc');
+            $query->orderBy('sort_order')->orderBy('created_at', 'desc');
 
-        $offers = $query->paginate(12);
+            return $query->paginate(12);
+        });
 
         return response()->json($offers);
     }

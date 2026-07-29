@@ -14,7 +14,9 @@ class AddSellerIdToProductsTable extends Migration
     public function up()
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->foreignId('seller_id')->nullable()->after('category_id')->constrained('sellers')->onDelete('set null');
+            if (!Schema::hasColumn('products', 'seller_id')) {
+                $table->foreignId('seller_id')->nullable()->after('category_id')->constrained('sellers')->onDelete('set null');
+            }
         });
     }
 

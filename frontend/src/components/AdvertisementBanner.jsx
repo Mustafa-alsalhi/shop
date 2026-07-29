@@ -20,25 +20,8 @@ const AdvertisementBanner = () => {
       setBanners(bannerData)
     } catch (error) {
       console.error('Error fetching banners:', error)
-      // Fallback to dummy data if API fails
-      setBanners([
-        {
-          id: 1,
-          image_url: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&h=300&fit=crop',
-          title: 'Summer Sale',
-          description: 'Up to 50% Off',
-          link_url: '/products',
-          link_text: 'تسوق الآن'
-        },
-        {
-          id: 2,
-          image_url: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=300&fit=crop',
-          title: 'New Arrivals',
-          description: 'Latest Collection',
-          link_url: '/products',
-          link_text: 'استكشف الآن'
-        }
-      ])
+      // Don't show dummy data - just show empty
+      setBanners([])
     } finally {
       setLoading(false)
     }
@@ -116,16 +99,30 @@ const AdvertisementBanner = () => {
       >
         {banners.map((banner, index) => (
           <div key={banner.id} className="relative w-full h-full flex-shrink-0 banner-slide">
-            <img
-              src={banner.full_image_url || (banner.image_url.startsWith('http') ? banner.image_url : `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-d82a.up.railway.app'}${banner.image_url}`)}
-              alt={banner.title}
-              className="w-full h-full object-cover cursor-pointer"
-              onClick={(e) => handleBannerClick(banner.link_url, e)}
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = 'https://via.placeholder.com/800x400?text=Banner+Image';
-              }}
-            />
+            {banner.full_image_url || banner.image_url ? (
+              <img
+                src={banner.full_image_url || banner.image_url}
+                alt={banner.title}
+                className="w-full h-full object-cover cursor-pointer"
+                onClick={(e) => handleBannerClick(banner.link_url, e)}
+                onError={(e) => {
+                  e.target.style.display = 'none'
+                  e.target.nextElementSibling.style.display = 'flex'
+                }}
+              />
+            ) : null}
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center" style={{ display: (banner.full_image_url || banner.image_url) ? 'none' : 'flex' }}>
+              <div className="text-center">
+                <span className="text-4xl mb-2 block">🎉</span>
+                <p className="text-gray-600 text-sm">جاري تحميل الإعلان...</p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="mt-2 px-4 py-2 bg-amber-600 text-white rounded-lg text-sm hover:bg-amber-700 transition-colors"
+                >
+                  إعادة التحميل
+                </button>
+              </div>
+            </div>
             
             {/* Overlay - Removed orange background */}
             <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-transparent">

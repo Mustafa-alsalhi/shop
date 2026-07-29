@@ -66,7 +66,21 @@ class Banner extends Model
             return $this->image_url;
         }
 
-        return url($this->image_url);
+        // Use the application root URL
+        $backendUrl = url('/');
+
+        // If image_url starts with /storage/, prepend the backend URL
+        if (str_starts_with($this->image_url, '/storage/')) {
+            return $backendUrl . $this->image_url;
+        }
+
+        // If image_url starts with /, prepend the backend URL
+        if (str_starts_with($this->image_url, '/')) {
+            return $backendUrl . $this->image_url;
+        }
+
+        // Otherwise, prepend /storage/ and the backend URL
+        return $backendUrl . '/storage/' . $this->image_url;
     }
 
     /**

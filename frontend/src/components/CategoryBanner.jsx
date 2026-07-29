@@ -248,13 +248,13 @@ const CategoryBanner = () => {
     return (
       <div className="bg-white/80 backdrop-blur-sm py-8 border-y border-amber-200/30">
         <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center mb-12">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">**</h2>
+          <div className="flex flex-row-reverse justify-between items-center mb-12">
+            <h2 className="text-2xl sm:text-2xl md:text-3xl font-bold text-black">تسوق حسب الفئة</h2>
             <Link 
               to="/categories" 
-              className="inline-flex items-center text-amber-600 hover:text-amber-700 font-medium transition-colors text-xs sm:text-sm md:text-base"
+              className="inline-flex items-center text-amber-600 hover:text-amber-700 font-bold transition-colors text-xs sm:text-sm md:text-base"
             >
-              <span>**</span>
+              <span>عرض جميع الفئات</span>
               <ChevronRightIcon className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 mr-1" />
             </Link>
           </div>
@@ -271,8 +271,15 @@ const CategoryBanner = () => {
                 {[...Array(8)].map((_, index) => (
                   <div 
                     key={index} 
-                    className="flex-none w-32 h-32 bg-amber-100 rounded-lg animate-pulse"
-                  />
+                    className="flex-none w-32 sm:w-36 md:w-40 lg:w-44 xl:w-48"
+                  >
+                    <div className="block bg-white/80 backdrop-blur-sm rounded-lg shadow-lg overflow-hidden border border-amber-200/30 animate-pulse">
+                      <div className="h-32 sm:h-36 md:h-40 lg:h-44 xl:h-48 bg-gray-200"></div>
+                      <div className="p-3 bg-white/60 backdrop-blur-sm">
+                        <div className="h-4 bg-gray-200 rounded mx-auto w-3/4"></div>
+                      </div>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
@@ -289,11 +296,11 @@ const CategoryBanner = () => {
   return (
     <div className="bg-white/80 backdrop-blur-sm py-8 border-y border-amber-200/30">
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center mb-12">
+        <div className="flex flex-row-reverse justify-between items-center mb-12">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">تسوق حسب الفئة</h2>
           <Link 
             to="/categories" 
-            className="inline-flex items-center text-amber-600 hover:text-amber-700 font-medium transition-colors text-xs sm:text-sm md:text-base"
+            className="inline-flex items-center text-amber-600 hover:text-amber-700 font-bold transition-colors text-xs sm:text-sm md:text-base"
           >
             <span>عرض جميع الفئات</span>
             <ChevronRightIcon className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 mr-1" />
@@ -348,11 +355,28 @@ const CategoryBanner = () => {
                 }}
               >
                 {Array.isArray(categories) && categories.map((category, index) => (
-                  <div 
-                    key={category.id} 
+                  <div
+                    key={category.id}
                     className="flex-none w-32 sm:w-36 md:w-40 lg:w-44 xl:w-48"
+                    onMouseEnter={() => {
+                      console.log('Category card mouse enter - STOPPING AUTOPLAY')
+                      setIsPausedCategories(true)
+                      setIsAutoPlaying(false)
+                      if (categoriesIntervalRef.current) {
+                        clearInterval(categoriesIntervalRef.current)
+                        console.log('Categories interval cleared directly')
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      console.log('Category card mouse leave - RESUMING AUTOPLAY IN 2 SECONDS')
+                      setIsPausedCategories(false)
+                      setTimeout(() => {
+                        console.log('Timeout - RESUMING AUTOPLAY')
+                        setIsAutoPlaying(true)
+                      }, 2000)
+                    }}
                   >
-                    <Link 
+                    <Link
                       to={`/products?category=${category.id}`}
                       className="block bg-white/80 backdrop-blur-sm rounded-lg shadow-lg overflow-hidden hover:shadow-amber-200/50 transition-all duration-300 transform hover:scale-105 border border-amber-200/30 hover:border-amber-300/60"
                     >
@@ -379,7 +403,7 @@ const CategoryBanner = () => {
                         </div>
                       </div>
                       <div className="p-3 bg-white/60 backdrop-blur-sm">
-                        <h3 className="text-sm font-semibold text-amber-800 text-center truncate">{category.name}</h3>
+                        <h3 className="text-sm font-semibold text-black text-center truncate">{category.name}</h3>
                       </div>
                     </Link>
                   </div>

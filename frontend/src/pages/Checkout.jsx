@@ -9,8 +9,9 @@ import {
   ShieldCheckIcon,
   TruckIcon,
   CheckCircleIcon,
+  ArrowLeftIcon,
 } from '@heroicons/react/24/outline'
-import { selectCartItems, selectCartTotal, selectCartSubtotal, selectCartTax, clearCart, fetchCart } from '../store/slices/cartSlice'
+import { selectCartItems, selectCartTotal, selectCartSubtotal, selectCartTax, selectAppliedCoupon, clearCart, fetchCart, setAppliedCoupon, clearAppliedCoupon } from '../store/slices/cartSlice'
 import { selectUser, selectIsAuthenticated } from '../store/slices/authSlice'
 import { showSuccessNotification, showErrorNotification } from '../store/slices/uiSlice'
 import api from '../services/api'
@@ -18,18 +19,22 @@ import orderService from '../services/orderService'
 import shippingService from '../services/shippingService'
 import paymentMethodService from '../services/paymentMethodService'
 import LoadingSpinner from '../components/UI/LoadingSpinner'
+import LocationPicker from '../components/LocationPicker'
 
 // Helper function for default icons
 const getDefaultIconElement = (code, isSelected) => {
   switch (code) {
+    case 'online':
     case 'credit_card':
       return <CreditCardIcon className={`h-5 w-5 ${isSelected ? 'text-white' : 'text-gray-600'}`} />
     case 'paypal':
       return <div className={`h-5 w-5 flex items-center justify-center font-bold ${isSelected ? 'text-white' : 'text-blue-600'}`}>P</div>
     case 'bank_transfer':
+    case 'bank':
       return <div className={`h-5 w-5 flex items-center justify-center font-bold ${isSelected ? 'text-white' : 'text-green-600'}`}>B</div>
+    case 'cod':
     case 'cash_on_delivery':
-      return <div className={`h-5 w-5 flex items-center justify-center ${isSelected ? 'text-white' : 'text-orange-600'}`}>💵</div>
+      return <div className={`h-5 w-5 flex items-center justify-center text-lg ${isSelected ? 'text-white' : 'text-orange-600'}`}>💵</div>
     default:
       return <div className={`h-5 w-5 flex items-center justify-center font-bold ${isSelected ? 'text-white' : 'text-gray-600'}`}>$</div>
   }
@@ -55,6 +60,7 @@ const Checkout = () => {
   const cartSubtotal = useSelector(selectCartSubtotal)
   const cartTax = useSelector(selectCartTax)
   const cartTotal = useSelector(selectCartTotal)
+  const appliedCoupon = useSelector(selectAppliedCoupon)
   
   // Get currency from cart items
   const currency = getCartCurrency(cartItems)
@@ -65,6 +71,28 @@ const Checkout = () => {
   const [createdOrder, setCreatedOrder] = useState(null)
   const [errors, setErrors] = useState({})
   const [isLoading, setIsLoading] = useState(false)
+  const [couponCode, setCouponCode] = useState('')
+  const [couponLoading, setCouponLoading] = useState(false)
+  const [couponError, setCouponError] = useState('')
+
+  const [deliveryEstimation, setDeliveryEstimation] = useState({
+    fee: 15,
+    distance_km: 0,
+    loading: false,
+    calculated: false
+  });
+
+  // Calculate discount based on applied coupon
+  const discountAmount = appliedCoupon ? (appliedCoupon.discount_amount || 0) : 0
+  const finalTotal = cartTotal - discountAmount + deliveryEstimation.fee
+  
+  // Location data state
+  const [locationData, setLocationData] = useState({
+    latitude: null,
+    longitude: null,
+    formatted_address: '',
+    building_details: ''
+  })
   
   // Dynamic data states
   const [shippingCompanies, setShippingCompanies] = useState([])
@@ -80,11 +108,58 @@ const Checkout = () => {
   useEffect(() => {
     if (isAuthenticated) {
       dispatch(fetchCart()).catch(error => {
+        console.error('Failed to load cart:', error)
         // If cart fails to load, don't block the checkout page
         // User can still proceed with checkout
       })
     }
   }, [dispatch, isAuthenticated])
+
+  // Fetch dynamic delivery fee when location is selected
+  useEffect(() => {
+    if (locationData.latitude && locationData.longitude && cartItems.length > 0) {
+      const fetchDeliveryFee = async () => {
+        setDeliveryEstimation(prev => ({ ...prev, loading: true }));
+        try {
+          const token = localStorage.getItem('token');
+          const apiUrl = import.meta.env.VITE_API_URL || '/api';
+          
+          const response = await fetch(`${apiUrl}/checkout/calculate-delivery`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              latitude: locationData.latitude,
+              longitude: locationData.longitude
+            }),
+          });
+          
+          const data = await response.json();
+          if (response.ok) {
+            setDeliveryEstimation({
+              fee: data.fee,
+              distance_km: data.distance_km,
+              loading: false,
+              calculated: true
+            });
+          } else {
+             setDeliveryEstimation(prev => ({ ...prev, loading: false, fee: 15 }));
+          }
+        } catch (error) {
+          console.error("Failed to calculate delivery fee", error);
+          setDeliveryEstimation(prev => ({ ...prev, loading: false, fee: 15 }));
+        }
+      };
+      
+      const debounceTimer = setTimeout(() => {
+        fetchDeliveryFee();
+      }, 800);
+      
+      return () => clearTimeout(debounceTimer);
+    }
+  }, [locationData.latitude, locationData.longitude, cartItems]);
 
   // Load shipping companies and payment methods
   useEffect(() => {
@@ -98,9 +173,42 @@ const Checkout = () => {
           paymentMethodService.getActivePaymentMethods()
         ])
         
+        const staticMethods = [
+          {
+            id: 'cod',
+            code: 'cod',
+            name: 'الدفع عند الاستلام',
+            description: 'ادفع نقداً لمندوب التوصيل',
+            fee: 0,
+            icon_image: null,
+          },
+          {
+            id: 'online',
+            code: 'online',
+            name: 'الدفع الإلكتروني',
+            description: 'مدى، فيزا، ماستركارد، Apple Pay',
+            fee: 0,
+            icon_image: null,
+            comingSoon: true,
+          }
+        ];
+
+        const finalMethods = [...paymentData];
+        
+        // Add static cod if not present in DB (to guarantee the UI block renders)
+        if (!finalMethods.some(m => m.code === 'cod' || m.code === 'cash_on_delivery')) {
+          finalMethods.push(staticMethods[0]);
+        }
+        
+        // Add static online if not present in DB
+        if (!finalMethods.some(m => m.code === 'online')) {
+          finalMethods.push(staticMethods[1]);
+        }
+
         setShippingCompanies(shippingData)
-        setPaymentMethods(paymentData)
+        setPaymentMethods(finalMethods)
       } catch (error) {
+        console.error('Failed to load checkout data', error)
       } finally {
         setLoadingShipping(false)
         setLoadingPayment(false)
@@ -113,7 +221,7 @@ const Checkout = () => {
   // Utility function for image URLs
   const getImageUrl = useCallback((imageUrl, productName, size = 80) => {
     // Get base URL from environment or fallback to Railway production
-    const baseUrl = import.meta.env.VITE_API_URL || 'https://shop-production-d82a.up.railway.app/api'
+    const baseUrl = import.meta.env.VITE_API_URL || 'https://shop-production-8385.up.railway.app/api'
     const publicUrl = baseUrl.replace('/api', '')
     
     if (imageUrl && imageUrl !== 'null' && imageUrl !== 'undefined' && imageUrl !== null) {
@@ -179,8 +287,9 @@ const Checkout = () => {
       return
     }
     
-    // Check if cart is empty (but don't block if cart fails to load)
-    if (cartItems && cartItems.length === 0) {
+    // Check if cart is empty
+    if (!cartItems || cartItems.length === 0) {
+      console.log('Cart is empty, redirecting to cart page')
       navigate('/cart')
       return
     }
@@ -213,12 +322,45 @@ const Checkout = () => {
     }
   }
 
+  // Payment methods drag handlers
+  const handlePaymentDragStart = (e) => {
+    const el = document.getElementById('payment-methods-container');
+    if (!el) return;
+    const clientX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+    setPaymentDrag({
+      isDragging: true,
+      startX: clientX - el.offsetLeft,
+      scrollLeft: el.scrollLeft
+    });
+  };
+
+  const handlePaymentDragEnd = () => {
+    setPaymentDrag(prev => ({ ...prev, isDragging: false }));
+  };
+
+  const handlePaymentDragMove = (e) => {
+    if (!paymentDrag.isDragging) return;
+    const el = document.getElementById('payment-methods-container');
+    if (!el) return;
+    e.preventDefault();
+    const clientX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+    const x = clientX - el.offsetLeft;
+    const walk = (x - paymentDrag.startX) * 2;
+    el.scrollLeft = paymentDrag.scrollLeft - walk;
+  };
+
   const handlePaymentMethodChange = (paymentMethod) => {
     setFormData(prev => ({
       ...prev,
       payment_method: paymentMethod.code
     }))
-    setShowPaymentModal(true)
+    
+    // Only show payment modal for methods that actually require manual uploading of receipts
+    if (paymentMethod.code !== 'cod' && paymentMethod.code !== 'cash_on_delivery' && paymentMethod.code !== 'online') {
+      setShowPaymentModal(true)
+    } else {
+      setShowPaymentModal(false)
+    }
   }
 
   const handleImageUpload = (e) => {
@@ -275,6 +417,58 @@ const Checkout = () => {
     }
   }
 
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      setCouponError('يرجى إدخال كود الخصم')
+      return
+    }
+
+    setCouponLoading(true)
+    setCouponError('')
+
+    try {
+      const token = localStorage.getItem('token')
+      const apiUrl = import.meta.env.VITE_API_URL || '/api'
+
+      const response = await fetch(`${apiUrl}/coupons/apply`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code: couponCode.trim(),
+          total_amount: cartSubtotal,
+          products: cartItems.map(item => ({
+            id: item.product_id,
+            category_id: item.category_id,
+            price: item.price,
+            quantity: item.quantity
+          }))
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        dispatch(setAppliedCoupon({
+          ...data.data.coupon,
+          discount_amount: data.data.discount_amount,
+          eligible_amount: data.data.eligible_amount
+        }))
+        dispatch(showSuccessNotification('تم تطبيق كود الخصم بنجاح'))
+        setCouponCode('')
+      } else {
+        setCouponError(data.message || 'كود الخصم غير صالح')
+      }
+    } catch (error) {
+      console.error('Error applying coupon:', error)
+      setCouponError('حدث خطأ أثناء تطبيق كود الخصم')
+    } finally {
+      setCouponLoading(false)
+    }
+  }
+
   const validateForm = () => {
     const newErrors = {}
 
@@ -284,17 +478,13 @@ const Checkout = () => {
     if (!formData.email.trim()) newErrors.email = 'البريد الإلكتروني مطلوب'
     if (!formData.phone.trim()) newErrors.phone = 'رقم الهاتف مطلوب'
 
-    // Shipping Information
-    if (!formData.address.trim()) newErrors.address = 'العنوان مطلوب'
-    if (!formData.city.trim()) newErrors.city = 'المدينة مطلوبة'
-    if (!formData.state.trim()) newErrors.state = 'الولاية مطلوبة'
-    if (!formData.postal_code.trim()) newErrors.postal_code = 'الرمز البريدي مطلوب'
-    if (!formData.country.trim()) newErrors.country = 'البلد مطلوب'
-
-    // Shipping Company
-    if (!formData.shipping_company.trim()) {
-      newErrors.shipping_company = 'شركة التوصيل مطلوبة'
-      dispatch(showErrorNotification('يرجى اختيار شركة التوصيل'))
+    // Location Information
+    if (!locationData.latitude || !locationData.longitude) {
+      newErrors.location = 'يرجى تحديد الموقع على الخريطة'
+      dispatch(showErrorNotification('يرجى تحديد الموقع على الخريطة'))
+    }
+    if (!locationData.formatted_address.trim()) {
+      newErrors.formatted_address = 'العنوان مطلوب'
     }
 
     // Payment Method
@@ -304,16 +494,16 @@ const Checkout = () => {
     }
 
     // Payment Information
-    if (formData.payment_method) {
-      if (!formData.payer_name.trim()) {
+    if (formData.payment_method && formData.payment_method !== 'cod' && formData.payment_method !== 'cash_on_delivery' && formData.payment_method !== 'online') {
+      if (!formData.payer_name?.trim()) {
         newErrors.payer_name = 'اسم الشخص الذي قام بالإيداع مطلوب'
         dispatch(showErrorNotification('يرجى إدخال اسم الشخص الذي قام بالإيداع'))
       }
-      if (!formData.reference_number.trim()) {
+      if (!formData.reference_number?.trim()) {
         newErrors.reference_number = 'رقم المرجع مطلوب'
         dispatch(showErrorNotification('يرجى إدخال رقم المرجع للإيداع'))
       }
-      if (!formData.phone_number.trim()) {
+      if (!formData.phone_number?.trim()) {
         newErrors.phone_number = 'رقم الهاتف مطلوب'
         dispatch(showErrorNotification('يرجى إدخال رقم الهاتف'))
       }
@@ -341,31 +531,50 @@ const Checkout = () => {
       // Prepare order data for backend
       const orderData = {
         shipping_address: {
-          address: formData.address,
-          city: formData.city,
-          state: formData.state,
-          postal_code: formData.postal_code,
-          country: formData.country,
+          formatted_address: locationData.formatted_address,
+          building_details: locationData.building_details,
         },
         billing_address: {
-          address: formData.address,
-          city: formData.city,
-          state: formData.state,
-          postal_code: formData.postal_code,
-          country: formData.country,
+          formatted_address: locationData.formatted_address,
+          building_details: locationData.building_details,
         },
         payment_method: formData.payment_method,
         shipping_company: formData.shipping_company,
         notes: formData.order_notes,
+        latitude: locationData.latitude,
+        longitude: locationData.longitude,
+        formatted_address: locationData.formatted_address,
+        building_details: locationData.building_details,
       }
 
       // Save order to database
-      const response = await orderService.createOrder(orderData)
-
-      if (response.data) {
-        const order = response.data
+      console.log('=== CREATING ORDER ===')
+      console.log('Order data:', orderData)
+      console.log('Cart items:', cartItems)
+      console.log('Cart total:', cartTotal)
+      
+      let order
+      try {
+        const response = await orderService.createOrder(orderData)
+        console.log('Order creation response:', response)
+        console.log('Order response data:', response.data)
         
-        // Create payment request
+        if (!response.data) {
+          throw new Error('No order data returned from server')
+        }
+        
+        order = response.data
+        console.log('Order created successfully:', order.id)
+      } catch (orderError) {
+        console.error('❌ ORDER CREATION FAILED:', orderError)
+        console.error('Order error response:', orderError.response?.data)
+        dispatch(showErrorNotification('فشل في إنشاء الطلب: ' + (orderError.response?.data?.message || orderError.message)))
+        setIsProcessing(false)
+        return
+      }
+      
+      // Create payment request only if it requires manual proof
+      if (formData.payment_method !== 'cod' && formData.payment_method !== 'cash_on_delivery' && formData.payment_method !== 'online') {
         const selectedPaymentMethod = paymentMethods.find(m => m.code === formData.payment_method)
         const paymentRequestData = {
           order_id: order.id,
@@ -379,6 +588,8 @@ const Checkout = () => {
           payment_fee: typeof selectedPaymentMethod?.fee === 'number' ? selectedPaymentMethod.fee : parseFloat(selectedPaymentMethod?.fee || 0),
         }
 
+        console.log('Payment request data:', paymentRequestData)
+
         // Handle payment image upload
         if (formData.payment_image) {
           try {
@@ -386,7 +597,7 @@ const Checkout = () => {
             const response_img = await fetch(formData.payment_image)
             const blob = await response_img.blob()
             const file = new File([blob], 'payment_image.jpg', { type: 'image/jpeg' })
-            
+
             const formData_upload = new FormData()
             formData_upload.append('payment_image', file)
             formData_upload.append('order_id', order.id)
@@ -399,47 +610,58 @@ const Checkout = () => {
             formData_upload.append('payment_amount', cartTotal)
             formData_upload.append('payment_fee', paymentRequestData.payment_fee)
 
-            const paymentResponse = await api.post('/admin/payment-requests', formData_upload, {
+            console.log('Uploading payment request with image...')
+
+            const paymentResponse = await api.post('/user/payment-requests', formData_upload, {
               headers: {
                 'Content-Type': 'multipart/form-data',
               },
             })
+
+            console.log('Payment request created successfully:', paymentResponse.data)
           } catch (paymentError) {
+            console.error('Payment request error with image:', paymentError)
+            console.error('Error response:', paymentError.response?.data)
             throw paymentError
           }
         } else {
           try {
-            const paymentResponse = await api.post('/admin/payment-requests', paymentRequestData)
+            console.log('Creating payment request without image...')
+
+            const paymentResponse = await api.post('/user/payment-requests', paymentRequestData)
+
+            console.log('Payment request created successfully:', paymentResponse.data)
           } catch (paymentError) {
+            console.error('Payment request error without image:', paymentError)
+            console.error('Error response:', paymentError.response?.data)
             throw paymentError
           }
         }
-        
-        // Store order and show success modal FIRST
-        setCreatedOrder(order)
-        setShowSuccessModal(true)
-        setShowPaymentModal(false)
-        
-        // Show success notification
-        dispatch(showSuccessNotification('تم إنشاء الطلب وإرسال طلب الدفع بنجاح!', {
-          title: 'نجاح',
-          duration: 5000
-        }))
-        
-        // Don't clear cart automatically - it will be cleared when user confirms in modal
-        
-      } else {
-        dispatch(showErrorNotification('فشل في إنشاء الطلب. يرجى المحاولة مرة أخرى.', {
-          title: 'خطأ',
-          duration: 5000
-        }))
       }
+      
+      // Store order and show success modal FIRST
+      setCreatedOrder(order)
+      setShowSuccessModal(true)
+      setShowPaymentModal(false)
+      
+      // Show success notification
+      dispatch(showSuccessNotification('تم إنشاء الطلب وإرسال طلب الدفع بنجاح!', {
+        title: 'نجاح',
+        duration: 5000
+      }))
+      
+      // Don't clear cart automatically - it will be cleared when user confirms in modal
 
     } catch (error) {
-      dispatch(showErrorNotification('حدث خطأ. يرجى المحاولة مرة أخرى.', {
-          title: 'خطأ',
-          duration: 5000
-        }))
+      console.error('Checkout error:', error)
+      console.error('Error response:', error.response?.data)
+      console.error('Error status:', error.response?.status)
+      
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || 'حدث خطأ. يرجى المحاولة مرة أخرى.'
+      dispatch(showErrorNotification(errorMessage, {
+        title: 'خطأ',
+        duration: 5000
+      }))
     } finally {
       setIsProcessing(false)
     }
@@ -447,6 +669,118 @@ const Checkout = () => {
 
   if (isLoading) {
     return <LoadingSpinner />
+  }
+
+  // Show cart empty message
+  if (!cartItems || cartItems.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+            <ShoppingCartIcon className="h-24 w-24 text-gray-300 mx-auto mb-6" />
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">سلتك فارغة</h2>
+            <p className="text-gray-600 mb-8">يجب إضافة منتجات للسلة قبل إتمام عملية الدفع</p>
+            <button
+              onClick={() => navigate('/')}
+              className="inline-flex items-center gap-2 bg-amber-600 text-white px-6 py-3 rounded-xl hover:bg-amber-700 transition-colors"
+            >
+              <ArrowLeftIcon className="h-5 w-5" />
+              <span>تصفح المنتجات</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const renderPaymentCard = (method, isFullWidth = false) => {
+    if (!method) return null;
+    return (
+      <div
+        key={method.id || method.code}
+        className={`${isFullWidth ? 'w-full' : 'flex-none w-[260px] sm:w-[320px] shrink-0'} group relative p-5 sm:p-6 rounded-xl sm:rounded-2xl transition-all duration-300 overflow-hidden ${
+          method.comingSoon
+            ? 'bg-gray-100 border-2 border-gray-200 opacity-60 cursor-not-allowed grayscale'
+            : formData.payment_method === method.code
+              ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-xl shadow-green-500/30 ring-2 ring-green-500 ring-offset-2 cursor-pointer'
+              : 'bg-white border-2 border-gray-100 hover:border-green-300 hover:shadow-lg cursor-pointer'
+        }`}
+        onClick={() => {
+          if (!method.comingSoon) {
+            handlePaymentMethodChange(method)
+          }
+        }}
+      >
+        {method.comingSoon && (
+          <div className="absolute top-3 left-3 bg-red-500 text-white text-[10px] sm:text-xs px-2 py-1 rounded-full font-bold shadow-md transform -rotate-12 z-10">
+            قريباً
+          </div>
+        )}
+        <div className="flex items-start opacity-100">
+          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ml-4 transition-all shrink-0 ${
+            formData.payment_method === method.code
+              ? 'border-white bg-white'
+              : method.comingSoon ? 'border-gray-300 bg-gray-200' : 'border-gray-300 group-hover:border-green-500'
+          }`}>
+            {formData.payment_method === method.code && (
+              <div className="w-3 h-3 bg-green-600 rounded-full"></div>
+            )}
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className={`text-lg font-bold ${
+                formData.payment_method === method.code ? 'text-white' : 'text-gray-900'
+              }`}>
+                {method.name}
+              </h3>
+              {typeof method.fee === 'number' && method.fee > 0 && (
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold shrink-0 ${
+                  formData.payment_method === method.code
+                    ? 'bg-white/20 text-white'
+                    : 'bg-yellow-100 text-yellow-800'
+                }`}>
+                  +${method.fee.toFixed(2)} رسوم
+                </span>
+              )}
+            </div>
+            <p className={`text-sm mb-4 ${
+              formData.payment_method === method.code ? 'text-green-100' : 'text-gray-600'
+            }`}>
+              {method.description}
+            </p>
+            <div className="flex items-center">
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ml-3 shrink-0 ${
+                formData.payment_method === method.code ? 'bg-white/20' : 'bg-gray-100'
+              }`}>
+                {method.icon_image ? (
+                  <img
+                    src={method.icon_image}
+                    alt={method.name}
+                    className="w-8 h-8 object-cover rounded-lg"
+                    onError={(e) => {
+                      e.target.style.display = 'none'
+                      e.target.parentElement.innerHTML = getDefaultIconElement(method.code, formData.payment_method === method.code)
+                    }}
+                  />
+                ) : (
+                  getDefaultIconElement(method.code, formData.payment_method === method.code)
+                )}
+              </div>
+              <span className={`text-xs font-medium ${
+                formData.payment_method === method.code ? 'text-green-100' : 'text-gray-500'
+              }`}>
+                {method.code === 'online' ? 'آمن وموثوق' : method.name}
+              </span>
+            </div>
+          </div>
+        </div>
+        {formData.payment_method === method.code && (
+          <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
+            <CheckCircleIcon className="h-5 w-5 text-white" />
+          </div>
+        )}
+      </div>
+    )
   }
 
   return (
@@ -539,218 +873,33 @@ const Checkout = () => {
                 </div>
               </div>
 
-              {/* Shipping Information */}
+              {/* Shipping Information - Map-based Location Picker */}
               <div className="bg-gray-50 p-6 rounded-lg">
                 <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
                   <MapPinIcon className="h-5 w-5 mr-2" />
                   معلومات الشحن
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      عنوان الشارع
-                    </label>
-                    <input
-                      type="text"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                        errors.address ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      placeholder="123 الشارع الرئيسي"
-                    />
-                    {errors.address && (
-                      <p className="mt-1 text-sm text-red-600">{errors.address}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      المدينة
-                    </label>
-                    <input
-                      type="text"
-                      name="city"
-                      value={formData.city}
-                      onChange={handleInputChange}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                        errors.city ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      placeholder="الرياض"
-                    />
-                    {errors.city && (
-                      <p className="mt-1 text-sm text-red-600">{errors.city}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      الولاية
-                    </label>
-                    <input
-                      type="text"
-                      name="state"
-                      value={formData.state}
-                      onChange={handleInputChange}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                        errors.state ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      placeholder="الرياض"
-                    />
-                    {errors.state && (
-                      <p className="mt-1 text-sm text-red-600">{errors.state}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      الرمز البريدي
-                    </label>
-                    <input
-                      type="text"
-                      name="postal_code"
-                      value={formData.postal_code}
-                      onChange={handleInputChange}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                        errors.postal_code ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      placeholder="10001"
-                    />
-                    {errors.postal_code && (
-                      <p className="mt-1 text-sm text-red-600">{errors.postal_code}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      البلد
-                    </label>
-                    <input
-                      type="text"
-                      name="country"
-                      value={formData.country}
-                      onChange={handleInputChange}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                        errors.country ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      placeholder="المملكة العربية السعودية"
-                    />
-                    {errors.country && (
-                      <p className="mt-1 text-sm text-red-600">{errors.country}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Shipping Company Selection */}
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-2xl shadow-lg border border-blue-100">
-                <div className="flex items-center mb-8">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center ml-4">
-                    <MapPinIcon className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900">اختر شركة التوصيل</h2>
-                    <p className="text-gray-600">اختر الشركة المناسبة لتوصيل طلبك</p>
-                  </div>
-                </div>
-
-                {/* Horizontal Scroll Container */}
-                <div className="relative">
-                  {loadingShipping ? (
-                    <div className="text-center py-12">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-3 border-blue-600 mx-auto mb-6"></div>
-                      <p className="text-gray-600 text-lg">جاري تحميل شركات التوصيل...</p>
-                    </div>
-                  ) : shippingCompanies.length > 0 ? (
-                    <div
-                      id="shipping-companies-container"
-                      className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-4 cursor-grab active:cursor-grabbing"
-                      style={{
-                        scrollbarWidth: 'none',
-                        msOverflowStyle: 'none'
-                      }}
-                    >
-                      {shippingCompanies.map((company) => (
-                        <div
-                          key={company.id}
-                          className={`flex-none w-80 group relative p-6 rounded-2xl cursor-pointer transition-all duration-300 ${
-                            formData.shipping_company === company.code
-                              ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-xl transform scale-105'
-                              : 'bg-white border-2 border-gray-200 hover:border-blue-300 hover:shadow-lg transform hover:-translate-y-1'
-                          }`}
-                          onClick={() => handleInputChange({ target: { name: 'shipping_company', value: company.code } })}
-                        >
-                          <div className="flex items-start">
-                            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ml-4 transition-all ${
-                              formData.shipping_company === company.code
-                                ? 'border-white bg-white'
-                                : 'border-gray-300 group-hover:border-blue-500'
-                            }`}>
-                              {formData.shipping_company === company.code && (
-                                <div className="w-3 h-3 bg-blue-600 rounded-full"></div>
-                              )}
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between mb-3">
-                                <h3 className={`text-lg font-bold ${
-                                  formData.shipping_company === company.code ? 'text-white' : 'text-gray-900'
-                                }`}>
-                                  {company.name}
-                                </h3>
-                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                  formData.shipping_company === company.code
-                                    ? 'bg-white/20 text-white'
-                                    : 'bg-green-100 text-green-800'
-                                }`}>
-                                  {company.delivery_days} يوم
-                                </span>
-                              </div>
-                              <p className={`text-sm mb-4 ${
-                                formData.shipping_company === company.code ? 'text-blue-100' : 'text-gray-600'
-                              }`}>
-                                {company.description}
-                              </p>
-                              <div className="flex items-center justify-between">
-                                <div className={`text-lg font-bold ${
-                                  formData.shipping_company === company.code ? 'text-white' : 'text-blue-600'
-                                }`}>
-                                  ${typeof company.cost === 'number' ? company.cost.toFixed(2) : parseFloat(company.cost || 0).toFixed(2)}
-                                </div>
-                                <div className={`text-xs ${
-                                  formData.shipping_company === company.code ? 'text-blue-100' : 'text-gray-500'
-                                }`}>
-                                  تكلفة التوصيل
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          {formData.shipping_company === company.code && (
-                            <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                              <CheckCircleIcon className="h-5 w-5 text-white" />
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-12">
-                      <TruckIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                      <p className="text-gray-600 text-lg">لا توجد شركات توصيل متاحة</p>
-                    </div>
-                  )}
-                </div>
+                <LocationPicker 
+                  onLocationSelect={setLocationData}
+                  initialPosition={locationData.latitude && locationData.longitude ? [locationData.latitude, locationData.longitude] : null}
+                />
+                {errors.location && (
+                  <p className="mt-2 text-sm text-red-600">{errors.location}</p>
+                )}
+                {errors.formatted_address && (
+                  <p className="mt-2 text-sm text-red-600">{errors.formatted_address}</p>
+                )}
               </div>
 
               {/* Payment Information */}
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-8 rounded-2xl shadow-lg border border-green-100">
-                <div className="flex items-center mb-8">
-                  <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center ml-4">
-                    <CreditCardIcon className="h-6 w-6 text-white" />
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 sm:p-6 lg:p-8 rounded-2xl shadow-lg border border-green-100 w-full overflow-hidden">
+                <div className="flex items-center mb-5 sm:mb-8">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center ml-3 sm:ml-4">
+                    <CreditCardIcon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900">اختر طريقة الدفع</h2>
-                    <p className="text-gray-600">اختر الطريقة المناسبة لدفع طلبك</p>
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900">اختر طريقة الدفع</h2>
+                    <p className="text-sm sm:text-base text-gray-600">اختر الطريقة المناسبة لدفع طلبك</p>
                   </div>
                 </div>
 
@@ -762,90 +911,45 @@ const Checkout = () => {
                       <p className="text-gray-600 text-lg">جاري تحميل طرق الدفع...</p>
                     </div>
                   ) : paymentMethods.length > 0 ? (
-                    <div
-                      id="payment-methods-container"
-                      className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-4 cursor-grab active:cursor-grabbing"
-                      style={{
-                        scrollbarWidth: 'none',
-                        msOverflowStyle: 'none'
-                      }}
-                    >
-                      {paymentMethods.map((method) => (
-                        <div
-                          key={method.id}
-                          className={`flex-none w-80 group relative p-6 rounded-2xl cursor-pointer transition-all duration-300 ${
-                            formData.payment_method === method.code
-                              ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-xl transform scale-105'
-                              : 'bg-white border-2 border-gray-200 hover:border-green-300 hover:shadow-lg transform hover:-translate-y-1'
-                          }`}
-                          onClick={() => handlePaymentMethodChange(method)}
-                        >
-                          <div className="flex items-start">
-                            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ml-4 transition-all ${
-                              formData.payment_method === method.code
-                                ? 'border-white bg-white'
-                                : 'border-gray-300 group-hover:border-green-500'
-                            }`}>
-                              {formData.payment_method === method.code && (
-                                <div className="w-3 h-3 bg-green-600 rounded-full"></div>
-                              )}
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between mb-3">
-                                <h3 className={`text-lg font-bold ${
-                                  formData.payment_method === method.code ? 'text-white' : 'text-gray-900'
-                                }`}>
-                                  {method.name}
-                                </h3>
-                                {typeof method.fee === 'number' && method.fee > 0 && (
-                                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                    formData.payment_method === method.code
-                                      ? 'bg-white/20 text-white'
-                                      : 'bg-yellow-100 text-yellow-800'
-                                  }`}>
-                                    +${method.fee.toFixed(2)} رسوم
-                                  </span>
-                                )}
-                              </div>
-                              <p className={`text-sm mb-4 ${
-                                formData.payment_method === method.code ? 'text-green-100' : 'text-gray-600'
-                              }`}>
-                                {method.description}
-                              </p>
-                              <div className="flex items-center">
-                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ml-3 ${
-                                  formData.payment_method === method.code ? 'bg-white/20' : 'bg-gray-100'
-                                }`}>
-                                  {method.icon_image ? (
-                                    <img
-                                      src={method.icon_image}
-                                      alt={method.name}
-                                      className="w-8 h-8 object-cover rounded-lg"
-                                      onError={(e) => {
-                                        // Fallback to default icons if image fails to load
-                                        e.target.style.display = 'none'
-                                        e.target.parentElement.innerHTML = getDefaultIconElement(method.code, formData.payment_method === method.code)
-                                      }}
-                                    />
-                                  ) : (
-                                    getDefaultIconElement(method.code, formData.payment_method === method.code)
-                                  )}
-                                </div>
-                                <span className={`text-xs font-medium ${
-                                  formData.payment_method === method.code ? 'text-green-100' : 'text-gray-500'
-                                }`}>
-                                  {method.name}
-                                </span>
-                              </div>
-                            </div>
+                    <div className="space-y-6">
+                      {/* Bank Transfer / Other Custom Methods (Horizontal Scroll) */}
+                      {paymentMethods.filter(m => m.code !== 'cod' && m.code !== 'cash_on_delivery' && m.code !== 'online').length > 0 && (
+                        <div>
+                          <h3 className="text-sm font-bold text-gray-700 mb-3">التحويل البنكي وطرق أخرى</h3>
+                          <div
+                            id="payment-methods-container"
+                            className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-4 cursor-grab active:cursor-grabbing"
+                            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                            onMouseDown={handlePaymentDragStart}
+                            onMouseLeave={handlePaymentDragEnd}
+                            onMouseUp={handlePaymentDragEnd}
+                            onMouseMove={handlePaymentDragMove}
+                            onTouchStart={handlePaymentDragStart}
+                            onTouchEnd={handlePaymentDragEnd}
+                            onTouchMove={handlePaymentDragMove}
+                          >
+                            {paymentMethods
+                              .filter(m => m.code !== 'cod' && m.code !== 'cash_on_delivery' && m.code !== 'online')
+                              .map(method => renderPaymentCard(method))}
                           </div>
-                          {formData.payment_method === method.code && (
-                            <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                              <CheckCircleIcon className="h-5 w-5 text-white" />
-                            </div>
-                          )}
                         </div>
-                      ))}
+                      )}
+                      
+                      {/* Cash on Delivery */}
+                      {paymentMethods.find(m => m.code === 'cod' || m.code === 'cash_on_delivery') && (
+                        <div>
+                          <h3 className="text-sm font-bold text-gray-700 mb-3">الدفع نقداً</h3>
+                          {renderPaymentCard(paymentMethods.find(m => m.code === 'cod' || m.code === 'cash_on_delivery'), true)}
+                        </div>
+                      )}
+
+                      {/* Online Payment */}
+                      {paymentMethods.find(m => m.code === 'online') && (
+                        <div>
+                          <h3 className="text-sm font-bold text-gray-700 mb-3">البطاقات والحوالات الذكية</h3>
+                          {renderPaymentCard(paymentMethods.find(m => m.code === 'online'), true)}
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="text-center py-12">
@@ -921,17 +1025,38 @@ const Checkout = () => {
                   <span className="text-gray-600">المجموع الفرعي</span>
                   <span className="font-medium">{currency} {cartSubtotal.toFixed(2)}</span>
                 </div>
+                {appliedCoupon && discountAmount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-green-600">الخصم ({appliedCoupon.code})</span>
+                    <span className="font-medium text-green-600">-{currency} {discountAmount.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">الضريبة</span>
                   <span className="font-medium">{currency} {cartTax.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">الشحن</span>
-                  <span className="font-medium text-green-600">مجاني</span>
+                  <span className="text-gray-600 flex items-center">
+                    شحن وتوصيل
+                    {deliveryEstimation.loading && <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-600 mr-2"></div>}
+                  </span>
+                  <div className="text-left font-medium">
+                    {deliveryEstimation.calculated ? (
+                       <span className="text-gray-900">{currency} {deliveryEstimation.fee.toFixed(2)}</span>
+                    ) : (
+                       <span className="text-gray-500">حسب الموقع ({currency} 15 أساسي)</span>
+                    )}
+                  </div>
                 </div>
+                {deliveryEstimation.calculated && deliveryEstimation.distance_km > 0 && (
+                  <div className="flex justify-between text-xs mt-1">
+                    <span className="text-gray-500">المسافة المقدرة:</span>
+                    <span className="text-gray-500">{deliveryEstimation.distance_km} كم</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-lg font-bold pt-3 border-t border-gray-200">
                   <span>الإجمالي</span>
-                  <span className="text-green-600">{currency} {cartTotal.toFixed(2)}</span>
+                  <span className="text-green-600">{currency} {finalTotal.toFixed(2)}</span>
                 </div>
               </div>
 
@@ -943,13 +1068,46 @@ const Checkout = () => {
                 <div className="flex gap-2">
                   <input
                     type="text"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm"
                     placeholder="أدخل كود الخصم"
                   />
-                  <button className="px-4 py-2 border border-amber-600 text-amber-600 rounded-lg hover:bg-amber-50 transition-colors text-sm">
-                    تطبيق
+                  <button
+                    type="button"
+                    onClick={handleApplyCoupon}
+                    disabled={couponLoading}
+                    className="px-4 py-2 border border-amber-600 text-amber-600 rounded-lg hover:bg-amber-50 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {couponLoading ? 'جاري التطبيق...' : 'تطبيق'}
                   </button>
                 </div>
+                {couponError && (
+                  <p className="mt-2 text-sm text-red-600">{couponError}</p>
+                )}
+                {appliedCoupon && (
+                  <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-lg flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-green-700">
+                        تم تطبيق كود: {appliedCoupon.code}
+                      </p>
+                      <p className="text-xs text-green-600">
+                        الخصم: {appliedCoupon.type === 'percentage' ? `${appliedCoupon.value}%` : `${appliedCoupon.value}`}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        dispatch(clearAppliedCoupon())
+                        setCouponError('')
+                        dispatch(showSuccessNotification('تم إزالة كود الخصم'))
+                      }}
+                      className="text-xs text-red-600 hover:text-red-700"
+                    >
+                      إزالة
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Place Order Button */}

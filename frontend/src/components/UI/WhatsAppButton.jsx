@@ -1,8 +1,35 @@
 import React from 'react'
+import { useSelector } from 'react-redux'
 import WhatsAppIcon from './WhatsAppIcon'
+import { selectWhatsAppUrl } from '../../store/slices/settingsSlice'
+import { WHATSAPP_NUMBER, WHATSAPP_MESSAGES } from '../../config/whatsapp'
 
-const WhatsAppButton = ({ phoneNumber, message = "مرحباً، أود الاستفسار عن منتجاتكم" }) => {
+const WhatsAppButton = ({ message = WHATSAPP_MESSAGES.default }) => {
+  const whatsappUrlFromSettings = useSelector(selectWhatsAppUrl)
+  const settings = useSelector((state) => state.settings.data)
+  
+  console.log('WhatsAppButton - Full settings data:', settings)
+  console.log('WhatsAppButton - URL from settings:', whatsappUrlFromSettings)
+  console.log('WhatsAppButton - Default WHATSAPP_NUMBER:', WHATSAPP_NUMBER)
+  
+  // Extract phone number from settings URL if it's a full URL
+  let phoneNumber
+  if (whatsappUrlFromSettings) {
+    // If the URL contains https://wa.me/, extract the phone number
+    if (whatsappUrlFromSettings.includes('wa.me/')) {
+      phoneNumber = whatsappUrlFromSettings.split('wa.me/')[1].split('?')[0]
+    } else {
+      // Otherwise, use it as is (assuming it's just the phone number)
+      phoneNumber = whatsappUrlFromSettings
+    }
+  } else {
+    phoneNumber = WHATSAPP_NUMBER
+  }
+  
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`
+
+  console.log('WhatsAppButton - Final phone number:', phoneNumber)
+  console.log('WhatsAppButton - Final WhatsApp URL:', whatsappUrl)
 
   return (
     <a

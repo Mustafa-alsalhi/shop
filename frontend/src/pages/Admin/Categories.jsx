@@ -10,7 +10,7 @@ const AdminCategories = () => {
   const [error, setError] = useState('')
   const [showAddForm, setShowAddForm] = useState(false)
   const [editingCategory, setEditingCategory] = useState(null)
-  const [newCategory, setNewCategory] = useState({ name: '', description: '', image_url: '' })
+  const [newCategory, setNewCategory] = useState({ name: '', description: '', image_url: '', show_on_homepage: false, sort_order: 0 })
   const [previewImage, setPreviewImage] = useState('')
 
   useEffect(() => {
@@ -68,6 +68,8 @@ const AdminCategories = () => {
       const submitData = new FormData()
       submitData.append('name', newCategory.name.trim())
       submitData.append('description', newCategory.description?.trim() || '')
+      submitData.append('show_on_homepage', newCategory.show_on_homepage ? '1' : '0')
+      submitData.append('sort_order', newCategory.sort_order || '0')
 
       // Add image file if selected
       if (newCategory.image_file) {
@@ -93,7 +95,7 @@ const AdminCategories = () => {
         alert('تم إضافة الفئة بنجاح!')
       }
 
-      setNewCategory({ name: '', description: '', image_url: '', image_file: null })
+      setNewCategory({ name: '', description: '', image_url: '', image_file: null, show_on_homepage: false, sort_order: 0 })
       setPreviewImage('')
       setShowAddForm(false)
       fetchCategories() // Refresh categories list
@@ -112,7 +114,9 @@ const AdminCategories = () => {
       name: category.name || '',
       description: category.description || '',
       image_url: category.image_url || '',
-      image_file: null
+      image_file: null,
+      show_on_homepage: category.show_on_homepage || false,
+      sort_order: category.sort_order || 0
     })
     // Set preview image with proper URL handling
     if (category.image_url) {
@@ -137,7 +141,7 @@ const AdminCategories = () => {
 
   const handleCancel = () => {
     setEditingCategory(null)
-    setNewCategory({ name: '', description: '', image_url: '', image_file: null })
+    setNewCategory({ name: '', description: '', image_url: '', image_file: null, show_on_homepage: false, sort_order: 0 })
     setPreviewImage('')
     setShowAddForm(false)
   }
@@ -147,7 +151,7 @@ const AdminCategories = () => {
     if (!imagePath) return 'https://picsum.photos/seed/category/200/200.jpg'
     
     // Get base URL from environment or fallback to Railway production
-    const baseUrl = import.meta.env.VITE_API_URL || 'https://shop-production-d82a.up.railway.app/api'
+    const baseUrl = import.meta.env.VITE_API_URL || 'https://shop-production-8385.up.railway.app/api'
     const publicUrl = baseUrl.replace('/api', '')
     
     // If it's a relative path starting with /images/, convert to full URL
@@ -243,6 +247,35 @@ const AdminCategories = () => {
                     rows="3"
                     className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-50 text-xs sm:text-sm"
                   />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-4 sm:mt-6">
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                    ترتيب الظهور
+                  </label>
+                  <input
+                    type="number"
+                    value={newCategory.sort_order}
+                    onChange={(e) => setNewCategory({ ...newCategory, sort_order: parseInt(e.target.value) || 0 })}
+                    min="0"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-50 text-xs sm:text-sm"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    القيمة الأقل تظهر أولاً في الصفحة الرئيسية
+                  </p>
+                </div>
+                <div className="flex items-center">
+                  <label className="inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={newCategory.show_on_homepage}
+                      onChange={(e) => setNewCategory({ ...newCategory, show_on_homepage: e.target.checked })}
+                      className="sr-only peer"
+                    />
+                    <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+                    <span className="mr-3 text-xs sm:text-sm font-medium text-gray-900">عرض في الصفحة الرئيسية</span>
+                  </label>
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-4 sm:mt-6">

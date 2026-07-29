@@ -42,7 +42,9 @@ const ResetPassword = () => {
     const errors = {}
     
     if (!formData.token) {
-      errors.token = 'رمز إعادة التعيين مطلوب'
+      errors.token = 'رمز التحقق (OTP) مطلوب'
+    } else if (formData.token.length !== 6) {
+      errors.token = 'رمز التحقق يجب أن يكون 6 أرقام'
     }
     
     if (!formData.email) {
@@ -107,8 +109,33 @@ const ResetPassword = () => {
             </div>
           )}
 
-          {/* Token (Hidden Field) */}
-          <input type="hidden" name="token" value={formData.token} />
+          {/* OTP Token */}
+          <div>
+            <label htmlFor="token" className="block text-sm font-medium text-gray-700">
+              رمز التحقق (OTP) 
+            </label>
+            <div className="mt-1 flex gap-2">
+              <input
+                id="token"
+                name="token"
+                type="text"
+                required
+                maxLength="6"
+                value={formData.token}
+                onChange={handleChange}
+                className={`input text-center text-xl tracking-widest letter-spacing-[0.5em] ${validationErrors.token ? 'input-error' : ''}`}
+                placeholder="000000"
+              />
+            </div>
+            {validationErrors.token && (
+               <p className="mt-1 text-sm text-red-600">
+                  {validationErrors.token}
+               </p>
+            )}
+            <p className="text-xs text-gray-500 mt-2">
+                لقد أرسلنا رمزاً مكوناً من 6 أرقام إلى بريدك الإلكتروني.
+            </p>
+          </div>
 
           {/* Email */}
           <div>

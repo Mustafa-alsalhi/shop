@@ -6,21 +6,30 @@ import { loginUser, selectIsLoading, selectError, clearError } from '../../store
 import { showSuccessNotification, showErrorNotification } from '../../store/slices/uiSlice'
 import { fetchCart } from '../../store/slices/cartSlice'
 import { fetchWishlist } from '../../store/slices/wishlistSlice'
+import api from '../../services/api'
 
 const Login = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const location = useLocation()
-  
+
   const isLoading = useSelector(selectIsLoading)
   const error = useSelector(selectError)
-  
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   })
   const [showPassword, setShowPassword] = useState(false)
   const [validationErrors, setValidationErrors] = useState({})
+
+  // OTP states
+  const [step, setStep] = useState(1) // 1: email/password, 2: OTP
+  const [otp, setOtp] = useState('')
+  const [otpEmail, setOtpEmail] = useState('')
+  const [otpLoading, setOtpLoading] = useState(false)
+  const [otpError, setOtpError] = useState('')
+  const [resendCountdown, setResendCountdown] = useState(0)
 
   // Get redirect path from location state
   const from = location.state?.from?.pathname || '/'
@@ -30,10 +39,21 @@ const Login = () => {
     dispatch(clearError())
   }, [dispatch])
 
+  // Countdown timer for resend OTP
+  useEffect(() => {
+    let interval
+    if (resendCountdown > 0) {
+      interval = setInterval(() => {
+        setResendCountdown(prev => prev - 1)
+      }, 1000)
+    }
+    return () => clearInterval(interval)
+  }, [resendCountdown])
+
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
-    
+
     // Clear validation error for this field
     if (validationErrors[name]) {
       setValidationErrors(prev => ({ ...prev, [name]: '' }))
@@ -42,26 +62,26 @@ const Login = () => {
 
   const validateForm = () => {
     const errors = {}
-    
+
     if (!formData.email) {
       errors.email = 'البريد الإلكتروني مطلوب'
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       errors.email = 'البريد الإلكتروني غير صحيح'
     }
-    
+
     if (!formData.password) {
       errors.password = 'كلمة المرور مطلوبة'
     } else if (formData.password.length < 6) {
       errors.password = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'
     }
-    
+
     setValidationErrors(errors)
     return Object.keys(errors).length === 0
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
+
     if (!validateForm()) {
       return
     }
@@ -69,15 +89,98 @@ const Login = () => {
     try {
       const result = await dispatch(loginUser(formData))
       if (result.meta.requestStatus === 'fulfilled') {
-        dispatch(showSuccessNotification('تم تسجيل الدخول بنجاح!'))
-        // Fetch user's cart and wishlist from server
-        dispatch(fetchCart())
-        dispatch(fetchWishlist())
-        navigate(from, { replace: true })
+        // Check if OTP is required
+        if (result.payload.requires_otp) {
+          setStep(2)
+          setOtpEmail(result.payload.email)
+          setResendCountdown(60)
+          dispatch(showSuccessNotification('تم إرسال رمز التحقق إلى بريدك الإلكتروني'))
+        } else {
+          // Normal login (for backward compatibility)
+          dispatch(showSuccessNotification('تم تسجيل الدخول بنجاح!'))
+          dispatch(fetchCart())
+          dispatch(fetchWishlist())
+          
+          let targetPath = from;
+          // Extract user role from Redux payload
+          const userRole = result.payload.user?.role;
+          if (from === '/' || from === '/login') {
+            if (userRole === 'admin') targetPath = '/admin/dashboard';
+            else if (userRole === 'seller') targetPath = '/seller/dashboard';
+            else if (userRole === 'driver') targetPath = '/driver/dashboard';
+          }
+          navigate(targetPath, { replace: true })
+        }
       }
     } catch (error) {
       dispatch(showErrorNotification('فشل تسجيل الدخول'))
     }
+  }
+
+  const handleOtpSubmit = async (e) => {
+    e.preventDefault()
+    setOtpError('')
+    setOtpLoading(true)
+
+    try {
+      const response = await api.post('/verify-login-otp', {
+        email: otpEmail,
+        otp: otp
+      })
+
+      if (response.data.token) {
+        // Store token and user data in Redux
+        dispatch({
+          type: 'auth/login/fulfilled',
+          payload: {
+            user: response.data.user,
+            token: response.data.token
+          }
+        })
+
+        dispatch(showSuccessNotification('تم تسجيل الدخول بنجاح!'))
+        dispatch(fetchCart())
+        dispatch(fetchWishlist())
+        
+        let targetPath = from;
+        const userRole = response.data.user?.role;
+        if (from === '/' || from === '/login') {
+          if (userRole === 'admin') targetPath = '/admin/dashboard';
+          else if (userRole === 'seller') targetPath = '/seller/dashboard';
+          else if (userRole === 'driver') targetPath = '/driver/dashboard';
+        }
+        navigate(targetPath, { replace: true })
+      }
+    } catch (error) {
+      setOtpError(error.response?.data?.message || 'رمز التحقق غير صحيح')
+    } finally {
+      setOtpLoading(false)
+    }
+  }
+
+  const handleResendOtp = async () => {
+    if (resendCountdown > 0) return
+
+    setOtpLoading(true)
+    setOtpError('')
+
+    try {
+      await api.post('/resend-login-otp', {
+        email: otpEmail
+      })
+      setResendCountdown(60)
+      dispatch(showSuccessNotification('تم إعادة إرسال رمز التحقق'))
+    } catch (error) {
+      setOtpError(error.response?.data?.message || 'فشل في إعادة إرسال الرمز')
+    } finally {
+      setOtpLoading(false)
+    }
+  }
+
+  const handleOtpChange = (e) => {
+    const value = e.target.value.replace(/\D/g, '').slice(0, 6)
+    setOtp(value)
+    setOtpError('')
   }
 
   return (
@@ -102,128 +205,223 @@ const Login = () => {
 
           {/* Form Container */}
           <div className="px-8 py-6">
-            {/* Login Form */}
-            <form className="space-y-6" onSubmit={handleSubmit}>
-              {/* Error Message */}
-              {error && (
-                <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg">
-                  {error}
-                </div>
-              )}
-
-          {/* Email */}
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-amber-700 mb-2">
-              البريد الإلكتروني
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <svg className="h-5 w-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="أدخل بريدك الإلكتروني"
-                autoComplete="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className={`w-full pr-10 pl-3 py-3 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 backdrop-blur-sm ${validationErrors.email ? 'border-rose-500 focus:ring-rose-500 focus:border-rose-500' : ''}`}
-              />
-            </div>
-            {validationErrors.email && (
-              <p className="mt-1 text-sm text-rose-600">
-                {validationErrors.email}
-              </p>
-            )}
-          </div>
-
-          {/* Password */}
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-amber-700 mb-2">
-              كلمة المرور
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <svg className="h-5 w-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-              </div>
-              <input
-                id="password"
-                name="password"
-                placeholder="أدخل كلمة المرور"
-                type={showPassword ? 'text' : 'password'}
-                autoComplete="current-password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className={`w-full pr-10 pl-12 py-3 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 backdrop-blur-sm ${validationErrors.password ? 'border-rose-500 focus:ring-rose-500 focus:border-rose-500' : ''}`}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 left-0 pl-3 flex items-center"
-              >
-                {showPassword ? (
-                  <FaEyeSlash className="h-5 w-5 text-amber-600" />
-                ) : (
-                  <FaEye className="h-5 w-5 text-amber-600" />
+            {/* Step 1: Email & Password Form */}
+            {step === 1 && (
+              <form className="space-y-6" onSubmit={handleSubmit}>
+                {/* Error Message */}
+                {error && (
+                  <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg">
+                    {error}
+                  </div>
                 )}
-              </button>
-            </div>
-            {validationErrors.password && (
-              <p className="mt-1 text-sm text-rose-600">
-                {validationErrors.password}
-              </p>
-            )}
-          </div>
 
-          {/* Remember Me & Forgot Password */}
-          <div className="flex items-center justify-between" dir="rtl">
-            <div className="flex items-center" dir="rtl">
-              <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                className="h-4 w-4 text-amber-600 focus:ring-amber-500 border-amber-300 rounded"
-              />
-              <label htmlFor="remember-me" className="mr-2 block text-sm text-amber-800">
-                تذكرني
-              </label>
-            </div>
-
-            <div className="text-sm">
-              <Link
-                to="/forgot-password"
-                className="font-medium text-amber-600 hover:text-amber-700 transition-colors"
-              >
-                هل نسيت كلمة المرور؟
-              </Link>
-            </div>
-          </div>
-
-          {/* Submit Button */}
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full px-6 py-3 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-lg font-semibold hover:from-amber-700 hover:to-amber-800 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full border-2 border-amber-200 border-t-amber-600 h-5 w-5 ml-2"></div>
-                  جاري تسجيل الدخول...
+                {/* Email */}
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-amber-700 mb-2">
+                    البريد الإلكتروني
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="أدخل بريدك الإلكتروني"
+                      autoComplete="email"
+                      required
+                      value={formData.email}
+                      onChange={handleChange}
+                      className={`w-full pr-10 pl-3 py-3 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 backdrop-blur-sm ${validationErrors.email ? 'border-rose-500 focus:ring-rose-500 focus:border-rose-500' : ''}`}
+                    />
+                  </div>
+                  {validationErrors.email && (
+                    <p className="mt-1 text-sm text-rose-600">
+                      {validationErrors.email}
+                    </p>
+                  )}
                 </div>
-              ) : (
-              'تسجيل الدخول'
-              )}
-            </button>
-          </div>
-        </form>
+
+                {/* Password */}
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-amber-700 mb-2">
+                    كلمة المرور
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                    </div>
+                    <input
+                      id="password"
+                      name="password"
+                      placeholder="أدخل كلمة المرور"
+                      type={showPassword ? 'text' : 'password'}
+                      autoComplete="current-password"
+                      required
+                      value={formData.password}
+                      onChange={handleChange}
+                      className={`w-full pr-10 pl-12 py-3 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 backdrop-blur-sm ${validationErrors.password ? 'border-rose-500 focus:ring-rose-500 focus:border-rose-500' : ''}`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 left-0 pl-3 flex items-center"
+                    >
+                      {showPassword ? (
+                        <FaEyeSlash className="h-5 w-5 text-amber-600" />
+                      ) : (
+                        <FaEye className="h-5 w-5 text-amber-600" />
+                      )}
+                    </button>
+                  </div>
+                  {validationErrors.password && (
+                    <p className="mt-1 text-sm text-rose-600">
+                      {validationErrors.password}
+                    </p>
+                  )}
+                </div>
+
+                {/* Remember Me & Forgot Password */}
+                <div className="flex items-center justify-between" dir="rtl">
+                  <div className="flex items-center" dir="rtl">
+                    <input
+                      id="remember-me"
+                      name="remember-me"
+                      type="checkbox"
+                      className="h-4 w-4 text-amber-600 focus:ring-amber-500 border-amber-300 rounded"
+                    />
+                    <label htmlFor="remember-me" className="mr-2 block text-sm text-amber-800">
+                      تذكرني
+                    </label>
+                  </div>
+
+                  <div className="text-sm">
+                    <Link
+                      to="/forgot-password"
+                      className="font-medium text-amber-600 hover:text-amber-700 transition-colors"
+                    >
+                      هل نسيت كلمة المرور؟
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <div>
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full px-6 py-3 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-lg font-semibold hover:from-amber-700 hover:to-amber-800 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full border-2 border-amber-200 border-t-amber-600 h-5 w-5 ml-2"></div>
+                        جاري تسجيل الدخول...
+                      </div>
+                    ) : (
+                      'تسجيل الدخول'
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Step 2: OTP Form */}
+            {step === 2 && (
+              <form className="space-y-6" onSubmit={handleOtpSubmit}>
+                {/* Success Message */}
+                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+                  <p className="text-sm">تم إرسال رمز التحقق إلى بريدك الإلكتروني</p>
+                  <p className="text-xs mt-1 text-green-600">{otpEmail}</p>
+                </div>
+
+                {/* OTP Error */}
+                {otpError && (
+                  <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg">
+                    {otpError}
+                  </div>
+                )}
+
+                {/* OTP Input */}
+                <div>
+                  <label htmlFor="otp" className="block text-sm font-medium text-amber-700 mb-2">
+                    رمز التحقق
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
+                    </div>
+                    <input
+                      id="otp"
+                      name="otp"
+                      type="text"
+                      placeholder="أدخل الرمز المكون من 6 أرقام"
+                      maxLength={6}
+                      value={otp}
+                      onChange={handleOtpChange}
+                      className={`w-full pr-10 pl-3 py-3 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 backdrop-blur-sm text-center text-2xl tracking-widest font-bold ${otpError ? 'border-rose-500 focus:ring-rose-500 focus:border-rose-500' : ''}`}
+                    />
+                  </div>
+                  <p className="mt-2 text-xs text-gray-600 text-center">
+                    الرمز صالح لمدة 10 دقائق
+                  </p>
+                </div>
+
+                {/* Resend OTP */}
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={handleResendOtp}
+                    disabled={resendCountdown > 0 || otpLoading}
+                    className="text-amber-600 hover:text-amber-700 text-sm font-medium disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {resendCountdown > 0
+                      ? `إعادة الإرسال خلال ${resendCountdown} ثانية`
+                      : 'إعادة إرسال الرمز'
+                    }
+                  </button>
+                </div>
+
+                {/* Verify Button */}
+                <div>
+                  <button
+                    type="submit"
+                    disabled={otpLoading || otp.length !== 6}
+                    className="w-full px-6 py-3 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-lg font-semibold hover:from-amber-700 hover:to-amber-800 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {otpLoading ? (
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full border-2 border-amber-200 border-t-amber-600 h-5 w-5 ml-2"></div>
+                        جاري التحقق...
+                      </div>
+                    ) : (
+                      'تحقق من الرمز'
+                    )}
+                  </button>
+                </div>
+
+                {/* Back to Login */}
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStep(1)
+                      setOtp('')
+                      setOtpError('')
+                    }}
+                    className="text-amber-600 hover:text-amber-700 text-sm font-medium transition-colors"
+                  >
+                    العودة لتسجيل الدخول
+                  </button>
+                </div>
+              </form>
+            )}
 
             {/* Register Link */}
             <div className="text-center mt-6 pt-6 border-t border-amber-200">

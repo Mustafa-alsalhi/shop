@@ -12,8 +12,10 @@ import {
   RocketLaunchIcon
 } from '@heroicons/react/24/outline'
 import { Helmet } from 'react-helmet-async'
+import { useSettings } from '../contexts/SettingsContext'
 
 const ShippingInfo = () => {
+  const { storeName } = useSettings()
   const [selectedCity, setSelectedCity] = useState('riyadh')
   
   const containerVariants = {
@@ -103,8 +105,8 @@ const ShippingInfo = () => {
   return (
     <>
       <Helmet>
-        <title>معلومات الشحن - متجر أصالة</title>
-        <meta name="description" content="معلومات الشحن الكاملة لمتجر أصالة السعودية. خيارات التوصيل، الأسعار، والسياسات." />
+        <title>معلومات الشحن - {storeName}</title>
+        <meta name="description" content={`معلومات الشحن الكاملة لـ ${storeName} السعودية. خيارات التوصيل، الأسعار، والسياسات.`} />
       </Helmet>
 
       <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50" dir="rtl">

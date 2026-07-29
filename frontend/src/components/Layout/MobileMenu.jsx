@@ -113,6 +113,23 @@ const MobileMenu = ({ isOpen }) => {
 
               <li>
                 <button
+                  onClick={() => handleLinkClick('/sellers')}
+                  className="w-full flex items-center justify-between p-4 text-gray-700 hover:bg-gradient-to-r hover:from-cyan-50 hover:to-blue-50 hover:text-cyan-700 rounded-xl transition-all duration-200 group shadow-sm hover:shadow-md"
+                >
+                  <div className="flex items-center space-x-reverse space-x-3">
+                    <div className="p-2 bg-cyan-100 rounded-lg group-hover:bg-cyan-200 transition-colors">
+                      <svg className="h-5 w-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
+                    </div>
+                    <span className="font-medium">جميع المتاجر</span>
+                  </div>
+                  <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-cyan-600 transition-colors" />
+                </button>
+              </li>
+
+              <li>
+                <button
                   onClick={() => handleLinkClick('/categories')}
                   className="w-full flex items-center justify-between p-4 text-gray-700 hover:bg-gradient-to-r hover:from-amber-50 hover:to-orange-50 hover:text-amber-700 rounded-xl transition-all duration-200 group shadow-sm hover:shadow-md"
                 >
@@ -207,6 +224,22 @@ const MobileMenu = ({ isOpen }) => {
                   </li>
                   <li>
                     <button
+                      onClick={() => handleLinkClick('/orders')}
+                      className="w-full flex items-center justify-between p-4 text-gray-700 hover:bg-gradient-to-r hover:from-amber-50 hover:to-orange-50 hover:text-amber-700 rounded-xl transition-all duration-200 group shadow-sm hover:shadow-md"
+                    >
+                      <div className="flex items-center space-x-reverse space-x-3">
+                        <div className="p-2 bg-amber-100 rounded-lg group-hover:bg-amber-200 transition-colors">
+                          <svg className="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                          </svg>
+                        </div>
+                        <span className="font-medium">تتبع الطلب</span>
+                      </div>
+                      <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-amber-600 transition-colors" />
+                    </button>
+                  </li>
+                  <li>
+                    <button
                       onClick={() => handleLinkClick('/wishlist')}
                       className="w-full flex items-center justify-between p-4 text-gray-700 hover:bg-gradient-to-r hover:from-amber-50 hover:to-orange-50 hover:text-amber-700 rounded-xl transition-all duration-200 group shadow-sm hover:shadow-md"
                     >
@@ -254,6 +287,46 @@ const MobileMenu = ({ isOpen }) => {
                           <span className="font-medium">لوحة التحكم</span>
                         </div>
                         <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-purple-600 transition-colors" />
+                      </button>
+                    </li>
+                  )}
+
+                  {/* Seller Dashboard Link - Only for Sellers */}
+                  {user?.role === 'seller' && (
+                    <li>
+                      <button
+                        onClick={() => handleLinkClick('/seller/dashboard')}
+                        className="w-full flex items-center justify-between p-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 hover:text-blue-700 rounded-xl transition-all duration-200 group shadow-sm hover:shadow-md"
+                      >
+                        <div className="flex items-center space-x-reverse space-x-3">
+                          <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
+                            <svg className="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                          </div>
+                          <span className="font-medium">لوحة تحكم البائع</span>
+                        </div>
+                        <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-blue-600 transition-colors" />
+                      </button>
+                    </li>
+                  )}
+
+                  {/* Driver Dashboard Link - Only for Drivers */}
+                  {user?.role === 'driver' && (
+                    <li>
+                      <button
+                        onClick={() => handleLinkClick('/driver/orders')}
+                        className="w-full flex items-center justify-between p-4 text-gray-700 hover:bg-gradient-to-r hover:from-amber-50 hover:to-orange-50 hover:text-amber-700 rounded-xl transition-all duration-200 group shadow-sm hover:shadow-md"
+                      >
+                        <div className="flex items-center space-x-reverse space-x-3">
+                          <div className="p-2 bg-amber-100 rounded-lg group-hover:bg-amber-200 transition-colors">
+                            <svg className="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                            </svg>
+                          </div>
+                          <span className="font-medium">لوحة المندوب</span>
+                        </div>
+                        <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-amber-600 transition-colors" />
                       </button>
                     </li>
                   )}

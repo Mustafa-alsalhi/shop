@@ -11,7 +11,6 @@ import App from './App.jsx'
 import { store } from './store/store.js'
 import './styles/globals.css'
 import WhatsAppButton from './components/UI/WhatsAppButton.jsx'
-import { WHATSAPP_NUMBER, WHATSAPP_MESSAGES } from './config/whatsapp.js'
 
 // Security: Disable console in production to prevent data leakage
 if (process.env.NODE_ENV === 'production') {
@@ -84,10 +83,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
               }}
             />
           </BrowserRouter>
-          <WhatsAppButton 
-            phoneNumber={WHATSAPP_NUMBER} 
-            message={WHATSAPP_MESSAGES.default}
-          />
+          <WhatsAppButton />
         </QueryClientProvider>
       </Provider>
     </HelmetProvider>

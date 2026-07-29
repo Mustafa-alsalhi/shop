@@ -4,8 +4,10 @@ import { useDispatch, useSelector } from 'react-redux'
 import { forgotPassword, selectIsLoading, selectError, clearError } from '../../store/slices/authSlice'
 import { showSuccessNotification, showErrorNotification } from '../../store/slices/uiSlice'
 
+import { useNavigate } from 'react-router-dom'
 const ForgotPasswordEmail = () => {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   
   const isLoading = useSelector(selectIsLoading)
   const error = useSelector(selectError)
@@ -54,56 +56,14 @@ const ForgotPasswordEmail = () => {
     try {
       const result = await dispatch(forgotPassword(formData.email))
       if (result.meta.requestStatus === 'fulfilled') {
-        setIsSubmitted(true)
-        dispatch(showSuccessNotification('تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني!'))
+        dispatch(showSuccessNotification('تم إرسال رمز استعادة كلمة المرور إلى بريدك الإلكتروني!'))
+        navigate(`/reset-password?email=${encodeURIComponent(formData.email)}`)
       }
     } catch (error) {
       dispatch(showErrorNotification('فشل في إرسال رابط إعادة تعيين كلمة المرور'))
     }
   }
 
-  if (isSubmitted) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full">
-          <div className="text-center">
-            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-              <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-              تحقق من بريدك الإلكتروني
-            </h2>
-            <p className="mt-2 text-sm text-gray-600">
-              لقد أرسلنا رابط إعادة تعيين كلمة المرور إلى {' '}
-              <span className="font-medium">{formData.email}</span>
-            </p>
-            <p className="mt-4 text-sm text-gray-600">
-              ستنتهي صلاحية الرابط خلال 60 دقيقة.
-            </p>
-            <div className="mt-6">
-              <Link
-                to="/login"
-                className="btn btn-primary"
-              >
-                العودة لتسجيل الدخول
-              </Link>
-            </div>
-            <div className="mt-4 text-sm text-gray-600">
-              هل لم تستلم البريد الإلكتروني؟{' '}
-              <button
-                onClick={() => setIsSubmitted(false)}
-                className="font-medium text-primary-600 hover:text-primary-500"
-              >
-                حاول مرة أخرى
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -114,7 +74,7 @@ const ForgotPasswordEmail = () => {
             هل نسيت كلمة المرور؟
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور.
+            أدخل بريدك الإلكتروني وسنرسل لك رمزاً (OTP) لإعادة تعيين كلمة المرور.
           </p>
         </div>
 
@@ -165,7 +125,7 @@ const ForgotPasswordEmail = () => {
                   جاري الإرسال...
                 </div>
               ) : (
-                'إرسال رابط إعادة التعيين'
+                'إرسال رمز إعادة التعيين (OTP)'
               )}
             </button>
           </div>

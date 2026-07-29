@@ -70,7 +70,8 @@ const Banners = () => {
       })
       setFormData(prev => ({
         ...prev,
-        image_url: response.data.data.image_url
+        image_url: response.data.data.image_url,
+        full_image_url: response.data.data.full_url
       }))
     } catch (error) {
       console.error('Error uploading image:', error)
@@ -109,6 +110,7 @@ const Banners = () => {
       title: banner.title,
       description: banner.description || '',
       image_url: banner.image_url,
+      full_image_url: banner.full_image_url,
       link_url: banner.link_url || '',
       link_text: banner.link_text || '',
       is_active: banner.is_active,
@@ -136,6 +138,7 @@ const Banners = () => {
       title: '',
       description: '',
       image_url: '',
+      full_image_url: '',
       link_url: '',
       link_text: '',
       is_active: true,
@@ -233,12 +236,12 @@ const Banners = () => {
                     <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                       <div className="relative">
                         <img
-                          src={banner.full_image_url || (banner.image_url.startsWith('http') ? banner.image_url : `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-d82a.up.railway.app'}${banner.image_url}`)}
+                          src={banner.full_image_url || banner.image_url}
                           alt={banner.title}
                           className="h-12 w-16 sm:h-16 sm:w-24 object-cover rounded-lg sm:rounded-xl shadow-md"
                           onError={(e) => {
                             e.target.onerror = null;
-                            e.target.src = 'https://via.placeholder.com/96x64?text=No+Image';
+                            e.target.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22100%25%22%20height%3D%22100%25%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23f3f4f6%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22Arial%22%20font-size%3D%2214%22%20fill%3D%22%239ca3af%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3Eبدون صورة%3C%2Ftext%3E%3C%2Fsvg%3E';
                           }}
                         />
                         <div className="absolute -top-1 -right-1 h-2 w-2 sm:h-3 sm:w-3 rounded-full bg-amber-500 border-2 border-white"></div>
@@ -374,14 +377,14 @@ const Banners = () => {
                     صورة الإعلان
                   </label>
                   <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-reverse sm:space-x-4">
-                    {formData.image_url && (
+                    {(formData.image_url || formData.full_image_url) && (
                       <img
-                        src={formData.image_url.startsWith('http') ? formData.image_url : `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-d82a.up.railway.app'}${formData.image_url}`}
+                        src={formData.full_image_url || (formData.image_url.startsWith('http') ? formData.image_url : `${import.meta.env.VITE_API_URL.replace('/api', '')}${formData.image_url}`)}
                         alt="Preview"
                         className="h-16 w-24 sm:h-20 sm:w-32 object-cover rounded-lg sm:rounded-xl shadow-md"
                         onError={(e) => {
                           e.target.onerror = null;
-                          e.target.src = 'https://via.placeholder.com/128x80?text=Preview';
+                          e.target.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22100%25%22%20height%3D%22100%25%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23f3f4f6%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22Arial%22%20font-size%3D%2214%22%20fill%3D%22%239ca3af%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3Eمعاينة%3C%2Ftext%3E%3C%2Fsvg%3E';
                         }}
                       />
                     )}
@@ -491,6 +494,7 @@ const Banners = () => {
                         title: '',
                         description: '',
                         image_url: '',
+                        full_image_url: '',
                         link_url: '',
                         link_text: '',
                         is_active: true,

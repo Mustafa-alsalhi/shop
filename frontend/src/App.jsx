@@ -1,132 +1,104 @@
-import React, { useEffect } from 'react'
-
+import React, { useEffect, lazy, Suspense } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
-
 import { Helmet } from 'react-helmet-async'
-
 import { Provider } from 'react-redux'
-
 import { useDispatch, useSelector } from 'react-redux'
-
 import { getCurrentUser } from './store/slices/authSlice'
+import { fetchSettings } from './store/slices/settingsSlice'
+import { SettingsProvider } from './contexts/SettingsContext'
+import Layout from './components/Layout/Layout'
+import ProtectedLayout from './components/Layout/ProtectedLayout'
+import AdminLayout from './components/Layout/AdminLayout'
+import ProtectedRoute from './components/Auth/ProtectedRoute'
+import SellerLayout from './components/Layout/SellerLayout'
+import DriverLayout from './components/Layout/DriverLayout'
+import store from './store/store'
+
+
+
+
 
 
 
 // Layout Components
 
-import Layout from './components/Layout/Layout'
 
-import ProtectedLayout from './components/Layout/ProtectedLayout'
 
-import AdminLayout from './components/Layout/AdminLayout'
 
-import Home from './pages/Home'
-
-import Products from './pages/Products'
-
-import Categories from './pages/Categories'
-
-import ProductDetail from './pages/ProductDetail'
-
-import Cart from './pages/Cart'
-
-import Checkout from './pages/Checkout'
-
-import Orders from './pages/Orders'
-
-import Wishlist from './pages/Wishlist'
-
-import Account from './pages/Account'
-
-import Login from './pages/Auth/Login'
-
-import Register from './pages/Auth/Register'
-
-import ForgotPassword from './pages/Auth/ForgotPassword'
-
-import ForgotPasswordEmail from './pages/Auth/ForgotPasswordEmail'
-
-import ResetPassword from './pages/Auth/ResetPassword'
-
-import ProtectedRoute from './components/Auth/ProtectedRoute'
-
-import AdminRoute from './components/Auth/AdminRoute'
-
-import AdminDashboard from './pages/Admin/Dashboard'
-
-import AdminProducts from './pages/Admin/Products'
-
-import AdminProductForm from './pages/Admin/ProductForm'
-
-import AdminOrders from './pages/Admin/Orders'
-
-import AdminUsers from './pages/Admin/Users'
-
-import AddUser from './pages/Admin/AddUser'
-
-import EditUser from './pages/Admin/EditUser'
-
-import AdminBanners from './pages/Admin/Banners'
-
-import AdminCategories from './pages/Admin/Categories'
-
-import AdminCoupons from './pages/Admin/Coupons'
-
-import AdminSettings from './pages/Admin/Settings'
-
-import AdminShippingCompanies from './pages/Admin/ShippingCompanies'
-
-import AdminPaymentMethods from './pages/Admin/PaymentMethods'
-
-import AdminPaymentRequests from './pages/Admin/PaymentRequests'
-
-import AdminAboutUs from './pages/Admin/AboutUs'
-
-import AdminContactUs from './pages/Admin/ContactUs'
-
-import AdminSellers from './pages/Admin/Sellers'
-
-import AdminChat from './pages/Admin/Chat'
-
-import AdminOffers from './pages/Admin/Offers'
-
-import AdminOfferForm from './pages/Admin/OfferForm'
-
-import AdminPolicies from './pages/Admin/Policies'
-
-import AdminTestPage from './pages/Admin/TestPage'
-
-import ContactUs from './pages/ContactUs'
-
-import CustomerChat from './pages/Customer/Chat'
-
-import AboutUs from './pages/AboutUs'
-
-import AboutUsPublic from './pages/AboutUsPublic'
-
-import ShippingInfo from './pages/ShippingInfo'
-
-import Coupons from './pages/user/Coupons'
-
-import Offers from './pages/Offers'
-
-import OfferDetails from './pages/OfferDetails'
-
-import Seller from './pages/Seller'
-
-import Sellers from './pages/Sellers'
-
-import Policy from './pages/Policy'
-
-import NotFound from './pages/Errors/NotFound'
-
-import ServerError from './pages/Errors/ServerError'
+const Home = lazy(() => import('./pages/Home'))
+const Products = lazy(() => import('./pages/Products'))
+const Categories = lazy(() => import('./pages/Categories'))
+const ProductDetail = lazy(() => import('./pages/ProductDetail'))
+const Cart = lazy(() => import('./pages/Cart'))
+const Checkout = lazy(() => import('./pages/Checkout'))
+const Orders = lazy(() => import('./pages/Orders'))
+const OrderTracking = lazy(() => import('./pages/OrderTracking'))
+const Wishlist = lazy(() => import('./pages/Wishlist'))
+const Account = lazy(() => import('./pages/Account'))
+const Login = lazy(() => import('./pages/Auth/Login'))
+const Register = lazy(() => import('./pages/Auth/Register'))
+const ForgotPassword = lazy(() => import('./pages/Auth/ForgotPassword'))
+const ForgotPasswordEmail = lazy(() => import('./pages/Auth/ForgotPasswordEmail'))
+const ResetPassword = lazy(() => import('./pages/Auth/ResetPassword'))
+const AdminDashboard = lazy(() => import('./pages/Admin/Dashboard'))
+const AdminProducts = lazy(() => import('./pages/Admin/Products'))
+const AdminProductForm = lazy(() => import('./pages/Admin/ProductForm'))
+const AdminOrders = lazy(() => import('./pages/Admin/Orders'))
+const AdminUsers = lazy(() => import('./pages/Admin/Users'))
+const AddUser = lazy(() => import('./pages/Admin/AddUser'))
+const EditUser = lazy(() => import('./pages/Admin/EditUser'))
+const AdminBanners = lazy(() => import('./pages/Admin/Banners'))
+const AdminCategories = lazy(() => import('./pages/Admin/Categories'))
+const AdminCoupons = lazy(() => import('./pages/Admin/Coupons'))
+const AdminSettings = lazy(() => import('./pages/Admin/Settings'))
+const AdminShippingCompanies = lazy(() => import('./pages/Admin/ShippingCompanies'))
+const AdminPaymentMethods = lazy(() => import('./pages/Admin/PaymentMethods'))
+const AdminPaymentRequests = lazy(() => import('./pages/Admin/PaymentRequests'))
+const AdminAboutUs = lazy(() => import('./pages/Admin/AboutUs'))
+const AdminContactUs = lazy(() => import('./pages/Admin/ContactUs'))
+const AdminSellers = lazy(() => import('./pages/Admin/Sellers'))
+const AdminDrivers = lazy(() => import('./pages/Admin/Drivers'))
+const AdminAddDriver = lazy(() => import('./pages/Admin/AddDriver'))
+const AdminChat = lazy(() => import('./pages/Admin/Chat'))
+const AdminOffers = lazy(() => import('./pages/Admin/Offers'))
+const AdminOfferForm = lazy(() => import('./pages/Admin/OfferForm'))
+const AdminPolicies = lazy(() => import('./pages/Admin/Policies'))
+const Taxes = lazy(() => import('./pages/Admin/Taxes'))
+const AdminTestPage = lazy(() => import('./pages/Admin/TestPage'))
+const SellerDashboard = lazy(() => import('./pages/Seller/Dashboard'))
+const SellerProducts = lazy(() => import('./pages/Seller/Products'))
+const SellerProductForm = lazy(() => import('./pages/Seller/ProductForm'))
+const SellerCategories = lazy(() => import('./pages/Seller/Categories'))
+const SellerOrders = lazy(() => import('./pages/Seller/Orders'))
+const SellerPaymentRequests = lazy(() => import('./pages/Seller/PaymentRequests'))
+const SellerSettings = lazy(() => import('./pages/Seller/Settings'))
+const SellerOffers = lazy(() => import('./pages/Seller/Offers'))
+const SellerOfferForm = lazy(() => import('./pages/Seller/OfferForm'))
+const SellerCoupons = lazy(() => import('./pages/Seller/Coupons'))
+const SellerChat = lazy(() => import('./pages/Seller/Chat'))
+const SellerReports = lazy(() => import('./pages/Seller/Reports'))
+const DriverOrders = lazy(() => import('./pages/Driver/Orders'))
+const DriverOrderDetails = lazy(() => import('./pages/Driver/OrderDetails'))
+const DriverDashboard = lazy(() => import('./pages/Driver/Dashboard'))
+const DriverSettings = lazy(() => import('./pages/Driver/Settings'))
+const ContactUs = lazy(() => import('./pages/ContactUs'))
+const CustomerChat = lazy(() => import('./pages/Customer/Chat'))
+const AboutUs = lazy(() => import('./pages/AboutUs'))
+const AboutUsPublic = lazy(() => import('./pages/AboutUsPublic'))
+const ShippingInfo = lazy(() => import('./pages/ShippingInfo'))
+const Coupons = lazy(() => import('./pages/user/Coupons'))
+const Offers = lazy(() => import('./pages/Offers'))
+const OfferDetails = lazy(() => import('./pages/OfferDetails'))
+const Seller = lazy(() => import('./pages/Seller'))
+const Sellers = lazy(() => import('./pages/Sellers'))
+const Policy = lazy(() => import('./pages/Policy'))
+const NotFound = lazy(() => import('./pages/Errors/NotFound'))
+const ServerError = lazy(() => import('./pages/Errors/ServerError'))
 
 
 
 // Store
 
-import store from './store/store'
 
 // Scroll to top component
 const ScrollToTop = () => {
@@ -165,6 +137,7 @@ function App() {
 
       <ScrollToTop />
 
+      <Suspense fallback={<div className="flex h-screen w-full items-center justify-center"><div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div></div>}>
       <Routes>
 
         {/* Public Routes */}
@@ -184,6 +157,7 @@ function App() {
           <Route path="checkout" element={<Checkout />} />
 
           <Route path="orders" element={<Orders />} />
+          <Route path="orders/:id/track" element={<OrderTracking />} />
 
           <Route path="wishlist" element={<Wishlist />} />
 
@@ -240,8 +214,7 @@ function App() {
 
 
         {/* Admin Routes */}
-
-        <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+        <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminLayout /></ProtectedRoute>}>
 
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
 
@@ -262,6 +235,9 @@ function App() {
           <Route path="users/:id/edit" element={<EditUser />} />
 
           <Route path="sellers" element={<AdminSellers />} />
+
+          <Route path="drivers" element={<AdminDrivers />} />
+          <Route path="drivers/new" element={<AdminAddDriver />} />
 
           <Route path="chat" element={<AdminChat />} />
 
@@ -291,6 +267,64 @@ function App() {
 
           <Route path="policies" element={<AdminPolicies />} />
 
+          <Route path="taxes" element={<Taxes />} />
+
+          <Route path="test" element={<AdminTestPage />} />
+
+        </Route>
+
+
+
+        {/* Seller Routes */}
+        <Route path="/seller" element={<ProtectedRoute allowedRoles={['seller']}><SellerLayout /></ProtectedRoute>}>
+
+          <Route index element={<Navigate to="/seller/dashboard" replace />} />
+
+          <Route path="dashboard" element={<SellerDashboard />} />
+
+          <Route path="products" element={<SellerProducts />} />
+
+          <Route path="products/new" element={<SellerProductForm />} />
+
+          <Route path="products/:id/edit" element={<SellerProductForm />} />
+
+          <Route path="orders" element={<SellerOrders />} />
+
+          <Route path="payment-requests" element={<SellerPaymentRequests />} />
+
+          <Route path="categories" element={<SellerCategories />} />
+
+          <Route path="settings" element={<SellerSettings />} />
+
+          <Route path="chat" element={<SellerChat />} />
+
+          <Route path="reports" element={<SellerReports />} />
+
+          <Route path="offers" element={<SellerOffers />} />
+
+          <Route path="offers/new" element={<SellerOfferForm />} />
+
+          <Route path="offers/:id/edit" element={<SellerOfferForm />} />
+
+          <Route path="coupons" element={<SellerCoupons />} />
+
+        </Route>
+
+
+
+        {/* Driver Routes */}
+        <Route path="/driver" element={<ProtectedRoute allowedRoles={['driver']}><DriverLayout /></ProtectedRoute>}>
+
+          <Route index element={<Navigate to="/driver/dashboard" replace />} />
+
+          <Route path="dashboard" element={<DriverDashboard />} />
+
+          <Route path="orders" element={<DriverOrders />} />
+
+          <Route path="orders/:id" element={<DriverOrderDetails />} />
+          
+          <Route path="settings" element={<DriverSettings />} />
+
         </Route>
 
 
@@ -308,6 +342,7 @@ function App() {
         <Route path="*" element={<NotFound />} />
 
       </Routes>
+      </Suspense>
     </>
   )
 
@@ -335,6 +370,9 @@ function AppWrapper() {
 
     }
 
+    // Fetch settings on app load
+    dispatch(fetchSettings())
+
   }, [dispatch, token, user])
 
 
@@ -343,7 +381,11 @@ function AppWrapper() {
 
     <Provider store={store}>
 
-      <App />
+      <SettingsProvider>
+
+        <App />
+
+      </SettingsProvider>
 
     </Provider>
 

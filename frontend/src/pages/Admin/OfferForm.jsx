@@ -74,13 +74,13 @@ const OfferForm = () => {
       // Convert image URLs to absolute if needed
       let bannerUrl = offer.banner || ''
       if (bannerUrl && !bannerUrl.startsWith('http')) {
-        const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-d82a.up.railway.app'
+        const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-8385.up.railway.app'
         bannerUrl = `${baseUrl}/storage/${bannerUrl.startsWith('/') ? bannerUrl.slice(1) : bannerUrl}`
       }
 
       let thumbnailUrl = offer.thumbnail || ''
       if (thumbnailUrl && !thumbnailUrl.startsWith('http')) {
-        const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-d82a.up.railway.app'
+        const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-8385.up.railway.app'
         thumbnailUrl = `${baseUrl}/storage/${thumbnailUrl.startsWith('/') ? thumbnailUrl.slice(1) : thumbnailUrl}`
       }
 
@@ -285,8 +285,8 @@ const OfferForm = () => {
     }
 
     // Get base URL from environment or fallback to Railway production
-    const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-d82a.up.railway.app'
-    const apiUrl = import.meta.env.VITE_API_URL || 'https://shop-production-d82a.up.railway.app/api'
+    const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-8385.up.railway.app'
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://shop-production-8385.up.railway.app/api'
 
     // Handle various Laravel storage path formats
     if (imageUrl.startsWith('/storage/')) {

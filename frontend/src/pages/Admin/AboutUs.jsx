@@ -177,7 +177,7 @@ const AboutUs = () => {
     if (imagePath.startsWith('http')) return imagePath
     
     // Get base URL from environment or fallback to Railway production
-    const baseUrl = import.meta.env.VITE_API_URL || 'https://shop-production-d82a.up.railway.app/api'
+    const baseUrl = import.meta.env.VITE_API_URL || 'https://shop-production-8385.up.railway.app/api'
     const publicUrl = baseUrl.replace('/api', '')
     
     return `${publicUrl}/${imagePath}`

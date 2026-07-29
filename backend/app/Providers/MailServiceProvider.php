@@ -24,14 +24,14 @@ class MailServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        // Override mail configuration for all environments - Using SendGrid
-        Config::set('mail.default', 'smtp');
-        Config::set('mail.mailers.smtp.host', 'smtp.sendgrid.net');
-        Config::set('mail.mailers.smtp.port', 587);
-        Config::set('mail.mailers.smtp.username', 'apikey');
-        Config::set('mail.mailers.smtp.password', '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');
-        Config::set('mail.mailers.smtp.encryption', 'tls');
-        Config::set('mail.from.address', 'mustafaalsalhi065@gmail.com');
-        Config::set('mail.from.name', 'متجر أصالة');
+        // Use environment variables for mail configuration (Gmail SMTP)
+        Config::set('mail.default', env('MAIL_MAILER', 'smtp'));
+        Config::set('mail.mailers.smtp.host', env('MAIL_HOST', 'smtp.gmail.com'));
+        Config::set('mail.mailers.smtp.port', env('MAIL_PORT', 465));
+        Config::set('mail.mailers.smtp.username', env('MAIL_USERNAME'));
+        Config::set('mail.mailers.smtp.password', env('MAIL_PASSWORD'));
+        Config::set('mail.mailers.smtp.encryption', env('MAIL_ENCRYPTION', 'ssl'));
+        Config::set('mail.from.address', env('MAIL_FROM_ADDRESS'));
+        Config::set('mail.from.name', env('MAIL_FROM_NAME', '${APP_NAME}'));
     }
 }

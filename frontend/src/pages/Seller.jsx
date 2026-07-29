@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
-import { MagnifyingGlassIcon, FunnelIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon, FunnelIcon, XMarkIcon, ChatBubbleLeftIcon, TagIcon } from '@heroicons/react/24/outline'
 import {
   fetchProducts,
   selectProducts,
@@ -10,19 +10,26 @@ import {
   setFilters,
   clearFilters,
 } from '../store/slices/productsSlice'
+import { selectIsAuthenticated, selectUser } from '../store/slices/authSlice'
 import ProductCard from '../components/Product/ProductCard'
 import ProductFilters from '../components/Product/ProductFilters'
 import LoadingSpinner from '../components/UI/LoadingSpinner'
+import api from '../services/api'
 
 const Seller = () => {
   const { id } = useParams()
+  const navigate = useNavigate()
   const dispatch = useDispatch()
   const [seller, setSeller] = useState(null)
   const [loadingSeller, setLoadingSeller] = useState(true)
+  const [coupons, setCoupons] = useState([])
+  const [loadingCoupons, setLoadingCoupons] = useState(true)
   const products = useSelector(selectProducts)
   const isLoadingProducts = useSelector(selectIsLoading)
   const pagination = useSelector(selectPagination)
   const filters = useSelector((state) => state.products.filters)
+  const isAuthenticated = useSelector(selectIsAuthenticated)
+  const currentUser = useSelector(selectUser)
   
   const [showFilters, setShowFilters] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -36,7 +43,10 @@ const Seller = () => {
         const sellerResponse = await fetch(`${import.meta.env.VITE_API_URL}/sellers/${id}`)
         if (sellerResponse.ok) {
           const sellerData = await sellerResponse.json()
-          setSeller(sellerData.data || sellerData)
+          const seller = sellerData.data || sellerData
+          console.log('Seller data:', seller)
+          console.log('Seller categories:', seller.categories)
+          setSeller(seller)
         }
       } catch (error) {
         console.error('Error fetching seller data:', error)
@@ -46,6 +56,30 @@ const Seller = () => {
     }
 
     fetchSellerData()
+  }, [id])
+
+  useEffect(() => {
+    const fetchSellerCoupons = async () => {
+      try {
+        setLoadingCoupons(true)
+        const response = await api.get(`/sellers/${id}/coupons`)
+        console.log('Full response:', response)
+        console.log('Response data:', response.data)
+        console.log('Coupons data:', response.data.data)
+        const couponsData = response.data.data || response.data || []
+        console.log('Coupons array:', couponsData)
+        console.log('Coupons length:', couponsData.length)
+        setCoupons(couponsData)
+      } catch (error) {
+        console.error('Error fetching seller coupons:', error)
+        console.error('Error response:', error.response)
+        setCoupons([])
+      } finally {
+        setLoadingCoupons(false)
+      }
+    }
+
+    fetchSellerCoupons()
   }, [id])
 
   // Fetch seller products using Redux with filters
@@ -120,6 +154,24 @@ const Seller = () => {
       value !== ''
   ).length
 
+  const handleChatWithSeller = () => {
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: `/seller/${id}` } })
+      return
+    }
+    
+    // Check if user is trying to chat with themselves
+    if (currentUser?.seller_id === parseInt(id)) {
+      alert('لا يمكنك الدردشة مع نفسك')
+      return
+    }
+    navigate(`/chat/${id}`, { 
+      state: { 
+        sellerName: seller?.store_name 
+      } 
+    })
+  }
+
   if (loadingSeller || isLoadingProducts) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -177,10 +229,92 @@ const Seller = () => {
               </div>
               <div className="text-gray-600 text-sm sm:text-base">{seller.reviews_count || 0} تقييم</div>
               <div className="text-gray-600 text-sm sm:text-base">{seller.total_products || 0} منتج</div>
+              
+              {/* Chat Button */}
+              <button
+                onClick={handleChatWithSeller}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all duration-300 shadow-md hover:shadow-lg text-sm sm:text-base font-medium"
+              >
+                <ChatBubbleLeftIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span>دردشة مع البائع</span>
+              </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Seller Categories Section */}
+      {seller.categories && seller.categories.length > 0 && (
+        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-6 sm:mb-8">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 flex items-center">
+            <svg className="h-5 w-5 ml-2 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+            فئات البائع
+          </h2>
+          <div className="flex flex-wrap gap-2 sm:gap-3">
+            {seller.categories.map((category) => (
+              <button
+                key={category.id}
+                onClick={() => handleFilterChange({ category_id: [category.id] })}
+                className="px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300 rounded-lg hover:from-amber-100 hover:to-orange-100 transition-all duration-300 text-sm sm:text-base text-gray-700 hover:text-amber-800 font-medium"
+              >
+                {category.name}
+                <span className="mr-2 text-amber-600 text-xs">({category.products_count || 0})</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Seller Coupons Section */}
+      {!loadingCoupons && coupons.length > 0 && (
+        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-6 sm:mb-8">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 flex items-center">
+            <TagIcon className="h-5 w-5 ml-2 text-amber-600" />
+            كوبونات البائع
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            {coupons.map((coupon) => (
+              <div
+                key={coupon.id}
+                className="relative bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-dashed border-amber-300 rounded-xl p-4 hover:border-amber-500 transition-all duration-300"
+              >
+                <div className="absolute top-0 right-0 w-4 h-4 bg-white rounded-full -mr-2 -mt-2 border-2 border-amber-300"></div>
+                <div className="absolute bottom-0 right-0 w-4 h-4 bg-white rounded-full -mr-2 -mb-2 border-2 border-amber-300"></div>
+                <div className="absolute top-0 left-0 w-4 h-4 bg-white rounded-full -ml-2 -mt-2 border-2 border-amber-300"></div>
+                <div className="absolute bottom-0 left-0 w-4 h-4 bg-white rounded-full -ml-2 -mb-2 border-2 border-amber-300"></div>
+                
+                <div className="relative">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs sm:text-sm font-bold text-amber-600 bg-amber-100 px-2 py-1 rounded">
+                      {coupon.code}
+                    </span>
+                    <span className="text-xs sm:text-sm font-semibold text-gray-600">
+                      {coupon.type === 'percentage' ? `${coupon.value}%` : `${coupon.value} ريال`}
+                    </span>
+                  </div>
+                  
+                  <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-1">{coupon.name || 'كوبون'}</h3>
+                  
+                  {coupon.description && (
+                    <p className="text-xs sm:text-sm text-gray-600 mb-2 line-clamp-2">{coupon.description}</p>
+                  )}
+                  
+                  <div className="flex items-center justify-between text-xs text-gray-500">
+                    {coupon.minimum_amount && (
+                      <span>الحد الأدنى: {coupon.minimum_amount} ريال</span>
+                    )}
+                    {coupon.usage_limit && (
+                      <span>الاستخدام: {coupon.used_count || 0}/{coupon.usage_limit}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Products Section */}
       <div>

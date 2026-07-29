@@ -14,22 +14,26 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         // Create admin user
-        \App\Models\User::create([
-            'name' => 'Admin User',
-            'email' => 'admin@shophub.com',
-            'password' => \Illuminate\Support\Facades\Hash::make('password'),
-            'role' => 'admin',
-            'is_active' => true,
-        ]);
+        \App\Models\User::updateOrCreate(
+            ['email' => 'mustafaalsalhi065@gmail.com'],
+            [
+                'name' => 'Admin User',
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'role' => 'admin',
+                'is_active' => true,
+            ]
+        );
 
         // Create regular user
-        \App\Models\User::create([
-            'name' => 'John Doe',
-            'email' => 'john@example.com',
-            'password' => \Illuminate\Support\Facades\Hash::make('password'),
-            'role' => 'customer',
-            'is_active' => true,
-        ]);
+        \App\Models\User::updateOrCreate(
+            ['email' => 'john@example.com'],
+            [
+                'name' => 'John Doe',
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'role' => 'customer',
+                'is_active' => true,
+            ]
+        );
 
         // Create categories
         $categories = [
@@ -41,7 +45,10 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($categories as $category) {
-            \App\Models\Category::create($category);
+            \App\Models\Category::updateOrCreate(
+                ['slug' => $category['slug']],
+                $category
+            );
         }
 
         // Create products
@@ -152,65 +159,59 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($products as $productData) {
-            $product = \App\Models\Product::create($productData);
+            $product = \App\Models\Product::updateOrCreate(
+                ['slug' => $productData['slug']],
+                $productData
+            );
             
             // Add variants for some products
             if ($product->slug === 'wireless-headphones') {
-                $variant = \App\Models\ProductVariant::create([
-                    'product_id' => $product->id,
-                    'name' => 'Color',
-                    'is_active' => true,
-                ]);
+                $variant = \App\Models\ProductVariant::updateOrCreate(
+                    ['product_id' => $product->id, 'name' => 'Color'],
+                    ['is_active' => true]
+                );
                 
-                \App\Models\VariantOption::create([
-                    'product_variant_id' => $variant->id,
-                    'name' => 'Black',
-                    'price' => null,
-                ]);
+                \App\Models\VariantOption::updateOrCreate(
+                    ['product_variant_id' => $variant->id, 'name' => 'Black'],
+                    ['price' => null]
+                );
                 
-                \App\Models\VariantOption::create([
-                    'product_variant_id' => $variant->id,
-                    'name' => 'White',
-                    'price' => null,
-                ]);
+                \App\Models\VariantOption::updateOrCreate(
+                    ['product_variant_id' => $variant->id, 'name' => 'White'],
+                    ['price' => null]
+                );
                 
-                \App\Models\VariantOption::create([
-                    'product_variant_id' => $variant->id,
-                    'name' => 'Blue',
-                    'price' => 10.00,
-                ]);
+                \App\Models\VariantOption::updateOrCreate(
+                    ['product_variant_id' => $variant->id, 'name' => 'Blue'],
+                    ['price' => 10.00]
+                );
             }
             
             if ($product->slug === 'cotton-t-shirt') {
-                $variant = \App\Models\ProductVariant::create([
-                    'product_id' => $product->id,
-                    'name' => 'Size',
-                    'is_active' => true,
-                ]);
+                $variant = \App\Models\ProductVariant::updateOrCreate(
+                    ['product_id' => $product->id, 'name' => 'Size'],
+                    ['is_active' => true]
+                );
                 
-                \App\Models\VariantOption::create([
-                    'product_variant_id' => $variant->id,
-                    'name' => 'S',
-                    'price' => null,
-                ]);
+                \App\Models\VariantOption::updateOrCreate(
+                    ['product_variant_id' => $variant->id, 'name' => 'S'],
+                    ['price' => null]
+                );
                 
-                \App\Models\VariantOption::create([
-                    'product_variant_id' => $variant->id,
-                    'name' => 'M',
-                    'price' => null,
-                ]);
+                \App\Models\VariantOption::updateOrCreate(
+                    ['product_variant_id' => $variant->id, 'name' => 'M'],
+                    ['price' => null]
+                );
                 
-                \App\Models\VariantOption::create([
-                    'product_variant_id' => $variant->id,
-                    'name' => 'L',
-                    'price' => null,
-                ]);
+                \App\Models\VariantOption::updateOrCreate(
+                    ['product_variant_id' => $variant->id, 'name' => 'L'],
+                    ['price' => null]
+                );
                 
-                \App\Models\VariantOption::create([
-                    'product_variant_id' => $variant->id,
-                    'name' => 'XL',
-                    'price' => 5.00,
-                ]);
+                \App\Models\VariantOption::updateOrCreate(
+                    ['product_variant_id' => $variant->id, 'name' => 'XL'],
+                    ['price' => 5.00]
+                );
             }
         }
     }

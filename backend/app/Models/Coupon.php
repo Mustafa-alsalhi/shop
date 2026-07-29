@@ -10,6 +10,7 @@ class Coupon extends Model
     use HasFactory;
 
     protected $fillable = [
+        'seller_id',
         'code',
         'name',
         'description',
@@ -40,6 +41,14 @@ class Coupon extends Model
     ];
 
     /**
+     * العلاقة مع البائع
+     */
+    public function seller()
+    {
+        return $this->belongsTo(Seller::class);
+    }
+
+    /**
      * التحقق من صلاحية الكوبون
      */
     public function isValid(): bool
@@ -68,14 +77,14 @@ class Coupon extends Model
     }
 
     /**
-     * حساب قيمة الخصم
+     * حساب قيمة الخصم بناءً على المنتجات المؤهلة
      */
-    public function calculateDiscount($totalAmount): float
+    public function calculateDiscount($eligibleAmount): float
     {
         if ($this->type === 'fixed') {
             $discount = $this->value;
         } else {
-            $discount = $totalAmount * ($this->value / 100);
+            $discount = $eligibleAmount * ($this->value / 100);
         }
 
         // التحقق من أقصى خصم
@@ -83,15 +92,15 @@ class Coupon extends Model
             $discount = $this->maximum_discount;
         }
 
-        return min($discount, $totalAmount);
+        return min($discount, $eligibleAmount);
     }
 
     /**
-     * التحقق من إمكانية تطبيق الكوبون على المبلغ
+     * التحقق من إمكانية تطبيق الكوبون على المبلغ المؤهل
      */
-    public function canApplyToAmount($totalAmount): bool
+    public function canApplyToAmount($eligibleAmount): bool
     {
-        if ($this->minimum_amount && $totalAmount < $this->minimum_amount) {
+        if ($this->minimum_amount && $eligibleAmount < $this->minimum_amount) {
             return false;
         }
 
@@ -119,8 +128,9 @@ class Coupon extends Model
      */
     public function isApplicableToProduct($productId): bool
     {
-        if (!$this->applicable_products) {
-            return true; // ينطبق على جميع المنتجات
+        // إذا لم يكن هناك منتجات محددة، ينطبق على جميع المنتجات
+        if (empty($this->applicable_products)) {
+            return true;
         }
 
         return in_array($productId, $this->applicable_products);
@@ -131,10 +141,60 @@ class Coupon extends Model
      */
     public function isApplicableToCategory($categoryId): bool
     {
-        if (!$this->applicable_categories) {
-            return true; // ينطبق على جميع الفئات
+        // إذا لم يكن هناك فئات محددة، ينطبق على جميع الفئات
+        if (empty($this->applicable_categories)) {
+            return true;
         }
 
         return in_array($categoryId, $this->applicable_categories);
+    }
+
+    /**
+     * التحقق من أن المنتج مؤهل للكوبون
+     * يستخدم في السلة لتحديد المنتجات التي يمكن تطبيق الخصم عليها
+     */
+    public function isProductEligible($productId, $categoryId): bool
+    {
+        // إذا لم يكن هناك أي قيود، المنتج مؤهل
+        if (empty($this->applicable_products) && empty($this->applicable_categories)) {
+            return true;
+        }
+
+        // التحقق من المنتج
+        if (!empty($this->applicable_products)) {
+            if (in_array($productId, $this->applicable_products)) {
+                return true;
+            }
+        }
+
+        // التحقق من الفئة
+        if (!empty($this->applicable_categories)) {
+            if (in_array($categoryId, $this->applicable_categories)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * حساب المبلغ المؤهل للخصم من عناصر السلة
+     */
+    public function calculateEligibleAmount($cartItems): float
+    {
+        $eligibleAmount = 0;
+
+        foreach ($cartItems as $item) {
+            $productId = $item['product_id'] ?? $item['id'];
+            $categoryId = $item['category_id'] ?? null;
+            $quantity = $item['quantity'] ?? 1;
+            $price = $item['price'] ?? $item['unit_price'] ?? 0;
+
+            if ($this->isProductEligible($productId, $categoryId)) {
+                $eligibleAmount += ($price * $quantity);
+            }
+        }
+
+        return $eligibleAmount;
     }
 }

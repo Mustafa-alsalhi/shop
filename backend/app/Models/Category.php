@@ -16,10 +16,13 @@ class Category extends Model
         'image',
         'image_url',
         'is_active',
+        'show_on_homepage',
+        'sort_order',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'show_on_homepage' => 'boolean',
     ];
 
     public function products()

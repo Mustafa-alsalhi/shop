@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:3000', 'http://localhost:3001', 'https://dependable-benevolence-production-8c3c.up.railway.app'],
+    'allowed_origins' => ['http://localhost:3000', 'http://localhost:3001', 'https://dependable-benevolence-production-8c3c.up.railway.app', 'https://shop-production-8385.up.railway.app'],
 
     'allowed_origins_patterns' => [],
 

@@ -30,7 +30,19 @@ use App\Http\Controllers\Api\OfferController;
 
 use App\Http\Controllers\Api\PolicyController;
 
-use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Api\NotificationController;
+
+use App\Http\Controllers\Api\SellerCategoryController;
+
+use App\Http\Controllers\Api\SellerOfferController;
+
+use App\Http\Controllers\Api\SellerCouponController;
+
+use App\Http\Controllers\Api\SellerMessageController;
+
+use App\Http\Controllers\Api\SellerReportController;
+
+use App\Http\Controllers\Api\DriverController;
 
 
 
@@ -144,58 +156,57 @@ use App\Http\Controllers\NotificationController;
 
 
 
-    // Public routes
-
-    Route::get('/products', [ProductController::class, 'index']);
-
-    Route::get('/products/featured', [ProductController::class, 'featured']);
-
-    Route::get('/products/bestsellers', [ProductController::class, 'bestSellers']);
-
-    Route::get('/sellers/top', [ProductController::class, 'topSellers']);
-    Route::get('/sellers/{id}', [ProductController::class, 'getSeller']);
-
-    Route::get('/products/clothing', [ProductController::class, 'clothing']);
-
-    Route::get('/products/kids', [ProductController::class, 'kids']);
-
-    Route::get('/products/electronics', [ProductController::class, 'electronics']);
-
-    Route::get('/products/{id}', [ProductController::class, 'show']);
-
-    Route::get('/products/{id}/related', [ProductController::class, 'related']);
-
-    Route::get('/categories', [CategoryController::class, 'index']);
-
-    Route::get('/banners', [BannerController::class, 'getActiveBanners']);
+    // Public routes (with maintenance check)
+    Route::middleware(['maintenance'])->group(function () {
+        Route::get('/products', [ProductController::class, 'index']);
+        Route::get('/products/featured', [ProductController::class, 'featured']);
+        Route::get('/products/bestsellers', [ProductController::class, 'bestSellers']);
+        Route::get('/sellers/top', [ProductController::class, 'topSellers']);
+        Route::get('/sellers/{id}', [ProductController::class, 'getSeller']);
+        Route::get('/products/clothing', [ProductController::class, 'clothing']);
+        Route::get('/products/sports', [ProductController::class, 'sports']);
+        Route::get('/products/electronics', [ProductController::class, 'electronics']);
+        Route::get('/products/{id}', [ProductController::class, 'show']);
+        Route::get('/products/{id}/related', [ProductController::class, 'related']);
+        Route::get('/categories', [CategoryController::class, 'index']);
+        Route::get('/categories/homepage', [CategoryController::class, 'getHomepageCategories']);
+        Route::get('/banners', [BannerController::class, 'getActiveBanners']);
+    });
 
 
 
     // Offers routes (Public)
-    Route::get('/offers', [OfferController::class, 'active']);
-    Route::get('/offers/{id}', [OfferController::class, 'show']);
+    Route::middleware(['maintenance'])->group(function () {
+        Route::get('/offers', [OfferController::class, 'active']);
+        Route::get('/offers/{id}', [OfferController::class, 'show']);
+    });
 
 
 
     // Policies routes (Public)
-    Route::get('/policies', [PolicyController::class, 'index']);
-    Route::get('/policies/{type}', [PolicyController::class, 'show']);
+    Route::middleware(['maintenance'])->group(function () {
+        Route::get('/policies', [PolicyController::class, 'index']);
+        Route::get('/policies/{type}', [PolicyController::class, 'show']);
+    });
 
 
 
     // Auth routes
-
-    Route::post('/register', [AuthController::class, 'register']);
-
-    Route::post('/login', [AuthController::class, 'login']);
-
-    Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+    Route::middleware(['maintenance'])->group(function () {
+        Route::post('/register', [AuthController::class, 'register']);
+        Route::post('/login', [AuthController::class, 'login']);
+        Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+        Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+        Route::post('/verify-login-otp', [AuthController::class, 'verifyLoginOtp']);
+        Route::post('/resend-login-otp', [AuthController::class, 'resendLoginOtp']);
+        Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+    });
 
 
 
     // Protected routes
 
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware(['auth:sanctum', 'maintenance'])->group(function () {
 
         Route::get('/user', [AuthController::class, 'getCurrentUser']);
 
@@ -219,8 +230,9 @@ use App\Http\Controllers\NotificationController;
 
         Route::delete('/cart', [CartController::class, 'clearCart']);
 
+        // Checkout route for dynamic delivery calculation
+        Route::post('/checkout/calculate-delivery', [OrderController::class, 'calculateDelivery']);
         
-
         // Wishlist routes
 
         Route::get('/wishlist', [WishlistController::class, 'index']);
@@ -236,8 +248,11 @@ use App\Http\Controllers\NotificationController;
         // Coupon validation routes (for users)
 
         Route::post('/coupons/validate', [CouponController::class, 'validateCoupon']);
+        Route::post('/coupons/apply', [CouponController::class, 'validateCoupon']);
 
         Route::get('/coupons', [CouponController::class, 'userCoupons']);
+
+        Route::get('/sellers/{sellerId}/coupons', [CouponController::class, 'sellerCoupons']);
 
         
 
@@ -249,6 +264,13 @@ use App\Http\Controllers\NotificationController;
 
         Route::get('/orders/{id}', [OrderController::class, 'show']);
 
+        // Reviews route
+        Route::post('/products/{id}/reviews', [\App\Http\Controllers\Api\ReviewController::class, 'store']);
+
+
+        // Payment requests routes (for users - use admin controller but without admin middleware)
+        Route::post('/user/payment-requests', [\App\Http\Controllers\Admin\PaymentRequestController::class, 'store']);
+
 
         // Chat/Messages routes
         Route::get('/messages', [MessageController::class, 'index']);
@@ -258,12 +280,12 @@ use App\Http\Controllers\NotificationController;
         Route::post('/messages/{userId}/mark-read', [MessageController::class, 'markAsRead']);
 
         // Notifications routes
-        Route::get('/notifications', [NotificationController::class, 'index']);
-        Route::get('/notifications/unread', [NotificationController::class, 'unread']);
-        Route::put('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
-        Route::put('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
-        Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
-        Route::post('/notifications', [NotificationController::class, 'store']);
+        Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index']);
+        Route::get('/notifications/unread', [\App\Http\Controllers\NotificationController::class, 'unread']);
+        Route::put('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead']);
+        Route::put('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead']);
+        Route::delete('/notifications/{id}', [\App\Http\Controllers\NotificationController::class, 'destroy']);
+        Route::post('/notifications', [\App\Http\Controllers\NotificationController::class, 'store']);
         
         // Test route for message creation
         Route::get('/test-message', function () {
@@ -298,7 +320,11 @@ use App\Http\Controllers\NotificationController;
 
 
 
-    // Admin routes
+
+
+
+
+// Admin routes
 
     Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
 
@@ -331,6 +357,20 @@ use App\Http\Controllers\NotificationController;
         Route::put('/orders/{id}', [AdminController::class, 'updateOrder']);
 
         Route::delete('/orders/{id}', [AdminController::class, 'deleteOrder']);
+
+        // Driver management routes (Admin)
+        Route::get('/drivers', [\App\Http\Controllers\DriverController::class, 'index']);
+        Route::post('/drivers', [\App\Http\Controllers\DriverController::class, 'store']);
+        Route::get('/drivers/{id}/statistics', [\App\Http\Controllers\DriverController::class, 'showStatistics']);
+        Route::post('/drivers/{id}', [\App\Http\Controllers\DriverController::class, 'update']);
+        Route::delete('/drivers/{id}', [\App\Http\Controllers\DriverController::class, 'destroy']);
+        Route::post('/orders/{id}/assign-driver', [AdminController::class, 'assignDriver']);
+        Route::get('/orders/{id}/smart-drivers', [AdminController::class, 'getSmartDrivers']);
+
+        // Notifications routes (Admin)
+        Route::get('/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'getNotifications']);
+        Route::post('/notifications/mark-all-read', [\App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead']);
+        Route::post('/notifications/{id}/mark-read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
 
         Route::get('/categories', [AdminController::class, 'categories']);
 
@@ -488,6 +528,25 @@ use App\Http\Controllers\NotificationController;
         Route::put('/policies/{id}', [PolicyController::class, 'update']);
         Route::delete('/policies/{id}', [PolicyController::class, 'destroy']);
 
+        // Taxes management routes (Admin)
+        Route::get('/taxes', [\App\Http\Controllers\Admin\TaxController::class, 'index']);
+        Route::post('/taxes', [\App\Http\Controllers\Admin\TaxController::class, 'store']);
+        Route::get('/taxes/{id}', [\App\Http\Controllers\Admin\TaxController::class, 'show']);
+        Route::put('/taxes/{id}', [\App\Http\Controllers\Admin\TaxController::class, 'update']);
+        Route::delete('/taxes/{id}', [\App\Http\Controllers\Admin\TaxController::class, 'destroy']);
+        Route::get('/taxes/active', [\App\Http\Controllers\Admin\TaxController::class, 'active']);
+        Route::get('/taxes/default', [\App\Http\Controllers\Admin\TaxController::class, 'default']);
+
+        // Settings management routes (Admin)
+        Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index']);
+        Route::put('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'update']);
+
+        // Backup management routes (Admin)
+        Route::post('/backups/create', [\App\Http\Controllers\Admin\BackupController::class, 'createBackup']);
+        Route::get('/backups', [\App\Http\Controllers\Admin\BackupController::class, 'listBackups']);
+        Route::get('/backups/download/{filename}', [\App\Http\Controllers\Admin\BackupController::class, 'downloadBackup']);
+        Route::delete('/backups/{filename}', [\App\Http\Controllers\Admin\BackupController::class, 'deleteBackup']);
+
     });
 
 
@@ -497,4 +556,99 @@ use App\Http\Controllers\NotificationController;
     Route::post('/contact-us', [\App\Http\Controllers\Admin\ContactUsController::class, 'store']);
 
     Route::get('/contact-us/statistics', [\App\Http\Controllers\Admin\ContactUsController::class, 'getStatistics']);
+
+    // Public Settings routes
+    Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'publicIndex']);
+
+    // Seller routes (Protected with seller middleware)
+    Route::middleware(['auth:sanctum', 'seller'])->prefix('seller')->group(function () {
+        // Seller categories routes
+        Route::get('/categories', [SellerCategoryController::class, 'index']);
+        Route::post('/categories', [SellerCategoryController::class, 'store']);
+        Route::get('/categories/{id}', [SellerCategoryController::class, 'show']);
+        Route::put('/categories/{id}', [SellerCategoryController::class, 'update']);
+        Route::delete('/categories/{id}', [SellerCategoryController::class, 'destroy']);
+        Route::put('/categories/order', [SellerCategoryController::class, 'updateOrder']);
+        
+        // Seller products routes
+        Route::get('/products', [ProductController::class, 'sellerProducts']);
+        Route::post('/products', [ProductController::class, 'sellerStoreProduct']);
+        Route::get('/products/{id}', [ProductController::class, 'sellerGetProduct']);
+        Route::put('/products/{id}', [ProductController::class, 'sellerUpdateProduct']);
+        Route::delete('/products/{id}', [ProductController::class, 'sellerDeleteProduct']);
+        
+        // Seller orders routes
+        Route::get('/orders', [\App\Http\Controllers\Api\SellerOrderController::class, 'index']);
+        Route::get('/orders/{id}', [\App\Http\Controllers\Api\SellerOrderController::class, 'show']);
+        Route::put('/orders/{id}/status', [\App\Http\Controllers\Api\SellerOrderController::class, 'updateStatus']);
+        Route::get('/statistics', [\App\Http\Controllers\Api\SellerOrderController::class, 'getStatistics']);
+        Route::get('/payment-requests', [\App\Http\Controllers\Api\SellerOrderController::class, 'getPaymentRequests']);
+        
+        // Notifications routes (Seller)
+        Route::get('/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'getNotifications']);
+        Route::post('/notifications/mark-all-read', [\App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead']);
+        Route::post('/notifications/{id}/mark-read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
+        
+        // Seller settings routes
+        Route::get('/settings', [\App\Http\Controllers\Api\SellerOrderController::class, 'getSettings']);
+        Route::put('/settings', [\App\Http\Controllers\Api\SellerOrderController::class, 'updateSettings']);
+        
+        // Seller offers routes
+        Route::get('/offers', [SellerOfferController::class, 'index']);
+        Route::post('/offers', [SellerOfferController::class, 'store']);
+        Route::get('/offers/{id}', [SellerOfferController::class, 'show']);
+        Route::put('/offers/{id}', [SellerOfferController::class, 'update']);
+        Route::delete('/offers/{id}', [SellerOfferController::class, 'destroy']);
+        
+        // Seller coupons routes
+        Route::get('/coupons', [SellerCouponController::class, 'index']);
+        Route::post('/coupons', [SellerCouponController::class, 'store']);
+        Route::get('/coupons/{id}', [SellerCouponController::class, 'show']);
+        Route::put('/coupons/{id}', [SellerCouponController::class, 'update']);
+        Route::delete('/coupons/{id}', [SellerCouponController::class, 'destroy']);
+        Route::put('/coupons/{id}/toggle', [SellerCouponController::class, 'toggleStatus']);
+        Route::get('/coupons/products', [SellerCouponController::class, 'getProducts']);
+        Route::get('/coupons/categories', [SellerCouponController::class, 'getCategories']);
+        
+        // Test routes without authentication (for debugging)
+        Route::get('/test/coupons/products', [SellerCouponController::class, 'getProducts']);
+        Route::get('/test/coupons/categories', [SellerCouponController::class, 'getCategories']);
+        
+        // Seller chat routes
+        Route::get('/messages', [SellerMessageController::class, 'index']);
+        Route::get('/messages/{customerId}', [SellerMessageController::class, 'show']);
+        Route::post('/messages', [SellerMessageController::class, 'store']);
+        Route::get('/messages/unread/count', [SellerMessageController::class, 'unreadCount']);
+        Route::post('/messages/{customerId}/mark-read', [SellerMessageController::class, 'markAsRead']);
+        
+        // Seller reports routes
+        Route::get('/reports/kpis', [SellerReportController::class, 'getKPIs']);
+        Route::get('/reports/sales-trends', [SellerReportController::class, 'getSalesTrends']);
+        Route::get('/reports/top-products', [SellerReportController::class, 'getTopSellingProducts']);
+        Route::get('/reports/low-stock', [SellerReportController::class, 'getLowStockAlerts']);
+        Route::get('/reports/comprehensive', [SellerReportController::class, 'getComprehensiveReport']);
+    });
+
+    // Driver routes (Protected with driver middleware)
+    Route::middleware(['auth:sanctum', 'driver'])->prefix('driver')->group(function () {
+        Route::get('/orders', [DriverController::class, 'getOrders']);
+        Route::get('/orders/completed', [DriverController::class, 'getCompletedOrders']);
+        Route::get('/orders/{id}', [DriverController::class, 'getOrderDetails']);
+        Route::patch('/orders/{id}/status', [DriverController::class, 'updateOrderStatus']);
+        
+        // Driver Profile and Status updates
+        Route::get('/profile', [\App\Http\Controllers\DriverController::class, 'getProfile']);
+        Route::put('/profile/status', [\App\Http\Controllers\DriverController::class, 'updateStatus']);
+        Route::put('/profile/location', [\App\Http\Controllers\DriverController::class, 'updateLocation']);
+        
+        // Driver Settings and KYC
+        Route::get('/settings', [\App\Http\Controllers\DriverController::class, 'getDriverProfile']);
+        Route::post('/settings', [\App\Http\Controllers\DriverController::class, 'updateDriverProfile']);
+        
+        // Nearby Stores Map
+        Route::get('/nearby-stores', [DriverController::class, 'getNearbyStores']);
+
+        // Dashboard Statistics
+        Route::get('/statistics', [DriverController::class, 'getStatistics']);
+    });
 

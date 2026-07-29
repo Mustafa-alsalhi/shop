@@ -46,6 +46,38 @@ class CouponController extends Controller
     }
 
     /**
+     * عرض كوبونات بائع معين للمستخدمين
+     */
+    public function sellerCoupons($sellerId)
+    {
+        try {
+            \Log::info('Fetching coupons for seller ID: ' . $sellerId);
+            
+            // Get all coupons for this seller (simplified for debugging)
+            $coupons = Coupon::where('seller_id', $sellerId)
+                ->get(['id', 'code', 'name', 'description', 'type', 'value', 'minimum_amount', 'maximum_discount', 'usage_limit', 'used_count', 'starts_at', 'expires_at', 'is_active', 'is_first_time_only']);
+            
+            \Log::info('All coupons for seller: ' . $coupons->count());
+            
+            foreach ($coupons as $coupon) {
+                \Log::info('Coupon - ID: ' . $coupon->id . ', Code: ' . $coupon->code . ', Active: ' . ($coupon->is_active ? 'Yes' : 'No') . ', Expires: ' . $coupon->expires_at);
+            }
+            
+            return response()->json([
+                'status' => 'success',
+                'data' => $coupons
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching seller coupons: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch seller coupons',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * تخزين كوبون جديد
      */
     public function store(Request $request)
@@ -197,7 +229,9 @@ class CouponController extends Controller
             'user_id' => 'nullable|integer',
             'products' => 'nullable|array',
             'products.*.id' => 'integer',
-            'products.*.category_id' => 'integer'
+            'products.*.category_id' => 'nullable|integer',
+            'products.*.price' => 'required|numeric',
+            'products.*.quantity' => 'required|integer|min:1'
         ]);
 
         if ($validator->fails()) {
@@ -225,17 +259,30 @@ class CouponController extends Controller
             ], 400);
         }
 
-        // التحقق من الحد الأدنى للطلب
-        if (!$coupon->canApplyToAmount($request->total_amount)) {
+        // حساب المبلغ المؤهل للخصم بناءً على المنتجات والفئات
+        $cartItems = $request->products ?? [];
+        $eligibleAmount = $coupon->calculateEligibleAmount($cartItems);
+
+        // إذا لم يكن هناك منتجات مؤهلة
+        if ($eligibleAmount == 0 && !empty($cartItems)) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Minimum amount requirement not met',
-                'minimum_amount' => $coupon->minimum_amount
+                'message' => 'Coupon is not applicable to any products in your cart'
             ], 400);
         }
 
-        // حساب قيمة الخصم
-        $discount = $coupon->calculateDiscount($request->total_amount);
+        // التحقق من الحد الأدنى للطلب (بناءً على المبلغ المؤهل فقط)
+        if (!$coupon->canApplyToAmount($eligibleAmount)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Minimum amount requirement not met for eligible products',
+                'minimum_amount' => $coupon->minimum_amount,
+                'eligible_amount' => $eligibleAmount
+            ], 400);
+        }
+
+        // حساب قيمة الخصم بناءً على المبلغ المؤهل
+        $discount = $coupon->calculateDiscount($eligibleAmount);
 
         return response()->json([
             'status' => 'success',
@@ -243,6 +290,7 @@ class CouponController extends Controller
             'data' => [
                 'coupon' => $coupon,
                 'discount_amount' => $discount,
+                'eligible_amount' => $eligibleAmount,
                 'final_amount' => $request->total_amount - $discount
             ]
         ]);

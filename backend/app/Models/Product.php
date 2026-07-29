@@ -17,6 +17,7 @@ class Product extends Model
         'price',
         'sale_price',
         'currency',
+        'tax_id',
         'condition',
         'sale_start_date',
         'sale_end_date',
@@ -32,6 +33,8 @@ class Product extends Model
         'seller_avatar',
         'seller_rating',
         'seller_reviews_count',
+        'is_approved',
+        'seller_category_id',
         'is_active',
         'is_featured',
         'stock',
@@ -49,6 +52,7 @@ class Product extends Model
         'variants' => 'array',
         'is_active' => 'boolean',
         'is_featured' => 'boolean',
+        'is_approved' => 'boolean',
         'rating' => 'decimal:2',
         'sale_start_date' => 'datetime',
         'sale_end_date' => 'datetime',
@@ -59,9 +63,19 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function tax()
+    {
+        return $this->belongsTo(Tax::class);
+    }
+
     public function seller()
     {
         return $this->belongsTo(Seller::class);
+    }
+
+    public function sellerCategory()
+    {
+        return $this->belongsTo(SellerCategory::class, 'seller_category_id');
     }
 
     public function variants()
@@ -117,5 +131,40 @@ class Product extends Model
                 $query->whereNull('end_date')
                     ->orWhere('end_date', '>=', $now);
             });
+    }
+
+    protected static function booted()
+    {
+        static::updated(function ($product) {
+            // If stock dropped to 0 (or less) and it was previously > 0
+            if ($product->wasChanged('stock') && $product->stock <= 0 && $product->getOriginal('stock') > 0) {
+                
+                try {
+                    // Determine who to notify
+                    $email = null;
+                    $ownerName = '';
+
+                    if ($product->seller_id && $product->seller && $product->seller->user) {
+                        $email = $product->seller->user->email;
+                        $ownerName = $product->seller->store_name ?? $product->seller->user->name;
+                    } else {
+                        // Admin's product
+                        $admin = \App\Models\User::where('role', 'admin')->first();
+                        if ($admin) {
+                            $email = $admin->email;
+                            $ownerName = 'الإدارة العامة';
+                        }
+                    }
+
+                    if ($email) {
+                        \Illuminate\Support\Facades\Mail::to($email)->send(new \App\Mail\ProductOutofStockMail($product, $ownerName));
+                    }
+
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Failed to send ProductOutofStockMail: ' . $e->getMessage());
+                }
+
+            }
+        });
     }
 }

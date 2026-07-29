@@ -18,7 +18,9 @@ const AdminProductForm = () => {
     sku: '',
     category_id: '',
     seller_id: '',
+    seller_category_id: '',
     currency: 'USD',
+    tax_id: '',
     is_active: true,
     is_featured: false,
     condition: 'new',
@@ -32,6 +34,8 @@ const AdminProductForm = () => {
 
   const [categories, setCategories] = useState([])
   const [sellers, setSellers] = useState([])
+  const [sellerCategories, setSellerCategories] = useState([])
+  const [taxes, setTaxes] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [previewImage, setPreviewImage] = useState('')
@@ -40,6 +44,8 @@ const AdminProductForm = () => {
   useEffect(() => {
     fetchCategories()
     fetchSellers()
+    fetchSellerCategories()
+    fetchTaxes()
     if (isEditing && id) {
       fetchProduct()
     }
@@ -56,13 +62,63 @@ const AdminProductForm = () => {
   const fetchSellers = async () => {
     try {
       const token = localStorage.getItem('token')
-      const response = await api.get('/admin/sellers', {
+      if (!token) {
+        console.log('No token found, skipping sellers fetch')
+        return
+      }
+      const apiUrl = import.meta.env.VITE_API_URL || '/api'
+      const response = await fetch(`${apiUrl}/admin/sellers`, {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       })
-      setSellers(response.data || [])
+      if (response.ok) {
+        const data = await response.json()
+        setSellers(data || [])
+      } else {
+        setSellers([])
+      }
     } catch (err) {
+      console.log('Failed to fetch sellers:', err)
+      // Set sellers to empty array to prevent errors
+      setSellers([])
+    }
+  }
+
+  const fetchTaxes = async () => {
+    try {
+      const response = await api.get('/admin/taxes')
+      const taxesData = response.data.data || response.data || []
+      setTaxes(Array.isArray(taxesData) ? taxesData : [])
+    } catch (err) {
+      console.log('Failed to fetch taxes:', err)
+      setTaxes([])
+    }
+  }
+
+  const fetchSellerCategories = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      if (!token) {
+        return
+      }
+      const apiUrl = import.meta.env.VITE_API_URL || '/api'
+      const response = await fetch(`${apiUrl}/seller/categories`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setSellerCategories(data || [])
+      } else {
+        setSellerCategories([])
+      }
+    } catch (err) {
+      console.log('Failed to fetch seller categories:', err)
+      setSellerCategories([])
     }
   }
 
@@ -75,7 +131,7 @@ const AdminProductForm = () => {
       // Convert image URL to absolute if needed
       let imageUrl = product.image_url || ''
       if (imageUrl && !imageUrl.startsWith('http')) {
-        imageUrl = `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-d82a.up.railway.app'}${imageUrl.startsWith('/') ? imageUrl : '/' + imageUrl}`
+        imageUrl = `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-8385.up.railway.app'}${imageUrl.startsWith('/') ? imageUrl : '/' + imageUrl}`
       }
       
       setFormData(prev => ({
@@ -89,7 +145,9 @@ const AdminProductForm = () => {
         sku: product.sku || '',
         category_id: product.category_id || '',
         seller_id: product.seller_id || '',
+        seller_category_id: product.seller_category_id || '',
         currency: product.currency || 'USD',
+        tax_id: product.tax_id || '',
         is_active: product.is_active !== undefined ? product.is_active : true,
         is_featured: product.is_featured || false,
         condition: product.condition || 'new',
@@ -106,7 +164,7 @@ const AdminProductForm = () => {
       const galleryImages = product.gallery_images || []
       const processedGalleryImages = galleryImages.map(img => {
         if (typeof img === 'string' && !img.startsWith('http')) {
-          return `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-d82a.up.railway.app'}${img.startsWith('/') ? img : '/' + img}`
+          return `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-8385.up.railway.app'}${img.startsWith('/') ? img : '/' + img}`
         }
         return img
       })
@@ -228,6 +286,11 @@ const AdminProductForm = () => {
       submitData.append('sku', formData.sku?.trim() || '')
       submitData.append('category_id', parseInt(formData.category_id))
       submitData.append('currency', formData.currency)
+      if (formData.tax_id) {
+        submitData.append('tax_id', parseInt(formData.tax_id))
+      } else {
+        submitData.append('tax_id', '')
+      }
       submitData.append('is_active', formData.is_active ? '1' : '0')
       submitData.append('is_featured', formData.is_featured ? '1' : '0')
       submitData.append('condition', formData.condition)
@@ -250,6 +313,11 @@ const AdminProductForm = () => {
       // Add seller_id if selected
       if (formData.seller_id) {
         submitData.append('seller_id', parseInt(formData.seller_id))
+      }
+
+      // Add seller_category_id if selected
+      if (formData.seller_category_id) {
+        submitData.append('seller_category_id', parseInt(formData.seller_category_id))
       }
 
       // Add variants
@@ -464,6 +532,48 @@ const AdminProductForm = () => {
                   {sellers.map((seller) => (
                     <option key={seller.id} value={seller.id}>
                       {seller.store_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Seller Category */}
+              {formData.seller_id && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    فئة البائع
+                  </label>
+                  <select
+                    name="seller_category_id"
+                    value={formData.seller_category_id}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">اختر فئة البائع (اختياري)</option>
+                    {sellerCategories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Tax */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  الضريبة
+                </label>
+                <select
+                  name="tax_id"
+                  value={formData.tax_id}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">بدون ضريبة</option>
+                  {taxes.filter(t => t.is_active).map((tax) => (
+                    <option key={tax.id} value={tax.id}>
+                      {tax.name} ({tax.rate}%)
                     </option>
                   ))}
                 </select>

@@ -12,6 +12,7 @@ class Message extends Model
     protected $fillable = [
         'sender_id',
         'receiver_id',
+        'seller_id',
         'message',
         'is_read',
         'read_at',
@@ -30,6 +31,11 @@ class Message extends Model
     public function receiver()
     {
         return $this->belongsTo(User::class, 'receiver_id');
+    }
+
+    public function seller()
+    {
+        return $this->belongsTo(Seller::class, 'seller_id');
     }
 
     // Scope to get messages between two users

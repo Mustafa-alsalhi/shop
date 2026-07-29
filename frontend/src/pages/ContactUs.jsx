@@ -11,8 +11,10 @@ import {
 import { Helmet } from 'react-helmet-async'
 import api from '../services/api'
 import { showSuccessNotification, showErrorNotification } from '../store/slices/uiSlice'
+import { useSettings } from '../contexts/SettingsContext'
 
 const ContactUs = () => {
+  const { storeName, storeEmail, storePhone, storeAddress } = useSettings()
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -66,8 +68,8 @@ const ContactUs = () => {
   return (
     <>
       <Helmet>
-        <title>اتصل بنا - متجر أصالة</title>
-        <meta name="description" content="تواصل مع متجر أصالة عبر الهاتف أو البريد الإلكتروني أو زيارتنا في الرياض" />
+        <title>اتصل بنا - {storeName}</title>
+        <meta name="description" content={`تواصل مع ${storeName} عبر الهاتف أو البريد الإلكتروني أو زيارتنا`} />
       </Helmet>
       
       <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-12" dir="rtl">
@@ -102,41 +104,45 @@ const ContactUs = () => {
                 </h2>
                 
                 <div className="space-y-6">
-                  <div className="flex items-start space-x-reverse space-x-3">
-                    <div className="p-3 bg-amber-100 rounded-lg">
-                      <PhoneIcon className="h-5 w-5 text-amber-600" />
+                  {storePhone && (
+                    <div className="flex items-start space-x-reverse space-x-3">
+                      <div className="p-3 bg-amber-100 rounded-lg">
+                        <PhoneIcon className="h-5 w-5 text-amber-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-amber-900 mb-1">الهاتف</h3>
+                        <p className="text-gray-600">{storePhone}</p>
+                        <p className="text-sm text-amber-700">السبت - الخميس: 9 ص - 9 م</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-amber-900 mb-1">الهاتف</h3>
-                      <p className="text-gray-600">+966 77 678 0551</p>
-                      <p className="text-sm text-amber-700">السبت - الخميس: 9 ص - 9 م</p>
-                    </div>
-                  </div>
+                  )}
 
-                  <div className="flex items-start space-x-reverse space-x-3">
-                    <div className="p-3 bg-amber-100 rounded-lg">
-                      <EnvelopeIcon className="h-5 w-5 text-amber-600" />
+                  {storeEmail && (
+                    <div className="flex items-start space-x-reverse space-x-3">
+                      <div className="p-3 bg-amber-100 rounded-lg">
+                        <EnvelopeIcon className="h-5 w-5 text-amber-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-amber-900 mb-1">البريد الإلكتروني</h3>
+                        <p className="text-gray-600">{storeEmail}</p>
+                        <p className="text-sm text-amber-700">رد خلال 24 ساعة</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-amber-900 mb-1">البريد الإلكتروني</h3>
-                      <p className="text-gray-600">support@asalah.store</p>
-                      <p className="text-sm text-amber-700">رد خلال 24 ساعة</p>
-                    </div>
-                  </div>
+                  )}
 
-                  <div className="flex items-start space-x-reverse space-x-3">
-                    <div className="p-3 bg-amber-100 rounded-lg">
-                      <MapPinIcon className="h-5 w-5 text-amber-600" />
+                  {storeAddress && (
+                    <div className="flex items-start space-x-reverse space-x-3">
+                      <div className="p-3 bg-amber-100 rounded-lg">
+                        <MapPinIcon className="h-5 w-5 text-amber-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-amber-900 mb-1">العنوان</h3>
+                        <p className="text-gray-600">
+                          {storeAddress}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-amber-900 mb-1">العنوان</h3>
-                      <p className="text-gray-600">
-                        شارع الملك فهد<br />
-                        الرياض، المملكة العربية السعودية<br />
-                        الرمز البريدي 12345
-                      </p>
-                    </div>
-                  </div>
+                  )}
 
                   <div className="flex items-start space-x-reverse space-x-3">
                     <div className="p-3 bg-amber-100 rounded-lg">

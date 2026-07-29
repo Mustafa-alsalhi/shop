@@ -29,259 +29,180 @@ class AdminController extends Controller
 
 
     public function dashboard()
-
     {
-
         try {
+            $now = now();
+            $today = clone $now; $today->startOfDay();
+            $thisWeek = clone $now; $thisWeek->startOfWeek();
+            $thisMonth = clone $now; $thisMonth->startOfMonth();
+            $thisYear = clone $now; $thisYear->startOfYear();
 
-            // Get basic counts
-
+            // Store wide stats
             $totalProducts = \App\Models\Product::count();
-
             $totalOrders = \App\Models\Order::count();
-
             $totalUsers = \App\Models\User::count();
-
             $totalCategories = \App\Models\Category::count();
+            $totalSellers = \App\Models\Seller::where('status', 'active')->count();
 
-            
+            // Store Revenue stats
+            $todayOrders = \App\Models\Order::where('created_at', '>=', $today)->count();
+            $thisWeekOrders = \App\Models\Order::where('created_at', '>=', $thisWeek)->count();
+            $thisMonthOrders = \App\Models\Order::where('created_at', '>=', $thisMonth)->count();
+            $thisYearOrders = \App\Models\Order::where('created_at', '>=', $thisYear)->count();
 
-            // Get today's stats (using correct column names)
-
-            $todayOrders = \App\Models\Order::whereDate('created_at', now()->toDateString())->count();
-
-            $todayRevenue = \App\Models\Order::whereDate('created_at', now()->toDateString())->sum('total_amount') ?? 0;
-
-            
-
-            // Get this month's stats (using correct column names)
-
-            $thisMonthOrders = \App\Models\Order::whereMonth('created_at', now()->month)->count();
-
-            $thisMonthRevenue = \App\Models\Order::whereMonth('created_at', now()->month)->sum('total_amount') ?? 0;
-
-            
-
-            // Get this year's stats (using correct column names)
-
-            $thisYearOrders = \App\Models\Order::whereYear('created_at', now()->year)->count();
-
-            $thisYearRevenue = \App\Models\Order::whereYear('created_at', now()->year)->sum('total_amount') ?? 0;
-
-            
-
-            // Get total revenue (using correct column name)
-
+            // Using total_amount for admin, representing the full cash flow of the store orders
+            $todayRevenue = \App\Models\Order::where('created_at', '>=', $today)->sum('total_amount') ?? 0;
+            $thisWeekRevenue = \App\Models\Order::where('created_at', '>=', $thisWeek)->sum('total_amount') ?? 0;
+            $thisMonthRevenue = \App\Models\Order::where('created_at', '>=', $thisMonth)->sum('total_amount') ?? 0;
+            $thisYearRevenue = \App\Models\Order::where('created_at', '>=', $thisYear)->sum('total_amount') ?? 0;
             $totalRevenue = \App\Models\Order::sum('total_amount') ?? 0;
 
-            
+            // Pending orders
+            $pendingOrdersCount = \App\Models\Order::where('status', 'pending')->count();
 
-            // Get top selling products (using OrderItem model with error handling)
-
+            // Top selling products
             $topSellingProducts = [];
-
             try {
-
                 $topSellingProducts = \App\Models\OrderItem::select('product_id', 
-
                             \DB::raw('SUM(quantity) as total_sales'), 
-
                             \DB::raw('SUM(quantity * price) as total_revenue'))
-
-                    ->with('product')
-
+                    ->with(['product:id,name,seller_id', 'product.seller:id,store_name'])
+                    ->whereHas('product')
                     ->groupBy('product_id')
-
                     ->orderBy('total_sales', 'desc')
-
                     ->limit(5)
-
                     ->get()
-
                     ->map(function ($item) {
-
                         return [
-
-                            'name' => $item->product->name ?? 'Unknown Product',
-
+                            'name' => $item->product ? $item->product->name : 'منتج غير معروف',
+                            'seller_name' => ($item->product && $item->product->seller) ? $item->product->seller->store_name : '-',
                             'sales' => $item->total_sales ?? 0,
-
                             'revenue' => $item->total_revenue ?? 0
-
                         ];
-
                     });
+            } catch (\Exception $e) {}
 
-            } catch (\Exception $e) {
-
-                \Log::error('Top selling products error: ' . $e->getMessage());
-
-                $topSellingProducts = [];
-
-            }
-
-            
-
-            // Get recent orders (with error handling)
-
-            $recentOrders = [];
-
+            // Sellers Performance Table
+            $sellersPerformance = [];
             try {
-
-                $recentOrders = \App\Models\Order::with('user')
-
-                    ->orderBy('created_at', 'desc')
-
-                    ->limit(5)
-
-                    ->get()
-
-                    ->map(function ($order) {
-
-                        return [
-
-                            'id' => $order->id,
-
-                            'customer_name' => $order->user->name ?? 'Unknown Customer',
-
-                            'total' => $order->total_amount ?? 0,
-
-                            'status' => $order->status ?? 'unknown',
-
-                            'created_at' => $order->created_at->format('Y-m-d H:i')
-
-                        ];
-
+                // Fetch all active sellers and join with products and order_items
+                $sellers = \App\Models\Seller::where('status', 'active')->get();
+                foreach($sellers as $seller) {
+                    $sellerItems = \App\Models\OrderItem::whereHas('product', function($q) use ($seller) {
+                        $q->where('seller_id', $seller->id);
                     });
 
+                    // Count DISTINCT orders that this seller fulfilled
+                    $sellerCompletedOrdersQuery = (clone $sellerItems)->whereHas('order', function($q) {
+                        $q->where('status', 'delivered');
+                    });
+                    
+                    $sellerTotalOrders = (clone $sellerItems)->distinct('order_id')->count('order_id');
+                    $sellerCompletedOrders = (clone $sellerCompletedOrdersQuery)->distinct('order_id')->count('order_id');
+
+                    // Seller specific revenue (quantity * price of their items)
+                    $sellerTotalSales = (clone $sellerItems)->sum(\DB::raw('price * quantity'));
+                    $sellerTodaySales = (clone $sellerItems)->where('created_at', '>=', $today)->sum(\DB::raw('price * quantity'));
+                    $sellerWeekSales = (clone $sellerItems)->where('created_at', '>=', $thisWeek)->sum(\DB::raw('price * quantity'));
+                    $sellerMonthSales = (clone $sellerItems)->where('created_at', '>=', $thisMonth)->sum(\DB::raw('price * quantity'));
+
+                    // Fetch the actual completed order lists for modal display
+                    $completedOrderIds = (clone $sellerCompletedOrdersQuery)->distinct()->pluck('order_id');
+                    $completedOrdersDetails = \App\Models\Order::with('user:id,name,first_name,last_name')
+                        ->whereIn('id', $completedOrderIds)
+                        ->orderBy('created_at', 'desc')
+                        ->get()
+                        ->map(function ($order) {
+                            return [
+                                'id' => $order->id,
+                                'order_number' => $order->order_number ?? $order->id,
+                                'customer_name' => $order->user ? ($order->user->first_name . ' ' . $order->user->last_name) : 'عميل غير معروف',
+                                'total_amount' => $order->total_amount ?? 0,
+                                'created_at' => $order->created_at ? $order->created_at->format('Y-m-d') : 'N/A'
+                            ];
+                        });
+
+                    $sellersPerformance[] = [
+                        'id' => $seller->id,
+                        'store_name' => $seller->store_name,
+                        'total_orders' => $sellerTotalOrders,
+                        'completed_orders' => $sellerCompletedOrders,
+                        'completed_orders_details' => $completedOrdersDetails,
+                        'today_sales' => $sellerTodaySales ?: 0,
+                        'week_sales' => $sellerWeekSales ?: 0,
+                        'month_sales' => $sellerMonthSales ?: 0,
+                        'total_sales' => $sellerTotalSales ?: 0,
+                    ];
+                }
+                
+                // Sort by total sales descending
+                usort($sellersPerformance, function($a, $b) {
+                    return $b['total_sales'] <=> $a['total_sales'];
+                });
             } catch (\Exception $e) {
-
-                \Log::error('Recent orders error: ' . $e->getMessage());
-
-                $recentOrders = [];
-
+                \Log::error('Seller performance error: ' . $e->getMessage());
             }
 
-            
+            // Recent orders
+            $recentOrders = [];
+            try {
+                $recentOrders = \App\Models\Order::with(['user:id,name,first_name,last_name'])
+                    ->orderBy('created_at', 'desc')
+                    ->limit(6)
+                    ->get()
+                    ->map(function ($order) {
+                        return [
+                            'id' => $order->id,
+                            'order_number' => $order->order_number ?? $order->id,
+                            'customer_name' => $order->user ? ($order->user->first_name . ' ' . $order->user->last_name) : 'عميل غير معروف',
+                            'total' => $order->total_amount ?? 0,
+                            'status' => $order->status ?? 'unknown',
+                            'created_at' => $order->created_at ? $order->created_at->format('Y-m-d') : 'N/A'
+                        ];
+                    });
+            } catch (\Exception $e) {
+                \Log::error('Recent orders error: ' . $e->getMessage());
+            }
 
-            // Log the data for debugging
-
-            \Log::info('Dashboard data:', [
-
-                'total_products' => $totalProducts,
-
-                'total_orders' => $totalOrders,
-
-                'total_users' => $totalUsers,
-
-                'total_categories' => $totalCategories,
-
-                'today_orders' => $todayOrders,
-
-                'today_revenue' => $todayRevenue,
-
-                'this_month_orders' => $thisMonthOrders,
-
-                'this_month_revenue' => $thisMonthRevenue,
-
-                'this_year_orders' => $thisYearOrders,
-
-                'this_year_revenue' => $thisYearRevenue,
-
-                'total_revenue' => $totalRevenue,
-
-                'top_selling_products_count' => $topSellingProducts->count(),
-
-                'recent_orders_count' => $recentOrders->count()
-
-            ]);
-
-            
+            // Out of stock
+            $outOfStockProducts = \App\Models\Product::with('category')
+                ->where('stock', '<=', 0)->orWhereNull('stock')
+                ->orderBy('name')
+                ->limit(5)->get();
 
             return response()->json([
-
                 'stats' => [
-
                     'total_products' => $totalProducts,
-
                     'total_orders' => $totalOrders,
-
                     'total_users' => $totalUsers,
-
                     'total_categories' => $totalCategories,
-
+                    'total_sellers' => $totalSellers,
+                    
                     'total_revenue' => $totalRevenue,
-
                     'today_orders' => $todayOrders,
-
                     'today_revenue' => $todayRevenue,
-
+                    'this_week_orders' => $thisWeekOrders,
+                    'this_week_revenue' => $thisWeekRevenue,
                     'this_month_orders' => $thisMonthOrders,
-
                     'this_month_revenue' => $thisMonthRevenue,
-
                     'this_year_orders' => $thisYearOrders,
-
                     'this_year_revenue' => $thisYearRevenue,
-
+                    
+                    'pending_orders' => $pendingOrdersCount,
                 ],
-
                 'top_selling_products' => $topSellingProducts,
-
-                'recent_orders' => $recentOrders
-
+                'recent_orders' => $recentOrders,
+                'out_of_stock_products' => $outOfStockProducts,
+                'sellers_performance' => $sellersPerformance
             ]);
-
-            
 
         } catch (\Exception $e) {
-
-            \Log::error('Dashboard error: ' . $e->getMessage());
-
-            \Log::error('Dashboard error trace: ' . $e->getTraceAsString());
-
-            
-
+            \Log::error('Dashboard error occurred: ' . $e->getMessage());
             return response()->json([
-
                 'message' => 'Dashboard error occurred',
-
-                'error' => $e->getMessage(),
-
-                'stats' => [
-
-                    'total_products' => 0,
-
-                    'total_orders' => 0,
-
-                    'total_users' => 0,
-
-                    'total_categories' => 0,
-
-                    'total_revenue' => 0,
-
-                    'today_orders' => 0,
-
-                    'today_revenue' => 0,
-
-                    'this_month_orders' => 0,
-
-                    'this_month_revenue' => 0,
-
-                    'this_year_orders' => 0,
-
-                    'this_year_revenue' => 0,
-
-                ],
-
-                'top_selling_products' => [],
-
-                'recent_orders' => []
-
+                'error' => $e->getMessage()
             ], 500);
-
         }
-
     }
 
 
@@ -443,6 +364,8 @@ class AdminController extends Controller
                 'category_id' => 'required|exists:categories,id',
 
                 'seller_id' => 'nullable|exists:sellers,id',
+
+                'tax_id' => 'nullable|exists:taxes,id',
 
                 'is_active' => 'sometimes|boolean',
 
@@ -648,7 +571,7 @@ class AdminController extends Controller
 
         $product = \App\Models\Product::findOrFail($id);
 
-        
+
 
         try {
 
@@ -700,6 +623,8 @@ class AdminController extends Controller
 
                 'seller_id' => 'nullable|exists:sellers,id',
 
+                'tax_id' => 'nullable|exists:taxes,id',
+
                 'is_active' => 'sometimes|boolean',
 
                 'is_featured' => 'sometimes|boolean',
@@ -719,6 +644,16 @@ class AdminController extends Controller
             // Add variants back to validated data
 
             $validated['variants'] = $variants;
+
+
+
+            // Convert empty tax_id to null
+
+            if (isset($validated['tax_id']) && $validated['tax_id'] === '') {
+
+                $validated['tax_id'] = null;
+
+            }
 
 
 
@@ -880,7 +815,11 @@ class AdminController extends Controller
 
                 'gallery_images' => $validated['gallery_images'] ?? 'not_set',
 
-                'all_validated' => array_keys($validated)
+                'all_validated' => array_keys($validated),
+
+                'tax_id' => $validated['tax_id'] ?? 'not_set',
+
+                'tax_id_value' => isset($validated['tax_id']) ? ($validated['tax_id'] === null ? 'null' : $validated['tax_id']) : 'not_set'
 
             ]);
 
@@ -936,7 +875,7 @@ class AdminController extends Controller
 
     {
 
-        $product = \App\Models\Product::with('category')->findOrFail($id);
+        $product = \App\Models\Product::with('category', 'tax')->findOrFail($id);
 
         return response()->json($product);
 
@@ -945,13 +884,28 @@ class AdminController extends Controller
 
 
     public function orders()
-
     {
-
-        $orders = \App\Models\Order::with('user')->orderBy('created_at', 'desc')->paginate(10);
-
+        $orders = \App\Models\Order::with(['user', 'driver', 'items.product.seller'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(100);
         return response()->json($orders);
+    }
 
+    public function getOrder($id)
+    {
+        try {
+            $order = \App\Models\Order::with(['user', 'driver', 'items.product.seller'])->findOrFail($id);
+            // Fetch payment requests for this order
+            $paymentRequests = \App\Models\PaymentRequest::where('order_id', $order->id)->get();
+            $orderArray = $order->toArray();
+            $orderArray['payment_requests'] = $paymentRequests;
+            
+            return response()->json(['data' => $orderArray]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['success' => false, 'message' => 'Order not found'], 404);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Error fetching order: ' . $e->getMessage()], 500);
+        }
     }
 
 
@@ -984,7 +938,11 @@ class AdminController extends Controller
 
                 'image_url' => 'nullable|string',
 
-                'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048'
+                'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+
+                'show_on_homepage' => 'sometimes|boolean',
+
+                'sort_order' => 'sometimes|integer|min:0'
 
             ]);
 
@@ -1060,7 +1018,11 @@ class AdminController extends Controller
 
                 'image_url' => 'nullable|string',
 
-                'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048'
+                'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+
+                'show_on_homepage' => 'sometimes|boolean',
+
+                'sort_order' => 'sometimes|integer|min:0'
 
             ]);
 
@@ -1144,7 +1106,9 @@ class AdminController extends Controller
 
                 'password' => 'required|string|min:6',
 
-                'role' => 'required|string|max:50|in:user,admin'
+                'phone' => 'nullable|string|max:20',
+
+                'role' => 'required|string|max:50|in:user,admin,seller,driver'
 
             ]);
 
@@ -1159,6 +1123,8 @@ class AdminController extends Controller
                 'email' => $validated['email'],
 
                 'password' => bcrypt($validated['password']),
+
+                'phone' => $validated['phone'] ?? null,
 
                 'role' => $validated['role'],
 
@@ -1238,7 +1204,9 @@ class AdminController extends Controller
 
                 'email' => 'required|email|max:255',
 
-                'role' => 'required|string|max:50|in:user,admin'
+                'phone' => 'nullable|string|max:20',
+
+                'role' => 'required|string|max:50|in:user,admin,seller,driver'
 
             ]);
 
@@ -1255,6 +1223,8 @@ class AdminController extends Controller
             $user->name = $validated['name'];
 
             $user->email = $validated['email'];
+
+            $user->phone = $validated['phone'] ?? $user->phone;
 
             $user->role = $validated['role'];
 
@@ -1362,7 +1332,11 @@ class AdminController extends Controller
 
         try {
 
-            $sellers = \App\Models\Seller::withCount('products')->get();
+            $sellers = \App\Models\Seller::with('user')->get()->map(function ($seller) {
+                $productsCount = \App\Models\Product::where('seller_id', $seller->id)->count();
+                $seller->products_count = $productsCount;
+                return $seller;
+            });
 
             return response()->json($sellers);
 
@@ -1455,6 +1429,8 @@ class AdminController extends Controller
 
             $validated = $request->validate([
 
+                'user_id' => 'required|exists:users,id',
+
                 'store_name' => 'required|string|max:255',
 
                 'description' => 'nullable|string',
@@ -1462,6 +1438,26 @@ class AdminController extends Controller
                 'avatar' => 'nullable|string',
 
                 'avatar_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+
+                'id_card_image_file' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:2048',
+
+                'commercial_register_image_file' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:2048',
+
+                'signed_contract_image_file' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:2048',
+
+                'kuraimi_account_name' => 'nullable|string|max:255',
+
+                'kuraimi_account_number' => 'nullable|string|max:255',
+
+                'alt_network_name' => 'nullable|string|max:255',
+
+                'alt_recipient_name' => 'nullable|string|max:255',
+
+                'alt_recipient_phone' => 'nullable|string|max:255',
+
+                'latitude' => 'nullable|numeric',
+
+                'longitude' => 'nullable|numeric',
 
                 'rating' => 'nullable|numeric|min:0|max:5',
 
@@ -1475,6 +1471,24 @@ class AdminController extends Controller
 
 
 
+            // Check if user already has a seller profile
+            $existingSeller = \App\Models\Seller::where('user_id', $validated['user_id'])->first();
+            if ($existingSeller) {
+                return response()->json([
+                    'message' => 'User already has a seller profile',
+                    'seller' => $existingSeller
+                ], 400);
+            }
+
+            // Get the user and update their role to seller
+            $user = \App\Models\User::find($validated['user_id']);
+            if (!$user) {
+                return response()->json(['message' => 'User not found'], 404);
+            }
+
+            $user->role = 'seller';
+            $user->save();
+
             // Set default values for optional fields if not provided
 
             $validated['rating'] = $validated['rating'] ?? 0;
@@ -1485,7 +1499,9 @@ class AdminController extends Controller
 
             $validated['is_verified'] = $validated['is_verified'] ?? false;
 
-            
+            $validated['user_id'] = $user->id;
+
+
 
             // Convert is_verified to boolean if it comes as string
 
@@ -1497,40 +1513,41 @@ class AdminController extends Controller
 
 
 
-            // Handle image upload
+            // Handle image and document uploads
 
-            if ($request->hasFile('avatar_file')) {
+            $uploadFields = [
 
-                $image = $request->file('avatar_file');
+                'avatar_file' => ['folder' => 'sellers', 'field' => 'avatar'],
 
-                $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+                'id_card_image_file' => ['folder' => 'sellers/documents', 'field' => 'id_card_image'],
 
-                $image->move(storage_path('app/public/images/sellers'), $imageName);
+                'commercial_register_image_file' => ['folder' => 'sellers/documents', 'field' => 'commercial_register_image'],
 
-                // Save full URL instead of relative path
-                $validated['avatar'] = asset('storage/images/sellers/' . $imageName);
+                'signed_contract_image_file' => ['folder' => 'sellers/documents', 'field' => 'signed_contract_image'],
 
-                
+            ];
 
-                // Log for debugging - NO binary storage to avoid issues
 
-                \Log::info('Image uploaded successfully in createSeller', [
 
-                    'image_name' => $imageName,
+            foreach ($uploadFields as $requestField => $config) {
 
-                    'avatar_path' => asset('storage/images/sellers/' . $imageName),
+                if ($request->hasFile($requestField)) {
 
-                    'file_path' => $image->getRealPath()
+                    $file = $request->file($requestField);
 
-                ]);
+                    $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+                    $file->move(storage_path('app/public/images/' . $config['folder']), $fileName);
+
+                    $validated[$config['field']] = asset('storage/images/' . $config['folder'] . '/' . $fileName);
+
+                }
+
+                unset($validated[$requestField]);
 
             }
 
 
-
-            // Remove avatar_file and avatar_image from validated data
-
-            unset($validated['avatar_file']);
 
             unset($validated['avatar_image']);
 
@@ -1626,7 +1643,7 @@ class AdminController extends Controller
 
             // Get all form fields using input() method
 
-            $fields = ['store_name', 'description', 'avatar', 'rating', 'reviews_count', 'status', 'is_verified'];
+            $fields = ['store_name', 'description', 'avatar', 'rating', 'reviews_count', 'status', 'is_verified', 'latitude', 'longitude', 'kuraimi_account_name', 'kuraimi_account_number', 'alt_network_name', 'alt_recipient_name', 'alt_recipient_phone'];
 
             
 
@@ -1654,40 +1671,41 @@ class AdminController extends Controller
 
             
 
-            // Handle image upload
+            // Handle image and document uploads
 
-            if ($request->hasFile('avatar_file')) {
+            $uploadFields = [
 
-                $image = $request->file('avatar_file');
+                'avatar_file' => ['folder' => 'sellers', 'field' => 'avatar'],
 
-                $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+                'id_card_image_file' => ['folder' => 'sellers/documents', 'field' => 'id_card_image'],
 
-                $image->move(storage_path('app/public/images/sellers'), $imageName);
+                'commercial_register_image_file' => ['folder' => 'sellers/documents', 'field' => 'commercial_register_image'],
 
-                // Save full URL instead of relative path
-                $validated['avatar'] = asset('storage/images/sellers/' . $imageName);
+                'signed_contract_image_file' => ['folder' => 'sellers/documents', 'field' => 'signed_contract_image'],
 
-                
+            ];
 
-                // Log for debugging - NO binary storage to avoid issues
 
-                \Log::info('Image uploaded successfully in updateSeller', [
 
-                    'image_name' => $imageName,
+            foreach ($uploadFields as $requestField => $config) {
 
-                    'avatar_path' => asset('storage/images/sellers/' . $imageName),
+                if ($request->hasFile($requestField)) {
 
-                    'file_path' => $image->getRealPath()
+                    $file = $request->file($requestField);
 
-                ]);
+                    $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+                    $file->move(storage_path('app/public/images/' . $config['folder']), $fileName);
+
+                    $validated[$config['field']] = asset('storage/images/' . $config['folder'] . '/' . $fileName);
+
+                }
+
+                unset($validated[$requestField]);
 
             }
 
 
-
-            // Remove avatar_file and avatar_image from validated data
-
-            unset($validated['avatar_file']);
 
             unset($validated['avatar_image']);
 
@@ -1855,5 +1873,116 @@ class AdminController extends Controller
 
     }
 
+    public function assignDriver(Request $request, $orderId)
+    {
+        try {
+            $request->validate([
+                'driver_id' => 'required|exists:users,id'
+            ]);
+
+            $order = \App\Models\Order::findOrFail($orderId);
+            $driver = \App\Models\User::where('id', $request->driver_id)
+                ->where('role', 'driver')
+                ->firstOrFail();
+
+            $order->driver_id = $driver->id;
+            $order->driver_status = 'assigned';
+            $order->save();
+
+            try {
+                if ($driver->email) {
+                    \Illuminate\Support\Facades\Mail::to($driver->email)->send(new \App\Mail\DriverAssignedMail($order, $driver));
+                }
+            } catch (\Exception $mailEx) {
+                \Illuminate\Support\Facades\Log::error('Failed to send driver assignment email: ' . $mailEx->getMessage());
+                // Non-blocking error, so it proceeds returning success
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Driver assigned successfully',
+                'data' => [
+                    'order' => $order,
+                    'driver' => $driver
+                ]
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error assigning driver: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getSmartDrivers(Request $request, $orderId)
+    {
+        try {
+            $order = \App\Models\Order::with('items.product.seller')->findOrFail($orderId);
+            
+            // Try to find pickup location (Seller)
+            $sellerLat = null;
+            $sellerLng = null;
+            if ($order->items && count($order->items) > 0 && isset($order->items[0]->product) && isset($order->items[0]->product->seller)) {
+                $sellerLat = $order->items[0]->product->seller->latitude;
+                $sellerLng = $order->items[0]->product->seller->longitude;
+            }
+
+            // Fallback to order location if no seller location is found
+            $targetLat = $sellerLat ?? $order->latitude;
+            $targetLng = $sellerLng ?? $order->longitude;
+            
+            $drivers = \App\Models\User::where('role', 'driver')
+                ->where('is_active', true)
+                ->withCount(['driverOrders as active_orders_count' => function ($query) {
+                    $query->whereIn('driver_status', ['assigned', 'picked_up_from_seller', 'out_for_delivery']);
+                }])
+                ->get();
+                
+            $drivers = $drivers->map(function ($driver) use ($targetLat, $targetLng) {
+                $driver->distance_km = null;
+                if ($targetLat && $targetLng && $driver->latitude && $driver->longitude) {
+                    $driver->distance_km = \App\Services\DeliveryService::calculateFee(
+                        $targetLat, $targetLng, 
+                        $driver->latitude, $driver->longitude
+                    )['distance_km'];
+                }
+                
+                // Categorize
+                if ($driver->is_online && $driver->active_orders_count == 0) {
+                    $driver->smart_status = 'available';
+                } elseif ($driver->is_online && $driver->active_orders_count > 0) {
+                    $driver->smart_status = 'busy';
+                } else {
+                    $driver->smart_status = 'offline';
+                }
+                
+                return $driver;
+            });
+            
+            // Sort: available first, then busy, then offline, and by distance
+            $drivers = $drivers->sortBy(function($driver) {
+                $statusScore = $driver->smart_status === 'available' ? 1 : ($driver->smart_status === 'busy' ? 2 : 3);
+                $dist = $driver->distance_km ?? 999999;
+                return sprintf('%d_%08d', $statusScore, $dist * 1000);
+            })->values();
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $drivers
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error fetching smart drivers: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch smart drivers'
+            ], 500);
+        }
+    }
 }
 

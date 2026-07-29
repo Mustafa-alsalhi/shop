@@ -28,26 +28,26 @@ const ProductCard = ({ product }) => {
   // Helper function to get correct image URL
   const getImageUrl = (imagePath) => {
     if (!imagePath) return 'https://picsum.photos/seed/product/300x300.jpg'
-    
+
     // Get base URL from environment or fallback to Railway production
-    const baseUrl = import.meta.env.VITE_API_URL || 'https://shop-production-d82a.up.railway.app/api'
+    const baseUrl = import.meta.env.VITE_API_URL || 'https://shop-production-8385.up.railway.app/api'
     const publicUrl = baseUrl.replace('/api', '')
-    
+
     // If it's a relative path starting with /images/, convert to full URL
     if (imagePath.startsWith('/images/')) {
       return `${publicUrl}${imagePath}`
     }
-    
+
     // If it's already a full URL, use it as is
     if (imagePath.startsWith('http')) {
       return imagePath
     }
-    
+
     // If it's a placeholder URL, use fallback
     if (imagePath.includes('via.placeholder.com')) {
       return `https://picsum.photos/seed/${product.name?.replace(/\s+/g, '') || 'product'}/300x300.jpg`
     }
-    
+
     // Otherwise, treat as relative path
     return `${publicUrl}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`
   }
@@ -82,14 +82,14 @@ const ProductCard = ({ product }) => {
     : 0
 
   return (
-    <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg overflow-hidden hover:shadow-amber-200/50 transition-all duration-300 group w-full border border-amber-200/30 hover:border-amber-300/60">
+    <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg overflow-hidden hover:shadow-amber-200/50 transition-all duration-300 group w-full h-full border border-amber-200/30 hover:border-amber-300/60 flex flex-col">
       {/* Product Image */}
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden flex-shrink-0 h-48">
         <Link to={`/products/${product.id}`}>
           <img
             src={getImageUrl(product.image_url || product.main_image_url)}
             alt={product.name}
-            className="w-full h-48 sm:h-56 md:h-60 lg:h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             onError={(e) => {
               e.target.src = `https://picsum.photos/seed/${product.name?.replace(/\s+/g, '') || 'product'}/300x300.jpg`
             }}
@@ -141,7 +141,7 @@ const ProductCard = ({ product }) => {
       </div>
 
       {/* Product Info */}
-      <div className="p-3 sm:p-4">
+      <div className="p-3 sm:p-4 flex flex-col flex-grow">
         {/* Category */}
         {product.category && (
           <p className="text-xs sm:text-sm text-amber-600 font-medium mb-1">
@@ -160,47 +160,63 @@ const ProductCard = ({ product }) => {
         </Link>
 
         {/* Rating */}
-        <div className="flex items-center mb-1.5 sm:mb-2">
+        <div className="flex items-center mb-1.5 sm:mb-2 text-xs sm:text-sm text-gray-600 gap-1.5">
           <div className="flex text-amber-400">
-            {[...Array(5)].map((_, i) => (
-              <StarIcon
-                key={i}
-                className={`h-3 w-3 sm:h-4 sm:w-4 ${
-                  i < Math.floor(product.average_rating || 0)
-                    ? 'text-amber-400'
-                    : 'text-gray-300'
-                }`}
-              />
-            ))}
+            {[...Array(5)].map((_, i) => {
+              const currentRating = product.rating || product.average_rating || 0;
+              return i < Math.floor(currentRating) ? (
+                <StarIconSolid
+                  key={i}
+                  className="h-3 w-3 sm:h-4 sm:w-4 text-amber-400"
+                />
+              ) : (
+                <StarIcon
+                  key={i}
+                  className="h-3 w-3 sm:h-4 sm:w-4 text-gray-300"
+                />
+              );
+            })}
           </div>
-          <span className="text-xs sm:text-sm text-amber-600 ml-1.5 sm:ml-2">
-            ({product.total_reviews || 0})
+          <span>
+            ({product.reviews_count || product.total_reviews || 0} تقييم)
           </span>
         </div>
 
         {/* Price */}
         <div className="flex items-center justify-between mb-2 sm:mb-3">
           <div className="flex items-center flex-wrap">
-            <span className="text-lg sm:text-2xl font-bold text-amber-600">
-              {product.currency || 'USD'} {product.price}
-            </span>
-            {product.sale_price && (
-              <span className="text-xs sm:text-sm text-gray-500 line-through ml-1.5 sm:ml-2">
-                {product.currency || 'USD'} {product.price}
-              </span>
-            )}
-            {product.sale_price && (
-              <span className="text-sm sm:text-lg font-bold text-emerald-600 ml-1.5 sm:ml-2">
-                {product.currency || 'USD'} {product.sale_price}
-              </span>
-            )}
-            {product.compare_price && !product.sale_price && (
-              <span className="text-xs sm:text-sm text-gray-500 line-through ml-1.5 sm:ml-2">
-                {product.currency || 'USD'} {product.compare_price}
-              </span>
+            {product.sale_price ? (
+              <>
+                <span className="text-lg sm:text-2xl font-bold text-amber-600">
+                  {product.currency} {product.price}
+                </span>
+                <span className="text-xs sm:text-sm text-gray-500 line-through ml-1.5 sm:ml-2">
+                  {product.currency} {product.sale_price}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="text-lg sm:text-2xl font-bold text-amber-600">
+                  {product.currency} {product.price}
+                </span>
+                {product.compare_price && (
+                  <span className="text-xs sm:text-sm text-gray-500 line-through ml-1.5 sm:ml-2">
+                    {product.currency} {product.compare_price}
+                  </span>
+                )}
+              </>
             )}
           </div>
+          {/* Tax */}
+          {product.tax && product.tax.is_active && (
+            <div className="text-xs text-gray-500">
+              +{product.tax.rate}% ضريبة
+            </div>
+          )}
         </div>
+
+        {/* Spacer to fill empty space */}
+        <div className="flex-grow"></div>
 
         {/* Action Buttons */}
         <div className="flex gap-1.5 sm:gap-2">

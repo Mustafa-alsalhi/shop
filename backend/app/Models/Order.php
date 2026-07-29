@@ -23,6 +23,12 @@ class Order extends Model
         'shipping_address',
         'billing_address',
         'notes',
+        'latitude',
+        'longitude',
+        'formatted_address',
+        'building_details',
+        'driver_id',
+        'driver_status',
     ];
 
     protected $casts = [
@@ -42,5 +48,35 @@ class Order extends Model
     public function items()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function paymentRequests()
+    {
+        return $this->hasMany(PaymentRequest::class);
+    }
+
+    public function driver()
+    {
+        return $this->belongsTo(User::class, 'driver_id');
+    }
+
+    protected static function booted()
+    {
+        static::updated(function ($order) {
+            if ($order->wasChanged('status')) {
+                try {
+                    $user = $order->user;
+                    if ($user && $user->email) {
+                        if ($order->status === 'delivered') {
+                            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\OrderDeliveredMail($order));
+                        } elseif (in_array($order->status, ['processing', 'shipped'])) {
+                            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\OrderStatusUpdatedMail($order, $order->status));
+                        }
+                    }
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Failed to send Order Status Update Mail: ' . $e->getMessage());
+                }
+            }
+        });
     }
 }

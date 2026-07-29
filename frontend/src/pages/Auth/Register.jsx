@@ -6,8 +6,10 @@ import { registerUser, selectIsLoading, selectError, clearError } from '../../st
 import { showSuccessNotification, showErrorNotification } from '../../store/slices/uiSlice'
 import { fetchCart } from '../../store/slices/cartSlice'
 import { fetchWishlist } from '../../store/slices/wishlistSlice'
+import { useSettings } from '../../contexts/SettingsContext'
 
 const Register = () => {
+  const { storeName } = useSettings()
   const dispatch = useDispatch()
   const navigate = useNavigate()
   
@@ -114,7 +116,7 @@ const Register = () => {
               إنشاء حساب جديد
             </h2>
             <p className="text-amber-100 text-sm">
-              انضم إلى متجر أصالة اليوم
+              انضم إلى {storeName} اليوم
             </p>
           </div>
 

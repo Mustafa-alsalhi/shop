@@ -25,8 +25,10 @@ import {
   TrophyIcon,
 } from '@heroicons/react/24/outline'
 import { Helmet } from 'react-helmet-async'
+import { useSettings } from '../contexts/SettingsContext'
 
 const Categories = () => {
+  const { storeName } = useSettings()
   const dispatch = useDispatch()
   
   // Redux state
@@ -72,7 +74,7 @@ const Categories = () => {
         return category.image
       }
       // Otherwise, use backend URL with correct path
-      const baseUrl = import.meta.env.VITE_API_URL || 'https://shop-production-d82a.up.railway.app/api'
+      const baseUrl = import.meta.env.VITE_API_URL || 'https://shop-production-8385.up.railway.app/api'
       const publicUrl = baseUrl.replace('/api', '')
       return `${publicUrl}/storage/images/categories/${category.image}`
     }
@@ -196,8 +198,8 @@ const Categories = () => {
   return (
     <>
       <Helmet>
-        <title>الفئات - متجر أصالة</title>
-        <meta name="description" content="تصفح جميع فئات المنتجات في متجر أصالة - إلكترونيات، أزياء، إكسسوارات، وأكثر" />
+        <title>الفئات - {storeName}</title>
+        <meta name="description" content={`تصفح جميع فئات المنتجات في ${storeName} - إلكترونيات، أزياء، إكسسوارات، وأكثر`} />
       </Helmet>
       
       <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-8 sm:py-12" dir="rtl">
@@ -213,7 +215,7 @@ const Categories = () => {
               الفئات
             </h1>
             <p className="text-gray-600 text-base sm:text-lg max-w-3xl mx-auto px-4">
-              استكشف عالمنتجات المتنوعة في متجر أصالة - كل ما تحتاجه في مكان واحد
+              استكشف عالمنتجات المتنوعة في {storeName} - كل ما تحتاجه في مكان واحد
             </p>
           </motion.div>
 
@@ -357,7 +359,7 @@ const Categories = () => {
                 جميع الفئات
               </h2>
               <p className="text-gray-600 text-base sm:text-lg">
-                تصفح جميع الفئات المتاحة في متجر أصالة
+                تصفح جميع الفئات المتاحة في {storeName}
               </p>
             </div>
 

@@ -18,7 +18,19 @@ class Seller extends Model
         'rating',
         'reviews_count',
         'status',
-        'is_verified'
+        'is_verified',
+        'address',
+        'city',
+        'latitude',
+        'longitude',
+        'id_card_image',
+        'commercial_register_image',
+        'signed_contract_image',
+        'kuraimi_account_name',
+        'kuraimi_account_number',
+        'alt_network_name',
+        'alt_recipient_name',
+        'alt_recipient_phone'
     ];
 
     protected $casts = [
@@ -34,5 +46,15 @@ class Seller extends Model
     public function products()
     {
         return $this->hasMany(Product::class);
+    }
+
+    public function sellerCategories()
+    {
+        return $this->hasMany(SellerCategory::class);
+    }
+
+    public function approvedProducts()
+    {
+        return $this->products()->where('is_approved', true);
     }
 }

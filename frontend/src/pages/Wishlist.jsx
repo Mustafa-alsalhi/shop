@@ -202,7 +202,7 @@ const Wishlist = () => {
     if (!imagePath) return `https://picsum.photos/seed/${productName?.replace(/\s+/g, '') || 'product'}/300x300.jpg`
     
     // Get base URL from environment or fallback to Railway production
-    const baseUrl = import.meta.env.VITE_API_URL || 'https://shop-production-d82a.up.railway.app/api'
+    const baseUrl = import.meta.env.VITE_API_URL || 'https://shop-production-8385.up.railway.app/api'
     const publicUrl = baseUrl.replace('/api', '')
     
     if (imagePath.startsWith('/images/')) {

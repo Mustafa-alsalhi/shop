@@ -70,7 +70,7 @@ const Orders = () => {
 
   const getImageUrl = (imageUrl, productName, size = 80) => {
     // Get base URL from environment or fallback to Railway production
-    const baseUrl = import.meta.env.VITE_API_URL || 'https://shop-production-d82a.up.railway.app/api'
+    const baseUrl = import.meta.env.VITE_API_URL || 'https://shop-production-8385.up.railway.app/api'
     const publicUrl = baseUrl.replace('/api', '')
     
     // Try to use provided image URL first (from order_item)
@@ -132,7 +132,7 @@ const Orders = () => {
       case 'processing':
         return 'قيد المعالجة'
       case 'shipped':
-        return 'تم الشحن'
+        return 'تم تجهيز الطلب'
       case 'delivered':
         return 'تم التسليم'
       case 'cancelled':
@@ -200,24 +200,8 @@ const Orders = () => {
   }
 
   // Handle track order
-  const handleTrackOrder = async (order) => {
-    try {
-      if (!order.tracking_number) {
-        dispatch(showErrorNotification('لا يوجد رقم تتبع متاح'))
-        return
-      }
-
-      const response = await orderService.trackOrder(order.tracking_number)
-      
-      if (response.data) {
-        dispatch(showSuccessNotification('تم تحديث معلومات التتبع'))
-        // Refresh orders to get updated tracking info
-        fetchOrders()
-      }
-    } catch (error) {
-      console.error('Error tracking order:', error)
-      dispatch(showErrorNotification('فشل في تتبع الطلب'))
-    }
+  const handleTrackOrder = (order) => {
+    navigate(`/orders/${order.id}/track`)
   }
 
   // Handle reorder
@@ -380,14 +364,12 @@ const Orders = () => {
                         </p>
                       </div>
                       <div className="flex items-center space-x-2">
-                        {order.tracking_number && (
-                          <button
-                            onClick={() => handleTrackOrder(order)}
-                            className="text-sm text-amber-600 hover:text-amber-700 font-medium"
-                          >
-                            تتبع الطلب
-                          </button>
-                        )}
+                        <button
+                          onClick={() => handleTrackOrder(order)}
+                          className="text-sm text-amber-600 hover:text-amber-700 font-medium"
+                        >
+                          تتبع الطلب
+                        </button>
                         <button
                           onClick={() => handleReorder(order)}
                           className="text-sm text-amber-600 hover:text-amber-700 font-medium"
@@ -553,15 +535,17 @@ const Orders = () => {
                         <div className="space-y-2">
                           <div className="flex justify-between text-sm">
                             <span className="text-gray-600">المجموع الفرعي:</span>
-                            <span className="font-medium">{selectedOrder.total_amount ? formatPrice(selectedOrder.total_amount * 0.9) : '0.00'} ريال</span>
+                            <span className="font-medium">{selectedOrder.subtotal ? formatPrice(selectedOrder.subtotal) : (selectedOrder.total_amount ? formatPrice(selectedOrder.total_amount - (selectedOrder.tax || 0)) : '0.00')} ريال</span>
                           </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">الضريبة:</span>
-                            <span className="font-medium">{selectedOrder.total_amount ? formatPrice(selectedOrder.total_amount * 0.1) : '0.00'} ريال</span>
-                          </div>
+                          {selectedOrder.tax && parseFloat(selectedOrder.tax) > 0 && (
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-600">الضريبة:</span>
+                              <span className="font-medium">{formatPrice(selectedOrder.tax)} ريال</span>
+                            </div>
+                          )}
                           <div className="flex justify-between text-sm">
                             <span className="text-gray-600">الشحن:</span>
-                            <span className="font-medium text-green-600">مجاني</span>
+                            <span className="font-medium text-gray-900">{selectedOrder.shipping && parseFloat(selectedOrder.shipping) > 0 ? `${formatPrice(selectedOrder.shipping)} ريال` : <span className="text-green-600">مجاني</span>}</span>
                           </div>
                           <div className="border-t border-amber-200 pt-2">
                             <div className="flex justify-between text-lg font-bold">
@@ -585,14 +569,15 @@ const Orders = () => {
                       إغلاق
                     </button>
                     <div className="flex items-center space-x-3">
-                      {selectedOrder.tracking_number && (
-                        <button
-                          onClick={() => handleTrackOrder(selectedOrder)}
-                          className="px-6 py-2 border border-amber-300 text-amber-700 rounded-lg hover:bg-amber-50 transition-colors font-medium"
-                        >
-                          تتبع الطلب
-                        </button>
-                      )}
+                      <button
+                        onClick={() => {
+                          handleCloseOrderDetails();
+                          handleTrackOrder(selectedOrder);
+                        }}
+                        className="px-6 py-2 border border-amber-300 text-amber-700 rounded-lg hover:bg-amber-50 transition-colors font-medium"
+                      >
+                        تتبع الطلب
+                      </button>
                       <button
                         onClick={() => handleReorder(selectedOrder)}
                         className="px-6 py-2 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg hover:from-amber-700 hover:to-orange-700 transition-all duration-300 font-medium"

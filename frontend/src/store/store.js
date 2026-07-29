@@ -5,6 +5,7 @@ import productsSlice from './slices/productsSlice'
 import uiSlice from './slices/uiSlice'
 import wishlistSlice from './slices/wishlistSlice'
 import notificationsSlice from './slices/notificationsSlice'
+import settingsSlice from './slices/settingsSlice'
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     ui: uiSlice,
     wishlist: wishlistSlice,
     notifications: notificationsSlice,
+    settings: settingsSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

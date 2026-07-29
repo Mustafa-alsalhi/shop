@@ -9,11 +9,16 @@ import {
 import {
   selectCartItems,
   selectCartTotal,
+  selectCartSubtotal,
+  selectCartTax,
   selectCartTotalItems,
   selectCartIsLoading,
+  selectAppliedCoupon,
   removeFromCart,
   updateCartItem,
   clearCart,
+  setAppliedCoupon,
+  clearAppliedCoupon,
 } from '../../store/slices/cartSlice'
 import { showSuccessNotification, showErrorNotification } from '../../store/slices/uiSlice'
 
@@ -23,10 +28,14 @@ const CartSidebar = ({ isOpen }) => {
   
   const cartItems = useSelector(selectCartItems)
   const cartTotal = useSelector(selectCartTotal)
-  const cartSubtotal = useSelector((state) => state.cart?.subtotal || 0)
-  const cartTax = useSelector((state) => state.cart?.tax || 0)
+  const cartSubtotal = useSelector(selectCartSubtotal)
+  const cartTax = useSelector(selectCartTax)
   const cartTotalItems = useSelector(selectCartTotalItems)
   const isLoading = useSelector(selectCartIsLoading)
+  const appliedCoupon = useSelector(selectAppliedCoupon)
+  const [couponCode, setCouponCode] = React.useState('')
+  const [couponLoading, setCouponLoading] = React.useState(false)
+  const [couponError, setCouponError] = React.useState('')
   
   // Also check localStorage as fallback
   const localStorageCart = JSON.parse(localStorage.getItem('cart') || '[]')
@@ -36,15 +45,26 @@ const CartSidebar = ({ isOpen }) => {
   
   // Calculate totals from display items if Redux state is empty
   const calculatedSubtotal = displayItems.reduce((sum, item) => sum + (parseFloat(item.price || 0) * item.quantity), 0)
-  const calculatedTax = calculatedSubtotal * 0.1
+  const calculatedTax = 0
   const calculatedTotal = calculatedSubtotal + calculatedTax
   
   // Use Redux values if available, otherwise use calculated values
   const displaySubtotal = cartSubtotal || calculatedSubtotal
   const displayTax = cartTax || calculatedTax
-  const displayTotal = cartTotal || calculatedTotal
+  
+  // Calculate discount based on applied coupon
+  let discountAmount = 0
+  if (appliedCoupon) {
+    // Use the discount amount calculated by the backend
+    discountAmount = appliedCoupon.discount_amount || 0
+  }
+  
+  const displayTotal = (cartTotal || calculatedTotal) - discountAmount
 
   const handleClose = () => {
+    // Clear applied coupon when closing cart
+    dispatch(clearAppliedCoupon())
+    setCouponError('')
     dispatch(closeCart())
   }
 
@@ -75,12 +95,88 @@ const CartSidebar = ({ isOpen }) => {
     navigate('/products')
   }
 
+  const handleApplyCoupon = async () => {
+    console.log('=== handleApplyCoupon called ===')
+    console.log('Coupon code:', couponCode)
+    console.log('Cart items:', displayItems)
+    console.log('Cart subtotal:', displaySubtotal)
+    
+    if (!couponCode.trim()) {
+      console.log('Coupon code is empty')
+      setCouponError('يرجى إدخال كود الخصم')
+      return
+    }
+
+    console.log('Setting loading to true')
+    setCouponLoading(true)
+    setCouponError('')
+
+    try {
+      const token = localStorage.getItem('token')
+      const apiUrl = import.meta.env.VITE_API_URL || '/api'
+      
+      console.log('Fetching:', `${apiUrl}/coupons/apply`)
+      console.log('Request body:', {
+        code: couponCode.trim(),
+        total_amount: displaySubtotal,
+        products: displayItems.map(item => ({
+          id: item.product_id,
+          category_id: item.category_id,
+          price: item.price,
+          quantity: item.quantity
+        }))
+      })
+
+      const response = await fetch(`${apiUrl}/coupons/apply`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code: couponCode.trim(),
+          total_amount: displaySubtotal,
+          products: displayItems.map(item => ({
+            id: item.product_id,
+            category_id: item.category_id,
+            price: item.price,
+            quantity: item.quantity
+          }))
+        }),
+      })
+
+      console.log('Response status:', response.status)
+      const data = await response.json()
+      console.log('Response data:', data)
+
+      if (response.ok) {
+        console.log('Coupon applied successfully')
+        dispatch(setAppliedCoupon({
+          ...data.data.coupon,
+          discount_amount: data.data.discount_amount,
+          eligible_amount: data.data.eligible_amount
+        }))
+        dispatch(showSuccessNotification('تم تطبيق كود الخصم بنجاح'))
+        setCouponCode('')
+      } else {
+        console.log('Coupon application failed:', data.message)
+        setCouponError(data.message || 'كود الخصم غير صالح')
+      }
+    } catch (error) {
+      console.error('Error applying coupon:', error)
+      setCouponError('حدث خطأ أثناء تطبيق كود الخصم')
+    } finally {
+      console.log('Setting loading to false')
+      setCouponLoading(false)
+    }
+  }
+
   // Helper function to get correct image URL
   const getImageUrl = (imagePath, productName) => {
     if (!imagePath) return `https://picsum.photos/seed/${productName?.replace(/\s+/g, '') || 'product'}/80x80.jpg`
     
     // Get base URL from environment or fallback to Railway production
-    const baseUrl = import.meta.env.VITE_API_URL || 'https://shop-production-d82a.up.railway.app/api'
+    const baseUrl = import.meta.env.VITE_API_URL || 'https://shop-production-8385.up.railway.app/api'
     const publicUrl = baseUrl.replace('/api', '')
     
     if (imagePath.startsWith('/images/')) {
@@ -263,6 +359,12 @@ const CartSidebar = ({ isOpen }) => {
                   <span className="text-gray-600">المجموع الفرعي ({cartTotalItems} عنصر)</span>
                   <span className="font-medium">{displayItems[0]?.currency || 'USD'} {displaySubtotal.toFixed(2)}</span>
                 </div>
+                {appliedCoupon && discountAmount > 0 && (
+                  <div className="flex justify-between text-xs sm:text-sm">
+                    <span className="text-green-600">الخصم ({appliedCoupon.code})</span>
+                    <span className="font-medium text-green-600">-{displayItems[0]?.currency || 'USD'} {discountAmount.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-xs sm:text-sm">
                   <span className="text-gray-600">الشحن</span>
                   <span className="font-medium text-green-600">Free</span>
@@ -284,12 +386,48 @@ const CartSidebar = ({ isOpen }) => {
                 <input
                   type="text"
                   placeholder="كود الخصم"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
                   className="flex-1 px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
-                <button className="btn btn-outline btn-xs sm:btn-sm">
-                  تطبيق
+                <button
+                  type="button"
+                  onClick={() => {
+                    console.log('Button clicked!')
+                    handleApplyCoupon()
+                  }}
+                  disabled={couponLoading}
+                  className="btn btn-outline btn-xs sm:btn-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {couponLoading ? 'جاري التطبيق...' : 'تطبيق'}
                 </button>
               </div>
+              {couponError && (
+                <p className="text-xs text-red-600">{couponError}</p>
+              )}
+              {appliedCoupon && (
+                <div className="p-2 bg-green-50 border border-green-200 rounded-lg flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-green-700">
+                      تم تطبيق كود: {appliedCoupon.code}
+                    </p>
+                    <p className="text-xs text-green-600">
+                      الخصم: {appliedCoupon.type === 'percentage' ? `${appliedCoupon.value}%` : `${appliedCoupon.value}`}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      dispatch(clearAppliedCoupon())
+                      setCouponError('')
+                      dispatch(showSuccessNotification('تم إزالة كود الخصم'))
+                    }}
+                    className="text-xs text-red-600 hover:text-red-700"
+                  >
+                    إزالة
+                  </button>
+                </div>
+              )}
 
               {/* Actions */}
               <div className="space-y-2">

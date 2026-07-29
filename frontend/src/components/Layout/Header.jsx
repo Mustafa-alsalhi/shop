@@ -23,6 +23,7 @@ import {
   ChevronRightIcon,
   BellIcon,
   PhoneIcon,
+  TruckIcon,
 } from '@heroicons/react/24/outline'
 import {
   HeartIcon as HeartIconSolid,
@@ -46,13 +47,10 @@ import { selectCartTotalItems as selectCartItemsCount } from '../../store/slices
 import { selectCategories, fetchCategories } from '../../store/slices/productsSlice'
 import cartService from '../../services/cartService'
 import { fetchCart } from '../../store/slices/cartSlice'
-import { LOGO_URL, LOGO_SIZE, STORE_NAME } from '../../config/logo'
+import { useSettings } from '../../contexts/SettingsContext'
 
 const Header = () => {
-  // Logo URL - يمكنك تغيير هذا الرابط في ملف src/config/logo.js
-  const logoUrl = LOGO_URL;
-  const logoSize = LOGO_SIZE;
-  const storeName = STORE_NAME;
+  const { storeLogo, storeName, loading: settingsLoading } = useSettings()
   
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -308,19 +306,24 @@ const Header = () => {
         }`}
       >
       <div className="container-custom">
-        <div className="flex items-center justify-between h-12 sm:h-14 md:h-16" dir="rtl">
+        <div className="flex items-center justify-between h-[60px] sm:h-16 md:h-20" dir="rtl">
           {/* Logo */}
           <Link
             to="/"
-            className="flex items-center space-x-2 text-2xl font-bold text-white hover:text-amber-200 transition-all duration-300 transform hover:scale-105 drop-shadow-lg"
+            className="flex items-center gap-2 sm:gap-3 text-2xl font-bold text-white hover:text-amber-200 transition-all duration-300 transform hover:scale-105 drop-shadow-lg shrink-0 max-w-[60%] sm:max-w-none"
           >
-            <img 
-              src={logoUrl} 
-              alt={storeName} 
-              className="filter drop-shadow-md rounded-lg"
-              style={{ width: `${logoSize.width}px`, height: `${logoSize.height}px` }}
-            />
-            <span className="hidden sm:inline font-bold tracking-wide">{storeName}</span>
+            {storeLogo ? (
+              <img 
+                src={storeLogo} 
+                alt={storeName} 
+                className="h-10 sm:h-12 md:h-14 lg:h-16 w-auto max-w-[120px] sm:max-w-[160px] md:max-w-[200px] object-contain filter drop-shadow-md shrink-0 -ml-1"
+              />
+            ) : (
+              <div className="h-10 w-10 sm:h-12 sm:w-12 bg-white/20 rounded-lg flex items-center justify-center shrink-0">
+                <ShoppingBagIcon className="h-6 w-6 text-white" />
+              </div>
+            )}
+            <span className="text-base sm:text-lg md:text-xl font-bold tracking-wide truncate whitespace-nowrap">{storeName}</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -383,7 +386,7 @@ const Header = () => {
                         console.log('View All Categories clicked!')
                         window.location.href = '/categories'
                       }}
-                      className="block w-full text-left px-4 py-2 text-purple-700 hover:bg-purple-100 transition-all duration-200 font-semibold"
+                      className="block w-full text-right px-4 py-2 text-purple-700 hover:bg-purple-100 transition-all duration-200 font-semibold"
                     >
                       عرض جميع الفئات
                     </button>
@@ -405,14 +408,28 @@ const Header = () => {
             >
               جميع المنتجات
             </Link>
+
+            <Link
+              to="/sellers"
+              className="text-white/90 hover:text-yellow-300 font-semibold transition-all duration-300 hover:scale-105 drop-shadow-sm"
+            >
+              جميع المتاجر
+            </Link>
+
+            <Link
+              to="/offers"
+              className="text-white/90 hover:text-yellow-300 font-semibold transition-all duration-300 hover:scale-105 drop-shadow-sm"
+            >
+              العروض والخصومات
+            </Link>
           </nav>
 
           {/* Right Side Actions */}
-          <div className="flex items-center space-x-reverse space-x-4">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             {/* Search */}
             <button
               onClick={() => dispatch(toggleSearch())}
-              className="p-2 text-white/80 hover:text-yellow-300 hover:bg-white/20 rounded-lg transition-all duration-300 hover:scale-110"
+              className="p-1.5 sm:p-2 text-white/80 hover:text-yellow-300 hover:bg-white/20 rounded-lg transition-all duration-300 hover:scale-110"
               aria-label="Search"
             >
               <MagnifyingGlassIcon className="h-5 w-5" />
@@ -425,7 +442,7 @@ const Header = () => {
                 className="p-1.5 sm:p-2 text-white/80 hover:text-yellow-300 hover:bg-white/20 rounded-lg transition-all duration-300 hover:scale-110 relative"
                 aria-label="Notifications"
               >
-                <BellIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+                <BellIcon className="h-5 w-5" />
                 {notifications && notifications.filter(n => !n.read).length > 0 && (
                   <span className="absolute top-0.5 sm:top-1 right-0.5 sm:right-1 bg-red-500 text-white text-xs rounded-full h-3 w-3 sm:h-4 sm:w-4 flex items-center justify-center animate-pulse">
                     {notifications.filter(n => !n.read).length > 99 ? '99+' : notifications.filter(n => !n.read).length}
@@ -533,7 +550,7 @@ const Header = () => {
             {/* Wishlist */}
             <button
               onClick={handleWishlistClick}
-              className="p-2 text-white/80 hover:text-amber-200 hover:bg-white/20 rounded-lg transition-all duration-300 hover:scale-110 relative"
+              className="p-1.5 sm:p-2 text-white/80 hover:text-amber-200 hover:bg-white/20 rounded-lg transition-all duration-300 hover:scale-110 relative"
               aria-label="Wishlist"
             >
               <HeartIcon className="h-5 w-5" />
@@ -547,7 +564,7 @@ const Header = () => {
             {/* Cart */}
             <button
               onClick={handleCartClick}
-              className="p-2 text-white/80 hover:text-amber-200 hover:bg-white/20 rounded-lg transition-all duration-300 hover:scale-110 relative"
+              className="p-1.5 sm:p-2 text-white/80 hover:text-amber-200 hover:bg-white/20 rounded-lg transition-all duration-300 hover:scale-110 relative"
               aria-label="Shopping cart"
             >
               <ShoppingCartIcon className="h-5 w-5" />
@@ -576,6 +593,24 @@ const Header = () => {
                         <span>لوحة التحكم</span>
                       </Link>
                     )}
+                    {user?.role === 'seller' && (
+                      <Link
+                        to="/seller/dashboard"
+                        className="flex items-center space-x-reverse space-x-3 px-4 py-3 text-amber-700 hover:bg-gradient-to-r hover:from-amber-50 hover:to-amber-100 transition-all duration-200 font-bold rounded-lg"
+                      >
+                        <ShoppingBagIcon className="h-5 w-5 text-amber-600" />
+                        <span>لوحة البائع</span>
+                      </Link>
+                    )}
+                    {user?.role === 'driver' && (
+                      <Link
+                        to="/driver/orders"
+                        className="flex items-center space-x-reverse space-x-3 px-4 py-3 text-amber-700 hover:bg-gradient-to-r hover:from-amber-50 hover:to-amber-100 transition-all duration-200 font-bold rounded-lg"
+                      >
+                        <ClipboardDocumentListIcon className="h-5 w-5 text-amber-600" />
+                        <span>لوحة المندوب</span>
+                      </Link>
+                    )}
                     <Link
                       to="/account"
                       className="flex items-center space-x-reverse space-x-3 px-4 py-3 text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 transition-all duration-200 rounded-lg"
@@ -596,6 +631,13 @@ const Header = () => {
                     >
                       <ClipboardDocumentListIcon className="h-5 w-5 text-green-600" />
                       <span>طلباتي</span>
+                    </Link>
+                    <Link
+                      to="/orders"
+                      className="flex items-center space-x-reverse space-x-3 px-4 py-3 text-gray-700 hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 transition-all duration-200 rounded-lg"
+                    >
+                      <TruckIcon className="h-5 w-5 text-orange-600" />
+                      <span>تتبع الطلب</span>
                     </Link>
                     <Link
                       to="/wishlist"
@@ -629,7 +671,7 @@ const Header = () => {
             {/* Mobile Menu Toggle */}
             <button
               onClick={handleMobileMenuClick}
-              className="lg:hidden p-2 text-white/80 hover:text-yellow-300 hover:bg-white/20 rounded-lg transition-all duration-300 hover:scale-110"
+              className="lg:hidden p-1.5 sm:p-2 text-white/80 hover:text-yellow-300 hover:bg-white/20 rounded-lg transition-all duration-300 hover:scale-110"
               aria-label="Toggle mobile menu"
             >
               {isMobileMenuOpen ? (

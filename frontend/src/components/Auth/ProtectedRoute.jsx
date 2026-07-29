@@ -3,7 +3,7 @@ import { Navigate, useLocation } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { selectIsAuthenticated } from '../../store/slices/authSlice'
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children, allowedRoles }) => {
   const isAuthenticated = useSelector(selectIsAuthenticated)
   const user = useSelector((state) => state.auth.user)
   const isLoading = useSelector((state) => state.auth.isLoading)
@@ -28,6 +28,16 @@ const ProtectedRoute = ({ children }) => {
   }
 
   if (isFullyAuthenticated) {
+    // Check role based authorization
+    if (allowedRoles && allowedRoles.length > 0) {
+      if (!user.role || !allowedRoles.includes(user.role)) {
+        // User is not authorized for this route, redirect to their specific dashboard
+        if (user.role === 'admin') return <Navigate to="/admin/dashboard" replace />
+        if (user.role === 'seller') return <Navigate to="/seller/dashboard" replace />
+        if (user.role === 'driver') return <Navigate to="/driver/dashboard" replace />
+        return <Navigate to="/" replace />
+      }
+    }
     return children
   }
 

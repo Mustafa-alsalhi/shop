@@ -11,6 +11,7 @@ const EditUser = () => {
   const [user, setUser] = useState({
     name: '',
     email: '',
+    phone: '',
     role: 'user',
     email_verified_at: null
   })
@@ -64,6 +65,7 @@ const EditUser = () => {
       const updateData = {
         name: user.name.trim(),
         email: user.email.trim(),
+        phone: user.phone ? user.phone.trim() : null,
         role: user.role
       }
       
@@ -190,6 +192,23 @@ const EditUser = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
+                  رقم الهاتف
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={user.phone || ''}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="أدخل رقم الهاتف (اختياري)"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  مطلوب للمناديب للتواصل مع العملاء
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   الدور *
                 </label>
                 <select
@@ -202,9 +221,11 @@ const EditUser = () => {
                   <option value="">اختيار الدور</option>
                   <option value="user">مستخدم</option>
                   <option value="admin">مدير</option>
+                  <option value="seller">بائع</option>
+                  <option value="driver">مندوب توصيل</option>
                 </select>
                 <p className="mt-1 text-xs text-gray-500">
-                  المستخدمون المديرون لديهم وصول كامل لوحة تحكم المديرين
+                  المدير: وصول كامل للوحة التحكم | البائع: إدارة المنتجات والطلبات | المندوب: إدارة التوصيل
                 </p>
               </div>
 

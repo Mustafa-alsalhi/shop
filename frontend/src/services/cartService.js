@@ -71,9 +71,9 @@ const cartService = {
       
       localStorage.setItem('cart', JSON.stringify(cart))
       
-      // Calculate totals
+      // Calculate totals - tax is 0 by default (will be calculated by backend)
       const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-      const tax = subtotal * 0.1
+      const tax = 0
       const total = subtotal + tax
       const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0)
       
@@ -116,9 +116,8 @@ const cartService = {
         console.log('⚠️ Item updated in localStorage (database failed)')
       }
       
-      // Calculate totals
       const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-      const tax = subtotal * 0.1
+      const tax = 0
       const total = subtotal + tax
       const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0)
       
@@ -156,7 +155,7 @@ const cartService = {
       
       // Calculate totals
       const subtotal = updatedCart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-      const tax = subtotal * 0.1
+      const tax = 0
       const total = subtotal + tax
       const totalItems = updatedCart.reduce((sum, item) => sum + item.quantity, 0)
       

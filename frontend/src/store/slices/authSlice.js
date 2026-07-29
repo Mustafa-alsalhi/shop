@@ -148,11 +148,11 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.isLoading = false
-        state.user = action.payload.user
-        state.token = action.payload.token
-        state.isAuthenticated = true
         state.error = null
-        localStorage.setItem('token', action.payload.token)
+        // Don't auto-login on registration - user must login with OTP
+        state.user = null
+        state.token = null
+        state.isAuthenticated = false
         // Clear guest cart and wishlist from localStorage to prevent data leakage to new account
         localStorage.removeItem('cart')
         localStorage.removeItem('wishlist')

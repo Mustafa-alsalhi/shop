@@ -27,11 +27,11 @@ const authService = {
   },
 
   forgotPassword: async (email) => {
-    return await apiRequest.post('/auth/forgot-password', { email })
+    return await apiRequest.post('/forgot-password', { email })
   },
 
   resetPassword: async (resetData) => {
-    return await apiRequest.post('/auth/reset-password', resetData)
+    return await apiRequest.post('/reset-password', resetData)
   },
 
   refreshToken: async () => {

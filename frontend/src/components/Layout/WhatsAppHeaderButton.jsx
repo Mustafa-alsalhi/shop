@@ -1,11 +1,28 @@
 import React from 'react'
+import { useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import WhatsAppIcon from '../UI/WhatsAppIcon'
 import { WHATSAPP_NUMBER, WHATSAPP_MESSAGES } from '../../config/whatsapp'
-import { useDispatch } from 'react-redux'
 import { closeMobileMenu } from '../../store/slices/uiSlice'
+import { selectWhatsAppUrl } from '../../store/slices/settingsSlice'
 
 const WhatsAppHeaderButton = ({ isMobile = false, message = WHATSAPP_MESSAGES.default }) => {
   const dispatch = useDispatch()
+  const whatsappUrlFromSettings = useSelector(selectWhatsAppUrl)
+  
+  // Extract phone number from settings URL if it's a full URL
+  let phoneNumber
+  if (whatsappUrlFromSettings) {
+    // If the URL contains https://wa.me/, extract the phone number
+    if (whatsappUrlFromSettings.includes('wa.me/')) {
+      phoneNumber = whatsappUrlFromSettings.split('wa.me/')[1].split('?')[0]
+    } else {
+      // Otherwise, use it as is (assuming it's just the phone number)
+      phoneNumber = whatsappUrlFromSettings
+    }
+  } else {
+    phoneNumber = WHATSAPP_NUMBER
+  }
 
   const handleClick = () => {
     if (isMobile) {
@@ -16,7 +33,7 @@ const WhatsAppHeaderButton = ({ isMobile = false, message = WHATSAPP_MESSAGES.de
   if (isMobile) {
     return (
       <a
-        href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`}
+        href={`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`}
         target="_blank"
         rel="noopener noreferrer"
         onClick={handleClick}
@@ -31,7 +48,7 @@ const WhatsAppHeaderButton = ({ isMobile = false, message = WHATSAPP_MESSAGES.de
 
   return (
     <a
-      href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`}
+      href={`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`}
       target="_blank"
       rel="noopener noreferrer"
       className="p-2 text-white/80 hover:text-green-200 hover:bg-white/20 rounded-lg transition-all duration-300 hover:scale-110"

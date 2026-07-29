@@ -12,6 +12,66 @@ use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
+    public function calculateDelivery(Request $request)
+    {
+        $request->validate([
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+        ]);
+
+        $user = $request->user();
+        $cartItems = Cart::with(['product.seller'])->where('user_id', $user->id)->get();
+
+        if ($cartItems->isEmpty()) {
+            return response()->json([
+                'fee' => 0,
+                'distance_km' => 0,
+                'message' => 'Cart is empty'
+            ]);
+        }
+
+        $customerLat = $request->latitude;
+        $customerLng = $request->longitude;
+
+        $sellersGroup = [];
+        foreach ($cartItems as $item) {
+            $sellerId = $item->product->seller_id;
+            if ($sellerId && $item->product->seller) {
+                if (!isset($sellersGroup[$sellerId])) {
+                    $sellersGroup[$sellerId] = [
+                        'latitude' => $item->product->seller->latitude,
+                        'longitude' => $item->product->seller->longitude,
+                    ];
+                }
+            } else {
+                $sellersGroup['admin'] = ['latitude' => null, 'longitude' => null];
+            }
+        }
+
+        $totalFee = 0;
+        $maxDistance = 0;
+
+        foreach ($sellersGroup as $sellerId => $location) {
+            if ($location['latitude'] && $location['longitude']) {
+                $result = \App\Services\DeliveryService::calculateFee(
+                    $customerLat, $customerLng,
+                    $location['latitude'], $location['longitude']
+                );
+                $totalFee += $result['fee'];
+                if ($result['distance_km'] > $maxDistance) {
+                    $maxDistance = $result['distance_km'];
+                }
+            } else {
+                $totalFee += env('BASE_DELIVERY_FEE', 15);
+            }
+        }
+
+        return response()->json([
+            'fee' => $totalFee,
+            'distance_km' => $maxDistance,
+            'message' => "Estimated delivery calculated successfully"
+        ]);
+    }
     public function index(Request $request)
     {
         Log::info('=== ORDER CONTROLLER - Getting User Orders ===');
@@ -55,6 +115,10 @@ class OrderController extends Controller
             'payment_method' => 'required|string',
             'shipping_company' => 'nullable|string',
             'notes' => 'nullable|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+            'formatted_address' => 'nullable|string',
+            'building_details' => 'nullable|string',
         ]);
 
         $user = $request->user();
@@ -73,12 +137,66 @@ class OrderController extends Controller
         try {
             DB::beginTransaction();
 
-            $subtotal = $cartItems->sum(function ($item) {
-                return $item->product->price * $item->quantity;
-            });
+            $subtotal = 0;
+            $tax = 0;
 
-            $tax = $subtotal * 0.1; // 10% tax
-            $shipping = $subtotal > 50 ? 0 : 10; // Free shipping over $50
+            foreach ($cartItems as $item) {
+                // Ensure a unified price is used for both subtotal and actual OrderItem row.
+                $itemPrice = $item->price > 0 ? $item->price : ($item->product->sale_price ?? $item->product->price);
+                $itemSubtotal = $itemPrice * $item->quantity;
+                $subtotal += $itemSubtotal;
+                
+                // Stash the calculated price for the OrderItem creation loop later
+                $item->calculated_price = $itemPrice;
+
+                // Calculate real tax if product has a valid and active tax
+                if ($item->product && $item->product->tax_id && $item->product->tax && $item->product->tax->is_active) {
+                    $taxModel = $item->product->tax;
+                    if ($taxModel->type === 'percentage') {
+                        $tax += ($itemSubtotal * $taxModel->rate) / 100;
+                    } else {
+                        $tax += $taxModel->rate * $item->quantity;
+                    }
+                }
+            }
+
+            // Calculate dynamic shipping based on user location and cart items' sellers
+            $shipping = 0;
+            if ($request->latitude && $request->longitude) {
+                $customerLat = $request->latitude;
+                $customerLng = $request->longitude;
+                $sellersGroup = [];
+                
+                foreach ($cartItems as $item) {
+                    $sellerId = $item->product->seller_id;
+                    if ($sellerId && $item->product->seller) {
+                        if (!isset($sellersGroup[$sellerId])) {
+                            $sellersGroup[$sellerId] = [
+                                'latitude' => $item->product->seller->latitude,
+                                'longitude' => $item->product->seller->longitude,
+                            ];
+                        }
+                    } else {
+                        $sellersGroup['admin'] = ['latitude' => null, 'longitude' => null];
+                    }
+                }
+                
+                foreach ($sellersGroup as $sellerId => $location) {
+                    if ($location['latitude'] && $location['longitude']) {
+                        $result = \App\Services\DeliveryService::calculateFee(
+                            $customerLat, $customerLng,
+                            $location['latitude'], $location['longitude']
+                        );
+                        $shipping += $result['fee'];
+                    } else {
+                        $shipping += env('BASE_DELIVERY_FEE', 15);
+                    }
+                }
+            } else {
+                // Fallback standard flat rate if map location missing
+                $shipping = 15;
+            }
+
             $total = $subtotal + $tax + $shipping;
             
             Log::info('Order totals:', [
@@ -102,6 +220,10 @@ class OrderController extends Controller
                 'shipping_address' => $request->shipping_address,
                 'billing_address' => $request->billing_address ?? $request->shipping_address,
                 'notes' => $request->notes,
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
+                'formatted_address' => $request->formatted_address,
+                'building_details' => $request->building_details,
             ]);
 
             Log::info('Order created:', ['order_id' => $order->id, 'order_number' => $order->order_number]);
@@ -131,8 +253,8 @@ class OrderController extends Controller
                     'product_name' => $cartItem->product->name,
                     'product_sku' => $cartItem->product->sku,
                     'quantity' => $cartItem->quantity,
-                    'price' => $cartItem->product->price,
-                    'total' => $cartItem->product->price * $cartItem->quantity,
+                    'price' => $cartItem->calculated_price,
+                    'total' => $cartItem->calculated_price * $cartItem->quantity,
                     'image_url' => $imageUrl,
                     'color' => $cartItem->color ?? null,
                     'color_code' => $cartItem->color_code ?? null,
@@ -156,6 +278,37 @@ class OrderController extends Controller
 
             // Load the complete order with items for response
             $completeOrder = Order::with(['items.product'])->find($order->id);
+
+            // --- Send Email Notifications to Sellers ---
+            try {
+                $itemsBySeller = [];
+                foreach ($completeOrder->items as $item) {
+                     if ($item->product && $item->product->seller) {
+                         $sellerId = $item->product->seller->id;
+                         if (!isset($itemsBySeller[$sellerId])) {
+                             $itemsBySeller[$sellerId] = [
+                                 'seller' => $item->product->seller,
+                                 'items' => []
+                             ];
+                         }
+                         $itemsBySeller[$sellerId]['items'][] = $item;
+                     }
+                }
+                
+                foreach ($itemsBySeller as $sellerData) {
+                    $seller = $sellerData['seller'];
+                    $sellerItems = $sellerData['items'];
+                    $sellerUser = $seller->user;
+                    
+                    if ($sellerUser && $sellerUser->email) {
+                        \Illuminate\Support\Facades\Mail::to($sellerUser->email)
+                            ->send(new \App\Mail\SellerOrderNotificationMail($completeOrder, $seller, $sellerItems));
+                    }
+                }
+            } catch (\Exception $mailEx) {
+                Log::error('Failed to send seller order notifications: ' . $mailEx->getMessage());
+            }
+            // -------------------------------------------
             
             // Transform the order items to include proper image URLs
             $completeOrder->items->transform(function ($item) {
@@ -193,7 +346,7 @@ class OrderController extends Controller
 
     public function show(Request $request, $id)
     {
-        $order = Order::with(['items.product', 'items.variant'])
+        $order = Order::with(['items.product', 'items.variant', 'driver'])
             ->where('user_id', $request->user()->id)
             ->findOrFail($id);
             

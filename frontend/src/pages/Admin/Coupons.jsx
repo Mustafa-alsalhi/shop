@@ -64,7 +64,8 @@ const Coupons = () => {
   const fetchCoupons = async () => {
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('/api/admin/coupons', {
+      const apiUrl = import.meta.env.VITE_API_URL || '/api'
+      const response = await fetch(`${apiUrl}/admin/coupons`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -86,7 +87,8 @@ const Coupons = () => {
   const fetchStatistics = async () => {
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('/api/admin/coupons/statistics', {
+      const apiUrl = import.meta.env.VITE_API_URL || '/api'
+      const response = await fetch(`${apiUrl}/admin/coupons/statistics`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -107,9 +109,10 @@ const Coupons = () => {
     
     try {
       const token = localStorage.getItem('token')
+      const apiUrl = import.meta.env.VITE_API_URL || '/api'
       const url = editingCoupon 
-        ? `/api/admin/coupons/${editingCoupon.id}`
-        : '/api/admin/coupons'
+        ? `${apiUrl}/admin/coupons/${editingCoupon.id}`
+        : `${apiUrl}/admin/coupons`
       
       const response = await fetch(url, {
         method: editingCoupon ? 'PUT' : 'POST',
@@ -144,7 +147,8 @@ const Coupons = () => {
 
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch(`/api/admin/coupons/${id}`, {
+      const apiUrl = import.meta.env.VITE_API_URL || '/api'
+      const response = await fetch(`${apiUrl}/admin/coupons/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -168,7 +172,8 @@ const Coupons = () => {
   const toggleStatus = async (id) => {
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch(`/api/admin/coupons/${id}/toggle`, {
+      const apiUrl = import.meta.env.VITE_API_URL || '/api'
+      const response = await fetch(`${apiUrl}/admin/coupons/${id}/toggle`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

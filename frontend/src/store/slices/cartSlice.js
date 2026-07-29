@@ -101,6 +101,7 @@ const initialState = {
   isLoading: false,
   error: null,
   isOpen: false,
+  appliedCoupon: null,
 }
 
 // Slice
@@ -119,6 +120,12 @@ const cartSlice = createSlice({
     },
     clearError: (state) => {
       state.error = null
+    },
+    setAppliedCoupon: (state, action) => {
+      state.appliedCoupon = action.payload
+    },
+    clearAppliedCoupon: (state) => {
+      state.appliedCoupon = null
     },
     // Optimistic updates for better UX
     optimisticUpdateItem: (state, action) => {
@@ -204,7 +211,8 @@ const cartSlice = createSlice({
           
           // Calculate totals
           state.subtotal = state.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-          state.tax = state.subtotal * 0.1
+          // Tax will be calculated by the backend based on product's tax
+          state.tax = 0
           state.total = state.subtotal + state.tax
           state.totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0)
         }
@@ -242,7 +250,8 @@ const cartSlice = createSlice({
         state.items = state.items.filter(item => item.id !== itemId)
         // Recalculate totals
         state.subtotal = state.items.reduce((sum, item) => sum + item.total, 0)
-        state.tax = state.subtotal * 0.1 // 10% tax
+        // Tax will be calculated by the backend based on product's tax
+        state.tax = 0
         state.total = state.subtotal + state.tax
         state.totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0)
         state.error = null
@@ -283,6 +292,8 @@ export const {
   openCart,
   closeCart,
   clearError,
+  setAppliedCoupon,
+  clearAppliedCoupon,
   optimisticUpdateItem,
   optimisticRemoveItem,
 } = cartSlice.actions
@@ -297,5 +308,6 @@ export const selectCartError = (state) => state.cart.error
 export const selectCartSubtotal = (state) => state.cart?.subtotal || 0
 export const selectCartTax = (state) => state.cart?.tax || 0
 export const selectIsLoading = (state) => state.cart?.isLoading || false
+export const selectAppliedCoupon = (state) => state.cart?.appliedCoupon || null
 
 export default cartSlice.reducer

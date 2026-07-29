@@ -11,7 +11,7 @@ import {
 import {
   fetchProducts,
   setFilters,
-  clearFilters,
+  clearFilters as clearFiltersAction,
   fetchCategories,
   selectProducts,
   selectPagination,
@@ -37,31 +37,44 @@ const Products = () => {
   
   const [showFilters, setShowFilters] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [readyToFetch, setReadyToFetch] = useState(false)
 
   // Fetch categories on component mount
   useEffect(() => {
     dispatch(fetchCategories())
   }, [dispatch])
 
-  // Initialize filters from URL params
+  // Initialize filters from URL params ONCE when component mounts
   useEffect(() => {
-    const urlFilters = {
-      search: searchParams.get('search') || '',
-      category_id: searchParams.get('category') ? parseInt(searchParams.get('category')) : null,
-      min_price: searchParams.get('min_price') ? parseFloat(searchParams.get('min_price')) : null,
-      max_price: searchParams.get('max_price') ? parseFloat(searchParams.get('max_price')) : null,
-      sortBy: searchParams.get('sort') || 'created_at',
-      sortOrder: searchParams.get('order') || 'desc',
-      featured: searchParams.get('featured') === 'true' ? true : null,
-      page: parseInt(searchParams.get('page')) || 1,
+    if (searchParams.toString() !== '') {
+      const urlFilters = {
+        search: searchParams.get('search') || '',
+        category_id: searchParams.get('category') ? parseInt(searchParams.get('category')) : null,
+        min_price: searchParams.get('min_price') ? parseFloat(searchParams.get('min_price')) : null,
+        max_price: searchParams.get('max_price') ? parseFloat(searchParams.get('max_price')) : null,
+        sortBy: searchParams.get('sort') || 'created_at',
+        sortOrder: searchParams.get('order') || 'desc',
+        featured: searchParams.get('featured') === 'true' ? true : null,
+        rating: searchParams.get('rating') ? parseInt(searchParams.get('rating')) : null,
+        in_stock: searchParams.get('in_stock') === 'true' ? true : null,
+        page: parseInt(searchParams.get('page')) || 1,
+      }
+      dispatch(setFilters(urlFilters))
+      setSearchQuery(urlFilters.search)
     }
     
-    dispatch(setFilters(urlFilters))
-    setSearchQuery(urlFilters.search)
-  }, [searchParams, dispatch])
+    // We wait 10ms to ensure Redux has updated the filters store
+    // which prevents the "All products" fetch from racing the "Filtered products" fetch.
+    setTimeout(() => {
+      setReadyToFetch(true)
+    }, 50)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Empty dependency array to read initial URL params ONLY ONCE
 
   // Fetch products when filters change - simplified
   const fetchProductsData = useCallback(() => {
+    if (!readyToFetch) return; // WAIT untill URL filters are processed in Redux!
+    
     console.log('Products.jsx: Fetching products with filters:', JSON.stringify(filters, null, 2))
     
     // Build API params
@@ -89,18 +102,15 @@ const Products = () => {
     
     // Use the imported fetchProducts action
     dispatch(fetchProducts(params))
-  }, [JSON.stringify(filters)])
+  }, [JSON.stringify(filters), readyToFetch])
 
   // Only run fetchProductsData when filters actually change
   useEffect(() => {
     fetchProductsData()
   }, [fetchProductsData])
 
-  // Initialize filters on component mount - only run once
-  useEffect(() => {
-    console.log('Products.jsx: Component mounted, initial fetch')
-    dispatch(fetchProducts({ per_page: 12 }))
-  }, []) // Empty dependency array - only run once
+  // Initial fetch is handled automatically by the urlFilters useEffect
+  // which updates Redux, which then triggers fetchProductsData via its useEffect.
 
   const handleSearch = (e) => {
     e.preventDefault()
@@ -129,19 +139,9 @@ const Products = () => {
   }
 
   const clearFilters = () => {
-    dispatch(setFilters({
-      search: '',
-      category_id: null,
-      min_price: null,
-      max_price: null,
-      sortBy: 'created_at',
-      sortOrder: 'desc',
-      featured: null,
-      rating: null,
-      in_stock: null,
-      page: 1,
-    }))
+    dispatch(clearFiltersAction())
     setSearchQuery('')
+    setSearchParams({})
   }
 
   const activeFiltersCount = Object.entries(filters).filter(
@@ -256,10 +256,9 @@ const Products = () => {
                 {/* Products Grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
                   {products.map((product) => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                    />
+                    <div key={product.id} className="w-full">
+                      <ProductCard product={product} />
+                    </div>
                   ))}
                 </div>
 

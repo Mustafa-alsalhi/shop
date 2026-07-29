@@ -28,8 +28,13 @@ class User extends Authenticatable
         'is_active',
         'address',
         'city',
+        'state',
         'country',
         'postal_code',
+        'is_online',
+        'work_zone',
+        'latitude',
+        'longitude',
     ];
 
     /**
@@ -50,6 +55,42 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'is_active' => 'boolean',
+        'is_online' => 'boolean',
         'address' => 'array',
     ];
+
+    public function seller()
+    {
+        return $this->hasOne(Seller::class);
+    }
+
+    public function driver()
+    {
+        return $this->hasOne(Driver::class);
+    }
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isSeller()
+    {
+        return $this->role === 'seller';
+    }
+
+    public function isCustomer()
+    {
+        return $this->role === 'customer';
+    }
+
+    public function isDriver()
+    {
+        return $this->role === 'driver';
+    }
+
+    public function driverOrders()
+    {
+        return $this->hasMany(Order::class, 'driver_id');
+    }
 }

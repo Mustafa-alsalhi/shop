@@ -12,8 +12,10 @@ import {
   SparklesIcon
 } from '@heroicons/react/24/outline'
 import { Helmet } from 'react-helmet-async'
+import { useSettings } from '../contexts/SettingsContext'
 
 const AboutUs = () => {
+  const { storeName } = useSettings()
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -94,8 +96,8 @@ const AboutUs = () => {
   return (
     <>
       <Helmet>
-        <title>من نحن - متجر أصالة</title>
-        <meta name="description" content="تعرف على مهمة متجر أصالة وقيمه وفريقه خلف وجهة السعودية الأولى للتسوق عبر الإنترنت." />
+        <title>من نحن - {storeName}</title>
+        <meta name="description" content={`تعرف على مهمة ${storeName} وقيمه وفريقه خلف وجهة السعودية الأولى للتسوق عبر الإنترنت.`} />
       </Helmet>
 
       <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50" dir="rtl">
@@ -116,7 +118,7 @@ const AboutUs = () => {
               >
                 <BuildingOfficeIcon className="h-10 w-10 text-white" />
               </motion.div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">من نحن متجر أصالة</h1>
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">من نحن {storeName}</h1>
               <p className="text-xl text-amber-100 max-w-3xl mx-auto">
                 شريككم الموثوق في التسوق عبر الإنترنت، نقدم منتجات عالية الجودة وخدمة استثنائية للمملكة العربية السعودية منذ عام 2020.
               </p>

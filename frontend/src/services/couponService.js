@@ -200,6 +200,7 @@ class CouponService {
     const conditions = {
       minimumAmount: true,
       applicableProducts: true,
+      applicableCategories: true,
       usageLimit: true,
       dateValid: true
     }
@@ -214,6 +215,14 @@ class CouponService {
       const cartProductIds = cartItems.map(item => item.product_id)
       conditions.applicableProducts = cartProductIds.some(id => 
         coupon.applicable_products.includes(id)
+      )
+    }
+
+    // التحقق من الفئات المطبقة
+    if (coupon.applicable_categories && coupon.applicable_categories.length > 0) {
+      const cartCategoryIds = cartItems.map(item => item.category_id).filter(id => id)
+      conditions.applicableCategories = cartCategoryIds.some(id => 
+        coupon.applicable_categories.includes(id)
       )
     }
 
@@ -239,8 +248,8 @@ class CouponService {
       return `الحد الأدنى للطلب هو ${coupon.minimum_amount} ريال`
     }
     
-    if (!conditions.applicableProducts) {
-      return 'هذا الكوبون لا ينطبق على المنتجات في سلة التسوق'
+    if (!conditions.applicableProducts && !conditions.applicableCategories) {
+      return 'هذا الكوبون لا ينطبق على المنتجات أو الفئات في سلة التسوق'
     }
     
     if (!conditions.usageLimit) {

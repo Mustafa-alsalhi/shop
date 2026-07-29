@@ -139,14 +139,14 @@ const OfferDetails = () => {
     if (!banner) return 'https://via.placeholder.com/1200x400?text=No+Banner'
     if (banner.startsWith('http')) return banner
     // For Laravel storage, use the storage URL
-    const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-d82a.up.railway.app'
+    const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-8385.up.railway.app'
     return `${baseUrl}/storage/${banner.startsWith('/') ? banner.slice(1) : banner}`
   }
 
   const getProductImageUrl = (image) => {
     if (!image) return 'https://via.placeholder.com/300x300?text=No+Image'
     if (image.startsWith('http')) return image
-    return `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-d82a.up.railway.app'}${image.startsWith('/') ? image : '/' + image}`
+    return `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-8385.up.railway.app'}${image.startsWith('/') ? image : '/' + image}`
   }
 
   const isInWishlist = (productId) => {
@@ -220,8 +220,34 @@ const OfferDetails = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="spinner h-12 w-12"></div>
+      <div className="min-h-screen bg-gray-50 flex flex-col" dir="rtl">
+        <div className="relative h-80 md:h-96 bg-gray-200 animate-pulse">
+           <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-12">
+             <div className="h-6 w-32 bg-gray-300 rounded mb-4"></div>
+             <div className="h-10 w-2/3 bg-gray-300 rounded mb-2"></div>
+             <div className="h-6 w-1/2 bg-gray-300 rounded mb-4"></div>
+           </div>
+        </div>
+        <div className="max-w-7xl mx-auto py-6 sm:py-8 px-4 w-full">
+           <div className="h-8 w-40 bg-gray-200 rounded mb-6 animate-pulse"></div>
+           <div className="mb-6 h-12 w-full bg-gray-200 rounded animate-pulse"></div>
+           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+             {[1, 2, 3, 4, 5, 6, 7, 8].map(n => (
+                <div key={n} className="bg-white rounded-xl shadow-lg overflow-hidden animate-pulse">
+                  <div className="h-40 sm:h-56 bg-gray-200"></div>
+                  <div className="p-3 sm:p-4 space-y-3">
+                    <div className="h-4 bg-gray-200 rounded w-full"></div>
+                    <div className="h-4 bg-gray-200 rounded w-2/3 mb-4"></div>
+                    <div className="h-6 bg-gray-200 rounded w-1/3"></div>
+                    <div className="flex gap-2">
+                       <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+                       <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+                    </div>
+                  </div>
+                </div>
+             ))}
+           </div>
+        </div>
       </div>
     )
   }

@@ -208,10 +208,12 @@ class BannerController extends Controller
     {
         $position = $request->get('position', 'home');
         
-        $banners = Banner::active()
-            ->byPosition($position)
-            ->ordered()
-            ->get();
+        $banners = \Illuminate\Support\Facades\Cache::remember("api_active_banners_{$position}", 600, function () use ($position) {
+            return Banner::active()
+                ->byPosition($position)
+                ->ordered()
+                ->get();
+        });
 
         return response()->json([
             'success' => true,

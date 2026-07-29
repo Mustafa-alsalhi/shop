@@ -13,30 +13,67 @@ class CartController extends Controller
     {
         \Log::info('=== CART INDEX REQUEST ===');
         \Log::info('User ID:', [$request->user()->id]);
-        
-        $cartItems = Cart::with(['product', 'variant'])
+
+        $cartItems = Cart::with(['product.tax', 'variant'])
             ->where('user_id', $request->user()->id)
             ->get();
-        
-        // Add total to each cart item
+
+        // Add total and tax to each cart item
         $cartItems->transform(function ($item) {
             $item->total = ($item->price ?? 0) * $item->quantity;
+
+            // Calculate tax for this item based on product's tax
+            $itemTax = 0;
+            
+            // Debug logging
+            \Log::info('Tax calculation for cart item:', [
+                'cart_item_id' => $item->id,
+                'product_id' => $item->product_id,
+                'product_name' => $item->product_name,
+                'price' => $item->price,
+                'quantity' => $item->quantity,
+                'total' => $item->total,
+                'has_product' => !is_null($item->product),
+                'tax_id' => $item->product ? $item->product->tax_id : 'no_product',
+                'tax_id_value' => $item->product && $item->product->tax_id ? $item->product->tax_id : 'null',
+                'has_tax_relation' => $item->product && !is_null($item->product->tax),
+                'tax_data' => $item->product && $item->product->tax ? $item->product->tax->toArray() : 'no_tax'
+            ]);
+            
+            // Only calculate tax if product has a valid tax_id and active tax
+            if ($item->product && $item->product->tax_id && $item->product->tax && $item->product->tax->is_active) {
+                if ($item->product->tax->type === 'percentage') {
+                    $itemTax = ($item->total * $item->product->tax->rate) / 100;
+                } else {
+                    $itemTax = $item->product->tax->rate * $item->quantity;
+                }
+                \Log::info('Tax applied:', ['item_id' => $item->id, 'tax_amount' => $itemTax]);
+            } else {
+                \Log::info('No tax applied:', [
+                    'item_id' => $item->id,
+                    'reason' => !$item->product ? 'no_product' : (!$item->product->tax_id ? 'no_tax_id' : (!$item->product->tax ? 'no_tax_relation' : (!$item->product->tax->is_active ? 'tax_inactive' : 'unknown')))
+                ]);
+            }
+            $item->tax = $itemTax;
+
             return $item;
         });
-        
+
         \Log::info('Cart Items Count:', [$cartItems->count()]);
         \Log::info('Cart Items:', $cartItems->toArray());
-        
+
         // Calculate totals
         $subtotal = $cartItems->sum(function ($item) {
             return ($item->price ?? 0) * $item->quantity;
         });
-        $tax = $subtotal * 0.1; // 10% tax
+        $tax = $cartItems->sum(function ($item) {
+            return $item->tax ?? 0;
+        });
         $total = $subtotal + $tax;
         $totalItems = $cartItems->sum('quantity');
-        
+
         \Log::info('Cart Totals:', ['subtotal' => $subtotal, 'tax' => $tax, 'total' => $total, 'total_items' => $totalItems]);
-        
+
         return response()->json([
             'items' => $cartItems,
             'subtotal' => $subtotal,
@@ -148,24 +185,39 @@ class CartController extends Controller
         \Log::info('Cart Item Full Data:', $cartItem->toArray());
         
         // Return the full cart with totals after adding
-        $cartItems = Cart::with(['product', 'variant'])
+        $cartItems = Cart::with(['product.tax', 'variant'])
             ->where('user_id', $request->user()->id)
             ->get();
-        
-        // Add total to each cart item
+
+        // Add total and tax to each cart item
         $cartItems->transform(function ($item) {
             $item->total = ($item->price ?? 0) * $item->quantity;
+
+            // Calculate tax for this item based on product's tax
+            $itemTax = 0;
+            // Only calculate tax if product has a valid tax_id and active tax
+            if ($item->product && $item->product->tax_id && $item->product->tax && $item->product->tax->is_active) {
+                if ($item->product->tax->type === 'percentage') {
+                    $itemTax = ($item->total * $item->product->tax->rate) / 100;
+                } else {
+                    $itemTax = $item->product->tax->rate * $item->quantity;
+                }
+            }
+            $item->tax = $itemTax;
+
             return $item;
         });
-        
+
         // Calculate totals
         $subtotal = $cartItems->sum(function ($item) {
             return ($item->price ?? 0) * $item->quantity;
         });
-        $tax = $subtotal * 0.1; // 10% tax
+        $tax = $cartItems->sum(function ($item) {
+            return $item->tax ?? 0;
+        });
         $total = $subtotal + $tax;
         $totalItems = $cartItems->sum('quantity');
-        
+
         return response()->json([
             'items' => $cartItems,
             'subtotal' => $subtotal,
@@ -188,7 +240,47 @@ class CartController extends Controller
             'quantity' => $request->quantity,
         ]);
 
-        return response()->json($cartItem);
+        // Return the full cart with totals after updating
+        $cartItems = Cart::with(['product.tax', 'variant'])
+            ->where('user_id', $request->user()->id)
+            ->get();
+
+        // Add total and tax to each cart item
+        $cartItems->transform(function ($item) {
+            $item->total = ($item->price ?? 0) * $item->quantity;
+
+            // Calculate tax for this item based on product's tax
+            $itemTax = 0;
+            // Only calculate tax if product has a valid tax_id and active tax
+            if ($item->product && $item->product->tax_id && $item->product->tax && $item->product->tax->is_active) {
+                if ($item->product->tax->type === 'percentage') {
+                    $itemTax = ($item->total * $item->product->tax->rate) / 100;
+                } else {
+                    $itemTax = $item->product->tax->rate * $item->quantity;
+                }
+            }
+            $item->tax = $itemTax;
+
+            return $item;
+        });
+
+        // Calculate totals
+        $subtotal = $cartItems->sum(function ($item) {
+            return ($item->price ?? 0) * $item->quantity;
+        });
+        $tax = $cartItems->sum(function ($item) {
+            return $item->tax ?? 0;
+        });
+        $total = $subtotal + $tax;
+        $totalItems = $cartItems->sum('quantity');
+
+        return response()->json([
+            'items' => $cartItems,
+            'subtotal' => $subtotal,
+            'tax' => $tax,
+            'total' => $total,
+            'total_items' => $totalItems,
+        ]);
     }
 
     public function destroy(Request $request, $id)

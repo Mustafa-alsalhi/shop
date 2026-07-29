@@ -77,7 +77,7 @@ const Offers = () => {
     if (!banner) return 'https://via.placeholder.com/400x200?text=No+Banner'
     if (banner.startsWith('http')) return banner
     // For Laravel storage, use the storage URL
-    const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-d82a.up.railway.app'
+    const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-8385.up.railway.app'
     return `${baseUrl}/storage/${banner.startsWith('/') ? banner.slice(1) : banner}`
   }
 
