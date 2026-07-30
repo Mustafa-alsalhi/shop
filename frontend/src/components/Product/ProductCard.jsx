@@ -10,8 +10,8 @@ import {
   StarIcon as StarIconSolid,
   HeartIcon as HeartIconSolid,
 } from '@heroicons/react/24/solid'
-import { 
-  addToWishlist, 
+import {
+  addToWishlist,
   removeFromWishlist,
   selectWishlistItems,
   selectIsInWishlist
@@ -21,7 +21,7 @@ import { showSuccessNotification } from '../../store/slices/uiSlice'
 const ProductCard = ({ product }) => {
   const dispatch = useDispatch()
   const wishlistItems = useSelector(selectWishlistItems)
-  
+
   // Check if product is in wishlist
   const isWishlisted = wishlistItems.some(item => item.id === product.id)
 
@@ -54,7 +54,7 @@ const ProductCard = ({ product }) => {
 
   const handleAddToCart = () => {
     console.log('View product details:', product.id, product.name)
-    
+
     // Just navigate to product details page
     window.location.href = `/products/${product.id}`
   }
@@ -75,11 +75,22 @@ const ProductCard = ({ product }) => {
     console.log('Quick view:', product.id)
   }
 
-  const discountPercentage = product.sale_price
-    ? Math.round(((product.price - product.sale_price) / product.price) * 100)
-    : product.compare_price
-    ? Math.round(((product.compare_price - product.price) / product.compare_price) * 100)
-    : 0
+  // Safely parse prices to numbers
+  const p1 = Number(product.price) || 0;
+  const p2 = Number(product.sale_price) || 0;
+  const p3 = Number(product.compare_at_price) || Number(product.compare_price) || 0;
+  
+  // Find the highest and lowest prices to mathematically determine original vs discounted
+  // This makes it foolproof no matter which field the seller used for the discount!
+  const prices = [p1, p2, p3].filter(p => p > 0);
+  const currentPrice = prices.length > 0 ? Math.min(...prices) : 0;
+  const originalPrice = prices.length > 1 ? Math.max(...prices) : (prices[0] || 0);
+
+  // Calculate percentage based on the largest vs smallest price
+  let discountPercentage = 0;
+  if (originalPrice > currentPrice && currentPrice > 0) {
+    discountPercentage = Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
+  }
 
   return (
     <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg overflow-hidden hover:shadow-amber-200/50 transition-all duration-300 group w-full h-full border border-amber-200/30 hover:border-amber-300/60 flex flex-col">
@@ -119,9 +130,8 @@ const ProductCard = ({ product }) => {
         <div className="absolute top-1 sm:top-2 right-1 sm:right-2 flex flex-col gap-1.5 sm:gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <button
             onClick={handleToggleWishlist}
-            className={`p-1.5 sm:p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md transition-all duration-300 hover:scale-110 ${
-              isWishlisted ? 'hover:bg-rose-50 border border-rose-200' : 'hover:bg-amber-50 border border-amber-200'
-            }`}
+            className={`p-1.5 sm:p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md transition-all duration-300 hover:scale-110 ${isWishlisted ? 'hover:bg-rose-50 border border-rose-200' : 'hover:bg-amber-50 border border-amber-200'
+              }`}
             title={isWishlisted ? 'إزالة من قائمة الرغبات' : 'إضافة إلى قائمة الرغبات'}
           >
             {isWishlisted ? (
@@ -182,29 +192,15 @@ const ProductCard = ({ product }) => {
           </span>
         </div>
 
-        {/* Price */}
         <div className="flex items-center justify-between mb-2 sm:mb-3">
-          <div className="flex items-center flex-wrap">
-            {product.sale_price ? (
-              <>
-                <span className="text-lg sm:text-2xl font-bold text-amber-600">
-                  {product.currency} {product.price}
-                </span>
-                <span className="text-xs sm:text-sm text-gray-500 line-through ml-1.5 sm:ml-2">
-                  {product.currency} {product.sale_price}
-                </span>
-              </>
-            ) : (
-              <>
-                <span className="text-lg sm:text-2xl font-bold text-amber-600">
-                  {product.currency} {product.price}
-                </span>
-                {product.compare_price && (
-                  <span className="text-xs sm:text-sm text-gray-500 line-through ml-1.5 sm:ml-2">
-                    {product.currency} {product.compare_price}
-                  </span>
-                )}
-              </>
+          <div className="flex items-center flex-wrap gap-1.5 sm:gap-2">
+            <span className="text-lg sm:text-2xl font-bold text-amber-600">
+              {product.currency || 'ر.ي'} {currentPrice}
+            </span>
+            {originalPrice > currentPrice && (
+              <span className="text-xs sm:text-sm text-gray-500 line-through">
+                {product.currency || 'ر.ي'} {originalPrice}
+              </span>
             )}
           </div>
           {/* Tax */}
