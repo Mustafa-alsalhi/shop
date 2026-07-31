@@ -24,6 +24,16 @@
   }
 }
 
+/* Neutralize LTR-based RTL hacks for true global RTL support */
+html[dir="rtl"] .flex-row-reverse {
+  flex-direction: row !important;
+}
+
+html[dir="rtl"] .space-x-reverse > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 0 !important;
+}
+
+
   /* Custom scrollbar with amber theme */
   ::-webkit-scrollbar {
     @apply w-3;
