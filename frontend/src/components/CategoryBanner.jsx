@@ -32,12 +32,12 @@ const CategoryBanner = () => {
       const maxScroll = container.scrollWidth - container.clientWidth
       
       // Check if we've reached end
-      if (container.scrollLeft + scrollAmount >= maxScroll) {
+      if (Math.abs(container.scrollLeft) + scrollAmount >= maxScroll) {
         // Reset to beginning smoothly
         container.scrollTo({ left: 0, behavior: 'smooth' })
       } else {
         // Scroll normally
-        container.scrollBy({ left: scrollAmount, behavior: 'smooth' })
+        container.scrollBy({ left: -scrollAmount, behavior: 'smooth' })
       }
     }
   }
@@ -60,13 +60,13 @@ const CategoryBanner = () => {
       }
       
       // Check if we're at the beginning
-      if (container.scrollLeft - scrollAmount <= 0) {
+      if (Math.abs(container.scrollLeft) - scrollAmount <= 0) {
         // Go to end smoothly
         const maxScroll = container.scrollWidth - container.clientWidth
-        container.scrollTo({ left: maxScroll, behavior: 'smooth' })
+        container.scrollTo({ left: -maxScroll, behavior: 'smooth' })
       } else {
         // Scroll normally
-        container.scrollBy({ left: -scrollAmount, behavior: 'smooth' })
+        container.scrollBy({ left: scrollAmount, behavior: 'smooth' })
       }
     }
   }
@@ -96,11 +96,11 @@ const CategoryBanner = () => {
       const maxScroll = container.scrollWidth - container.clientWidth
       
       // Check if we've reached the end
-      if (container.scrollLeft + scrollAmount >= maxScroll) {
+      if (Math.abs(container.scrollLeft) + scrollAmount >= maxScroll) {
         // Reset to beginning smoothly
         container.scrollTo({ left: 0, behavior: 'smooth' })
       } else {
-        container.scrollBy({ left: scrollAmount, behavior: 'smooth' })
+        container.scrollBy({ left: -scrollAmount, behavior: 'smooth' })
       }
     }, 4000) // Auto-play every 4 seconds
 
@@ -262,6 +262,7 @@ const CategoryBanner = () => {
             <div className="relative">
               <div 
                 id="categories-banner-container"
+                dir="rtl"
                 className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-4 px-2"
                 style={{
                   scrollbarWidth: 'none',
@@ -348,6 +349,7 @@ const CategoryBanner = () => {
               {/* Categories Container */}
               <div 
                 id="categories-banner-container"
+                dir="rtl"
                 className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-4 px-2"
                 style={{
                   scrollbarWidth: 'none',
