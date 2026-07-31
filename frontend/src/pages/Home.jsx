@@ -424,7 +424,7 @@ const topSellersIntervalRef = useRef(null)
 
 
 
-          if (container.scrollLeft + scrollAmount >= maxScroll) {
+          if (Math.abs(container.scrollLeft) + scrollAmount >= maxScroll) {
 
 
 
@@ -444,7 +444,7 @@ const topSellersIntervalRef = useRef(null)
 
 
 
-            container.scrollBy({ left: scrollAmount, behavior: 'smooth' })
+            container.scrollBy({ left: -scrollAmount, behavior: 'smooth' })
 
 
 
@@ -604,7 +604,7 @@ const topSellersIntervalRef = useRef(null)
 
 
 
-        if (container.scrollLeft + scrollAmount >= maxScroll) {
+        if (Math.abs(container.scrollLeft) + scrollAmount >= maxScroll) {
 
 
 
@@ -624,7 +624,7 @@ const topSellersIntervalRef = useRef(null)
 
 
 
-          container.scrollBy({ left: scrollAmount, behavior: 'smooth' })
+          container.scrollBy({ left: -scrollAmount, behavior: 'smooth' })
 
 
 
@@ -718,7 +718,7 @@ const topSellersIntervalRef = useRef(null)
 
           // Check if we've reached end
 
-          if (container.scrollLeft + scrollAmount >= maxScroll) {
+          if (Math.abs(container.scrollLeft) + scrollAmount >= maxScroll) {
 
             // Reset to beginning smoothly
 
@@ -728,7 +728,7 @@ const topSellersIntervalRef = useRef(null)
 
             // Scroll normally
 
-            container.scrollBy({ left: scrollAmount, behavior: 'smooth' })
+            container.scrollBy({ left: -scrollAmount, behavior: 'smooth' })
 
           }
 
@@ -2358,13 +2358,13 @@ const topSellersIntervalRef = useRef(null)
 
             const maxScroll = container.scrollWidth - container.clientWidth
 
-            if (container.scrollLeft + scrollAmount >= maxScroll) {
+            if (Math.abs(container.scrollLeft) + scrollAmount >= maxScroll) {
 
               container.scrollTo({ left: 0, behavior: 'smooth' })
 
             } else {
 
-              container.scrollBy({ left: scrollAmount, behavior: 'smooth' })
+              container.scrollBy({ left: -scrollAmount, behavior: 'smooth' })
 
             }
 
@@ -2639,13 +2639,13 @@ const topSellersIntervalRef = useRef(null)
 
           const maxScroll = container.scrollWidth - container.clientWidth
 
-          if (container.scrollLeft + scrollAmount >= maxScroll) {
+          if (Math.abs(container.scrollLeft) + scrollAmount >= maxScroll) {
 
             container.scrollTo({ left: 0, behavior: 'smooth' })
 
           } else {
 
-            container.scrollBy({ left: scrollAmount, behavior: 'smooth' })
+            container.scrollBy({ left: -scrollAmount, behavior: 'smooth' })
 
           }
 
@@ -5858,9 +5858,7 @@ const topSellersIntervalRef = useRef(null)
 
 
                   id="featured-products-container"
-
-
-
+                  dir="rtl"
                   className="flex gap-2 sm:gap-3 md:gap-4 lg:gap-5 xl:gap-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4 px-2 cursor-grab active:cursor-grabbing"
 
 
@@ -6122,7 +6120,7 @@ const topSellersIntervalRef = useRef(null)
                 <div 
 
                   id="top-sellers-container"
-
+                  dir="rtl"
                   className="flex gap-3 sm:gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-4 px-2 cursor-grab active:cursor-grabbing"
 
                   style={{
@@ -6799,7 +6797,7 @@ const topSellersIntervalRef = useRef(null)
 
 
 
-                  id="new-products-container"
+                  id="new-products-container" dir="rtl"
 
 
 
@@ -7021,7 +7019,7 @@ const topSellersIntervalRef = useRef(null)
 
 
 
-                  id="bestsellers-container"
+                  id="bestsellers-container" dir="rtl"
 
 
 
@@ -7202,7 +7200,7 @@ const topSellersIntervalRef = useRef(null)
                   <div 
 
                     id={`section-container-${section.id}`}
-
+                    dir="rtl"
                     className="flex gap-2 sm:gap-3 md:gap-4 lg:gap-5 xl:gap-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4 px-2 cursor-grab active:cursor-grabbing"
 
                     style={{
