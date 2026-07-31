@@ -31,10 +31,10 @@ const OffersBanner = () => {
       
       const maxScroll = container.scrollWidth - container.clientWidth
       
-      if (container.scrollLeft + scrollAmount >= maxScroll) {
+      if (Math.abs(container.scrollLeft) + scrollAmount >= maxScroll) {
         container.scrollTo({ left: 0, behavior: 'smooth' })
       } else {
-        container.scrollBy({ left: scrollAmount, behavior: 'smooth' })
+        container.scrollBy({ left: -scrollAmount, behavior: 'smooth' })
       }
     }
   }
@@ -55,11 +55,11 @@ const OffersBanner = () => {
         scrollAmount = 340
       }
       
-      if (container.scrollLeft - scrollAmount <= 0) {
+      if (Math.abs(container.scrollLeft) - scrollAmount <= 0) {
         const maxScroll = container.scrollWidth - container.clientWidth
-        container.scrollTo({ left: maxScroll, behavior: 'smooth' })
+        container.scrollTo({ left: -maxScroll, behavior: 'smooth' })
       } else {
-        container.scrollBy({ left: -scrollAmount, behavior: 'smooth' })
+        container.scrollBy({ left: scrollAmount, behavior: 'smooth' })
       }
     }
   }
@@ -88,10 +88,10 @@ const OffersBanner = () => {
 
       const maxScroll = container.scrollWidth - container.clientWidth
       
-      if (container.scrollLeft + scrollAmount >= maxScroll) {
+      if (Math.abs(container.scrollLeft) + scrollAmount >= maxScroll) {
         container.scrollTo({ left: 0, behavior: 'smooth' })
       } else {
-        container.scrollBy({ left: scrollAmount, behavior: 'smooth' })
+        container.scrollBy({ left: -scrollAmount, behavior: 'smooth' })
       }
     }, 4000)
 
@@ -384,6 +384,7 @@ const OffersBanner = () => {
               {/* Offers Container */}
               <div 
                 id="offers-banner-container"
+                dir="rtl"
                 className="flex gap-3 sm:gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-4 px-2 cursor-grab active:cursor-grabbing"
                 style={{
                   scrollbarWidth: 'none',
