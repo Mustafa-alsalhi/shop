@@ -117,15 +117,15 @@ function App() {
     <>
       <Helmet>
 
-        <title>متجر أصالة - تسوق عالي الجودة بأسعار ممتازة</title>
+        <title>منصة أصالة - تسوق عالي الجودة بأسعار ممتازة</title>
 
-        <meta name="description" content="متجر أصالة - وجهتك الأولى للتسوق الموثوقة للمنتجات عالية الجودة بأسعار تنافسية وخدمة عملاء ممتازة" />
+        <meta name="description" content="منصة أصالة - وجهتك الأولى للتسوق الموثوقة للمنتجات عالية الجودة بأسعار تنافسية وخدمة عملاء ممتازة" />
 
-        <meta name="keywords" content="متجر أصالة، تسوق، منتجات عالية الجودة، متجر إلكتروني، أسعار ممتازة، خدمة عملاء" />
+        <meta name="keywords" content="منصة أصالة، تسوق، منتجات عالية الجودة، متجر إلكتروني، أسعار ممتازة، خدمة عملاء" />
 
-        <meta property="og:title" content="متجر أصالة - تجربة تسوق فريدة" />
+        <meta property="og:title" content="منصة أصالة - تجربة تسوق فريدة" />
 
-        <meta property="og:description" content="اكتشف أفضل المنتجات عالية الجودة بأسعار تنافسية في متجر أصالة" />
+        <meta property="og:description" content="اكتشف أفضل المنتجات عالية الجودة بأسعار تنافسية في منصة أصالة" />
 
         <meta property="og:type" content="website" />
 
