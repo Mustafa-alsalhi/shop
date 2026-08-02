@@ -51,17 +51,17 @@ const Sellers = () => {
               {/* Seller Header */}
               <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-2 sm:p-4 flex-shrink-0">
                 <div className="flex items-center justify-between">
-                  {seller.is_verified && (
-                    <div className="bg-white text-green-600 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold flex-shrink-0">
-                      موثوق
-                    </div>
-                  )}
                   <div className="flex items-center space-x-1 sm:space-x-3 space-x-reverse">
                     <div className="text-white">
                       <h3 className="text-sm sm:text-lg font-bold line-clamp-1" dir="rtl">{seller.store_name || 'اسم المتجر'}</h3>
                       <p className="text-[10px] sm:text-sm opacity-90 line-clamp-1 max-w-[80px] sm:max-w-none" dir="rtl">{seller.description || 'وصف المتجر'}</p>
                     </div>
                   </div>
+                  {seller.is_verified && (
+                    <div className="bg-white text-green-600 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold flex-shrink-0">
+                      موثوق
+                    </div>
+                  )}
                 </div>
               </div>
 
