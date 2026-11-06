@@ -19,11 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-<<<<<<< HEAD
-    'allowed_origins' => ['http://localhost:3000', 'http://localhost:3001', 'https://asalaa.up.railway.app', 'https://asalaabac.up.railway.app'],
-=======
     'allowed_origins' => ['*'],
->>>>>>> 2d63415 (feat: add activity-based banners, header activities dropdown, and WhatsApp OTP phone auth)
 
     'allowed_origins_patterns' => [],
 

@@ -34,11 +34,7 @@ html[dir="rtl"] .space-x-reverse > :not([hidden]) ~ :not([hidden]) {
 }
 
 
-<<<<<<< HEAD
   /* Custom scrollbar with amber theme */
-=======
-  /* Custom scrollbar with teal theme */
->>>>>>> 2d63415 (feat: add activity-based banners, header activities dropdown, and WhatsApp OTP phone auth)
   ::-webkit-scrollbar {
     @apply w-2.5 sm:w-3;
   }
