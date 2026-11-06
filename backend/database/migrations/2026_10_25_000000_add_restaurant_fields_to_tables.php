@@ -14,68 +14,68 @@ return new class extends Migration
         // 1. تعديل جدول البائعين sellers
         Schema::table('sellers', function (Blueprint $table) {
             if (!Schema::hasColumn('sellers', 'type')) {
-                $table->string('type')->default('store')->after('store_name'); // 'store' أو 'restaurant'
+                $table->string('type')->default('store');
             }
             if (!Schema::hasColumn('sellers', 'cover_image')) {
-                $table->string('cover_image')->nullable()->after('avatar_image');
+                $table->string('cover_image')->nullable();
             }
             if (!Schema::hasColumn('sellers', 'is_open')) {
-                $table->boolean('is_open')->default(true)->after('status');
+                $table->boolean('is_open')->default(true);
             }
             if (!Schema::hasColumn('sellers', 'accepting_orders')) {
-                $table->boolean('accepting_orders')->default(true)->after('is_open');
+                $table->boolean('accepting_orders')->default(true);
             }
             if (!Schema::hasColumn('sellers', 'preparation_time')) {
-                $table->string('preparation_time')->nullable()->default('20-30 دقيقة')->after('accepting_orders');
+                $table->string('preparation_time')->nullable()->default('20-30 دقيقة');
             }
             if (!Schema::hasColumn('sellers', 'min_order_amount')) {
-                $table->decimal('min_order_amount', 10, 2)->default(0)->after('preparation_time');
+                $table->decimal('min_order_amount', 10, 2)->default(0);
             }
             if (!Schema::hasColumn('sellers', 'working_hours')) {
-                $table->json('working_hours')->nullable()->after('min_order_amount');
+                $table->json('working_hours')->nullable();
             }
             if (!Schema::hasColumn('sellers', 'cuisine_type')) {
-                $table->string('cuisine_type')->nullable()->after('working_hours');
+                $table->string('cuisine_type')->nullable();
             }
         });
 
         // 2. تعديل جدول التصنيفات categories
         Schema::table('categories', function (Blueprint $table) {
             if (!Schema::hasColumn('categories', 'type')) {
-                $table->string('type')->default('store')->after('name'); // 'store' أو 'restaurant'
+                $table->string('type')->default('store');
             }
         });
 
         // 3. تعديل جدول المنتجات products
         Schema::table('products', function (Blueprint $table) {
             if (!Schema::hasColumn('products', 'food_options')) {
-                $table->json('food_options')->nullable()->after('variants'); // خيارات الوجبة، الإضافات المدفوعة/المجانية، الأحجام
+                $table->json('food_options')->nullable();
             }
             if (!Schema::hasColumn('products', 'preparation_time')) {
-                $table->integer('preparation_time')->nullable()->after('food_options'); // وقت التحضير بالدقائق
+                $table->integer('preparation_time')->nullable();
             }
         });
 
         // 4. تعديل جدول السلة carts
         Schema::table('carts', function (Blueprint $table) {
             if (!Schema::hasColumn('carts', 'selected_options')) {
-                $table->json('selected_options')->nullable()->after('variant_attributes');
+                $table->json('selected_options')->nullable();
             }
             if (!Schema::hasColumn('carts', 'special_instructions')) {
-                $table->text('special_instructions')->nullable()->after('selected_options');
+                $table->text('special_instructions')->nullable();
             }
             if (!Schema::hasColumn('carts', 'seller_type')) {
-                $table->string('seller_type')->default('store')->after('special_instructions');
+                $table->string('seller_type')->default('store');
             }
         });
 
         // 5. تعديل جدول عناصر الطلب order_items
         Schema::table('order_items', function (Blueprint $table) {
             if (!Schema::hasColumn('order_items', 'selected_options')) {
-                $table->json('selected_options')->nullable()->after('variant_value');
+                $table->json('selected_options')->nullable();
             }
             if (!Schema::hasColumn('order_items', 'special_instructions')) {
-                $table->text('special_instructions')->nullable()->after('selected_options');
+                $table->text('special_instructions')->nullable();
             }
         });
     }
@@ -85,27 +85,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('sellers', function (Blueprint $table) {
-            $table->dropColumn([
-                'type', 'cover_image', 'is_open', 'accepting_orders', 
-                'preparation_time', 'min_order_amount', 'working_hours', 'cuisine_type'
-            ]);
-        });
-
-        Schema::table('categories', function (Blueprint $table) {
-            $table->dropColumn(['type']);
-        });
-
-        Schema::table('products', function (Blueprint $table) {
-            $table->dropColumn(['food_options', 'preparation_time']);
-        });
-
-        Schema::table('carts', function (Blueprint $table) {
-            $table->dropColumn(['selected_options', 'special_instructions', 'seller_type']);
-        });
-
-        Schema::table('order_items', function (Blueprint $table) {
-            $table->dropColumn(['selected_options', 'special_instructions']);
-        });
+        //
     }
 };

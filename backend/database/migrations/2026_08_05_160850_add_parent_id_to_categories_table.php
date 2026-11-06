@@ -13,9 +13,11 @@ class AddParentIdToCategoriesTable extends Migration
      */
     public function up()
     {
-        Schema::table('categories', function (Blueprint $table) {
-            $table->foreignId('parent_id')->nullable()->constrained('categories')->onDelete('cascade');
-        });
+        if (!Schema::hasColumn('categories', 'parent_id')) {
+            Schema::table('categories', function (Blueprint $table) {
+                $table->foreignId('parent_id')->nullable()->constrained('categories')->onDelete('cascade');
+            });
+        }
     }
 
     /**
@@ -25,9 +27,11 @@ class AddParentIdToCategoriesTable extends Migration
      */
     public function down()
     {
-        Schema::table('categories', function (Blueprint $table) {
-            $table->dropForeign(['parent_id']);
-            $table->dropColumn('parent_id');
-        });
+        if (Schema::hasColumn('categories', 'parent_id')) {
+            Schema::table('categories', function (Blueprint $table) {
+                $table->dropForeign(['parent_id']);
+                $table->dropColumn('parent_id');
+            });
+        }
     }
 }
