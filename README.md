@@ -1,241 +1,191 @@
-# E-Commerce Store - متجر إلكترونيكي احترافي
+# Multi-Vendor E-Commerce & Delivery Platform | منصة تجارة إلكترونية متعددة البائعين ونظام توصيل متكامل
 
-متجر إلكترونيكي متكامل مبني باستخدام Laravel 10+ و React.js
+![Laravel](https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
+![PHP](https://img.shields.io/badge/PHP_8.2+-777BB4?style=for-the-badge&logo=php&logoColor=white)
+![React](https://img.shields.io/badge/React_18-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![Redux Toolkit](https://img.shields.io/badge/Redux_Toolkit-593D88?style=for-the-badge&logo=redux&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-005C84?style=for-the-badge&logo=mysql&logoColor=white)
 
-## الهيكل العام للمشروع
+منصة تجارة إلكترونية وتوصيل متكاملة متعددة البائعين والأنشطة (**Multi-Vendor & Multi-Activity E-Commerce Platform**)، مبنية باستخدام **Laravel RESTful API** في الواجهة الخلفية و **React.js (Vite)** في الواجهة الأمامية. تدعم المنصة المتاجر المتنوعة، المطاعم، السوبرماركت، وتوفر 4 لوحات تحكم مستقلة بصلاحيات مخصصة (**RBAC**) لكل من المدير، البائع، مندوب التوصيل، والعميل.
 
-```
-my-store/
-├── backend/          # Laravel API
-├── frontend/         # React.js Application
-└── README.md         # هذا الملف
-```
+---
 
-## التقنيات المستخدمة
+## أبرز المميزات (Key Features)
 
-### Backend
-- Laravel 10+
-- MySQL
-- JWT Authentication (Laravel Sanctum)
-- RESTful API
-- Repository Pattern
+### 1. نظام متعدد البائعين والأنشطة (Multi-Vendor & Dynamic Activities)
+- دعم أنشطة تجارية متعددة (متاجر، مطاعم، سوبرماركت، وغيرها) مع صفحات أنشطة ديناميكية وبنرات إعلانية مخصصة لكل نشاط.
+- تخصيص واجهات عرض المنتجات حسب نوع النشاط (بطاقات منتجات المتاجر مع المقاسات والألوان، وبطاقات وجبات المطاعم مع وقت التحضير والإضافات).
+- نظام فئات رئيسية وفرعية متداخلة (**Nested Categories**) وعروض ترويجية وكوبونات خصم.
 
-### Frontend
-- React.js (Vite)
-- TailwindCSS
-- Axios
-- React Router
-- Redux Toolkit
-- Heroicons
-- React Query
+### 2. أربع لوحات تحكم متكاملة (Role-Based Dashboards - RBAC)
+- **لوحة تحكم المدير (Admin Dashboard):** إدارة شاملة للمستخدمين، البائعين، المناديب، الأنشطة، الفئات، المنتجات، الطلبات، البنرات الإعلانية، الضرائب، طرق الدفع، وطلبات السحب المالي، مع تقارير وإحصائيات تفصيلية.
+- **لوحة تحكم البائع (Seller Dashboard):** إدارة المتجر، المنتجات والمتغيرات والمخزون، العروض والكوبونات الخاصة بالمتجر، متابعة الطلبات وتحديث حالاتها، وطلبات سحب الأرباح.
+- **لوحة تحكم مندوب التوصيل (Driver Dashboard):** استلام الطلبات المسندة، عرض موقع العميل والمتجر على الخريطة، تحديث حالة التوصيل، وتأكيد التسليم عبر رمز التحقق (**Delivery Confirmation Code**).
+- **واجهة العميل (Customer Storefront):** تصفح المتاجر والمطاعم والأنشطة، فلترة وبحث متقدم، إدارة السلة والمفضلة (**Wishlist**)، إتمام الطلبات، وتتبع حالة الطلب وموقع التوصيل لحظياً.
 
-## المميزات الرئيسية
+### 3. المصادقة والتحقق عبر الواتساب (WhatsApp OTP Authentication)
+- نظام مصادقة آمن يعتمد على **Laravel Sanctum** (**Token-Based API Authentication**).
+- تسجيل الحسابات، التحقق من رقم الجوال، واستعادة كلمة المرور عبر رموز تحقق (**OTP**) تُرسل فورياً عبر **WhatsApp API (Quick Connect)**.
+- دعم كامل لتنسيق والتحقق من أرقام الجوال اليمنية (`+967`) مع تحويل الأرقام العربية تلقائياً.
 
-- نظام مستخدمين متكامل (Admin, Vendor, Customer)
-- إدارة المنتجات مع المتغيرات (الألوان والمقاسات)
-- نظام فئات رئيسية وفرعية (Nested Categories)
-- سلة مشتريات وطلبات
-- نظام دفع متعدد (Stripe, PayPal, Cash on Delivery)
-- كوبونات خصم
-- تقييمات المنتجات
-- Wishlist
-- لوحة تحكم Admin احترافية
-- RESTful API كامل
-- JWT Authentication مع Laravel Sanctum
-- حماية أمني متقدمة
+### 4. نظام التوصيل والخرائط التفاعلية (Geolocation & Delivery System)
+- تحديد موقع الاستلام والتوصيل بدقة عبر خرائط تفاعلية (**Leaflet & React-Leaflet**).
+- حساب تلقائي لتكلفة التوصيل بناءً على المسافة الفعلية بالكيلومتر والضرائب المطبقة.
+- تأكيد استلام الطلب بأمان عبر كود تسليم مكون من 6 أرقام (`delivery_code`) يتم التحقق منه عند التسليم.
 
-## هيكل المشروع
+### 5. نظام محادثة فوري (Built-in Messaging System)
+- نظام محادثة مدمج يتيح التواصل المباشر بين العملاء والبائعين وإدارة المنصة.
 
-### Backend Structure
-```
-backend/
-├── app/
-│   ├── Http/
-│   │   ├── Controllers/
-│   │   ├── Middleware/
-│   │   └── Requests/
-│   ├── Models/
-│   ├── Observers/
-│   └── Providers/
-├── database/
-│   ├── migrations/
-│   ├── seeders/
-│   └── factories/
-├── config/
-├── routes/
-├── storage/
-└── public/
-```
+---
 
-### Frontend Structure
-```
-frontend/
-├── src/
-│   ├── components/
-│   │   ├── Auth/
-│   │   ├── Layout/
-│   │   ├── Product/
-│   │   └── UI/
-│   ├── pages/
-│   ├── services/
-│   ├── store/
-│   ├── hooks/
-│   ├── utils/
-│   └── styles/
-├── public/
-├── dist/
+## التقنيات المستخدمة (Tech Stack)
+
+| الطبقة (Layer) | التقنيات والأدوات (Technologies) |
+| :--- | :--- |
+| **Backend** | PHP 8.2+, Laravel, RESTful API, Laravel Sanctum (API Tokens), Eloquent ORM, GuzzleHTTP |
+| **Frontend** | React 18, Vite, Redux Toolkit, React Query, React Router v6, Tailwind CSS, Framer Motion, Headless UI |
+| **Maps & UI** | Leaflet, React-Leaflet, Heroicons, React Icons, React Hook Form, React Hot Toast |
+| **Database** | MySQL (Relational Schema, Migrations, Seeders, Indexing) |
+| **External APIs** | Quick Connect API (WhatsApp OTP Verification) |
+
+---
+
+## هيكلية المشروع (Project Architecture)
+
+```text
+shop/
+├── backend/                  # الخادم المركزي (Laravel RESTful API)
+│   ├── app/
+│   │   ├── Http/
+│   │   │   ├── Controllers/  # وحدات التحكم (Admin, Seller, Driver, Customer APIs)
+│   │   │   └── Middleware/   # التحقق من الصلاحيات والأدوار (RoleMiddleware, SecurityHeaders)
+│   │   ├── Models/           # نماذج قاعدة البيانات والعلاقات (Eloquent Models)
+│   │   └── Services/         # خدمات الربط الخارجي (SmsService / WhatsApp OTP)
+│   ├── config/               # إعدادات النظام و CORS والخدمات الخارجية
+│   ├── database/
+│   │   ├── migrations/       # هيكلة جداول قاعدة البيانات
+│   │   └── seeders/          # البيانات الأولية الافتراضية
+│   └── routes/
+│       └── api.php           # مسارات الـ RESTful API
+│
+└── frontend/                 # تطبيق الويب (React.js + Vite)
+    ├── src/
+    │   ├── components/       # المكونات القابلة لإعادة الاستخدام (Layout, Banners, Product, UI)
+    │   ├── pages/            # صفحات المنصة (Admin, Seller, Driver, Auth, Storefront)
+    │   ├── services/         # طبقة الاتصال بالـ API (Axios Interceptors & Services)
+    │   ├── store/            # إدارة الحالة العامة (Redux Toolkit Slices)
+    │   ├── hooks/            # Custom React Hooks
+    │   └── utils/            # الدوال المساعدة ومعالجة الصور
+    └── public/               # الملفات الثابتة والشعارات
 ```
 
-## التثبيت والتشغيل
+---
 
-### المتطلبات الأساسية
-- Node.js 16+
-- PHP 8.1+
-- MySQL 8.0+
-- Composer
-- npm
+## طريقة التثبيت والتشغيل محلياً (Installation & Local Setup)
 
-### Backend Setup
+### المتطلبات الأساسية (Prerequisites)
+- **PHP** >= 8.2 & **Composer**
+- **MySQL** >= 8.0
+- **Node.js** >= 18.x & **npm**
+
+### 1. إعداد الواجهة الخلفية (Backend Setup)
+
 ```bash
 cd backend
 composer install
 cp .env.example .env
 php artisan key:generate
-php artisan migrate
-php artisan db:seed
+```
+
+قم بإنشاء قاعدة بيانات في MySQL وتحديث بيانات الاتصال في ملف `backend/.env`:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=ecommerce_store
+DB_USERNAME=root
+DB_PASSWORD=
+
+QUICK_CONNECT_API_URL=https://aalcgjgocszngpcqzjih.supabase.co/functions/v1/public-api
+QUICK_CONNECT_API_KEY=your_api_key_here
+QUICK_CONNECT_CHANNEL=whatsapp
+```
+
+ثم قم بتشغيل الترحيلات والبيانات الأولية وتشغيل السيرفر:
+
+```bash
+php artisan migrate --seed
 php artisan storage:link
 php artisan serve
 ```
-### Frontend Setup
-```bashnpm install react-icons
+سيعمل الخادم الخلفي على الرابط: `http://127.0.0.1:8000`
+
+### 2. إعداد الواجهة الأمامية (Frontend Setup)
+
+```bash
 cd frontend
 npm install
+```
+
+تأكد من ضبط رابط الـ API المحلي في ملف `frontend/.env`:
+
+```env
+VITE_API_URL=http://127.0.0.1:8000/api
+```
+
+لتشغيل بيئة التطوير:
+
+```bash
 npm run dev
 ```
 
-### إعداد قاعدة البيانات
-
-1. إنشاء قاعدة بيانات MySQL:
-   ```sql
-   CREATE DATABASE ecommerce_store CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-   ```
-
-2. تحديث ملف `.env` في مجلد backend:
-   ```env
-   DB_CONNECTION=mysql
-   DB_HOST=127.0.0.1
-   DB_PORT=3306
-   DB_DATABASE=ecommerce_store
-   DB_USERNAME=root
-   DB_PASSWORD=your_password
-   ```
-
-## المستخدمين الافتراضيين
-
-بعد تشغيل الـ seeders:
-
-- **Admin**: admin@example.com / password
-- **Vendor**: vendor@example.com / password  
-- **Customer**: customer@example.com / password
-
-## نقاط النهاية API
-
-### المصادقة
-- `POST /api/auth/register` - تسجيل حساب جديد
-- `POST /api/auth/login` - تسجيل دخول
-- `GET /api/auth/me` - بيانات المستخدم الحالي
-
-### المنتجات
-- `GET /api/products` - قائمة المنتجات
-- `GET /api/products/{id}` - تفاصيل المنتج
-- `POST /api/products` - إضافة منتج (يتطلب صلاحية)
-- `PUT /api/products/{id}` - تعديل منتج (يتطلب صلاحية)
-
-### الفئات
-- `GET /api/categories` - قائمة الفئات
-- `GET /api/categories/{id}` - تفاصيل الفئة
-- `GET /api/categories/tree` - هيكل الفئات الشجري
-
-### سلة المشتريات
-- `GET /api/cart` - عرض السلة
-- `POST /api/cart` - إضافة منتج للسلة
-- `PUT /api/cart/{item}` - تعديل كمية منتج
-- `DELETE /api/cart/{item}` - حذف منتج من السلة
-
-### الطلبات
-- `GET /api/orders` - قائمة طلبات المستخدم
-- `POST /api/orders` - إنشاء طلب جديد
-- `GET /api/orders/{id}` - تفاصيل الطلب
-- `PUT /api/orders/{id}/status` - تحديث حالة الطلب
-
-### الدفع
-- `POST /api/payments/stripe/create-intent` - إنشاء دفع Stripe
-- `POST /api/payments/paypal/create` - إنشاء دفع PayPal
-- `POST /api/payments/cod` - دفع عند الاستلام
-
-## الأمان
-
-- JWT Authentication مع Laravel Sanctum
-- حماية من SQL Injection, XSS, CSRF
-- Rate Limiting
-- Validation قوية
-- Middleware للصلاحيات
-- Password Hashing
-- Email Verification
-
-## لوحة تحكم Admin
-
-### الوصول
-- تسجيل الدخول بحساب admin
-- أو استخدم حساب admin@example.com / password
-
-### المميزات
-- إحصائيات المبيعات والمخطط البيانية
-- إدارة المنتجات والفئات
-- إدارة الطلبات والمستخدمين
-- إدارة الكوبونات والمخزون
-- إدارة التقييمات
-- إحصائيات النظام
-
-## النشر
-
-### على VPS
-
-1. تثبيت LEMP stack (Linux, Nginx, MySQL, PHP)
-2. إعداد Virtual Host لـ Nginx
-3. تشغيل `composer install --optimize-autoloader --no-dev`
-4. تشغيل `php artisan config:cache`
-5. تشغيل `php artisan route:cache`
-6. إعداد Supervisor لـ queue workers
-7. إعداد SSL certificate
-
-### على Shared Hosting
-
-1. رفع الملفات عبر FTP
-2. تعديل مسارات في `.env`
-3. تشغيل `composer install`
-4. تشغيل `php artisan migrate`
-5. تشغيل `php artisan config:cache`
-6. تشغيل `php artisan route:cache`
-
-### Docker (اختياري)
+ولبناء نسخة الإنتاج (`Production Build`):
 
 ```bash
-# Backend
-docker build -t ecommerce-backend .
-docker run -p 8000:8000 ecommerce-backend
-
-# Frontend
-docker build -t ecommerce-frontend .
-docker run -p 3000:3000 ecommerce-frontend
+npm run build
 ```
 
-## الدعم الفني
+---
 
-لأي استفسارات أو مشاكل، يرجى التواصل عبر:
-- الإيميل: support@example.com
-- الوثائق: https://docs.example.com
+## أبرز مسارات الواجهة البرمجية (Core API Endpoints)
 
-## الترخيص
+### المصادقة والتحقق (Authentication & WhatsApp OTP)
+- `POST /api/register` — تسجيل حساب جديد وإرسال كود التحقق عبر الواتساب
+- `POST /api/verify-register-otp` — تأكيد كود الـ OTP وتفعيل الحساب
+- `POST /api/resend-register-otp` — إعادة إرسال كود التحقق
+- `POST /api/login` — تسجيل الدخول برقم الجوال وكلمة المرور
+- `POST /api/forgot-password` — طلب رمز استعادة كلمة المرور عبر الواتساب
+- `POST /api/reset-password` — تعيين كلمة مرور جديدة
+- `POST /api/register-seller` — تسجيل حساب بائع ومتجر جديد
 
-هذا المشروع مرخص بموجب MIT License. يمكنك استخدامه وتعديله حسب احتياجاتك.
+### المتجر والمنتجات والأنشطة (Storefront, Products & Activities)
+- `GET /api/activities` — جلب الأنشطة التجارية الفعالة
+- `GET /api/banners` — جلب البنرات الإعلانية (الرئيسية، الترويجية، والخاصة بالأنشطة)
+- `GET /api/categories` — جلب الفئات الرئيسية والفرعية
+- `GET /api/products` — جلب المنتجات مع دعم الفلترة والبحث والترتيب
+- `GET /api/sellers` — استعراض المتاجر والمطاعم المعتمدة
+- `GET /api/offers` — جلب العروض الترويجية الفعالة
+
+### الطلبات والتوصيل ولوحات التحكم (Orders & Role Dashboards)
+- `POST /api/orders` — إنشاء طلب جديد مع حساب تكلفة التوصيل والضرائب
+- `GET /api/admin/dashboard` — إحصائيات وتقارير لوحة تحكم المدير
+- `GET /api/seller/dashboard` — إحصائيات ومبيعات لوحة تحكم البائع
+- `GET /api/driver/dashboard` — ملخص الطلبات والأرباح في لوحة تحكم المندوب
+- `PUT /api/driver/orders/{id}/status` — تحديث حالة توصيل الطلب وتأكيد كود التسليم
+
+---
+
+## الجوانب الأمنية (Security Practices)
+- **Token-Based Authentication:** حماية المسارات عبر **Laravel Sanctum**.
+- **Role-Based Access Control (RBAC):** فصل تام لصلاحيات (`admin`, `seller`, `driver`, `customer`) عبر Middleware مخصص.
+- **OTP Verification:** التحقق من ملكية رقم الهاتف عبر الواتساب مع تحديد صلاحية زمنية للرمز.
+- **Security Headers & CORS:** تطبيق ترويسات الحماية القياسية والتحكم الدقيق في النطاقات المسموح لها بالاتصال.
+- **Input Validation & Sanitization:** التحقق الصارم من كافة المدخلات وحماية قاعدة البيانات من هجمات `SQL Injection` و `XSS`.
+
+---
+
+## الترخيص (License)
+هذا المشروع مرخص بموجب رخصة [MIT License](https://opensource.org/licenses/MIT).
