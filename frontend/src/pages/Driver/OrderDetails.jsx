@@ -91,16 +91,52 @@ const DriverOrderDetails = () => {
     }
   }
 
-  const getStatusBadge = (status) => {
+  const parseOptions = (raw) => {
+    if (!raw) return null
+    if (typeof raw === 'object') return raw
+    try {
+      return JSON.parse(raw)
+    } catch {
+      return null
+    }
+  }
+
+  const isRestaurantItem = (item) => {
+    return Boolean(
+      item?.selected_options ||
+      item?.special_instructions ||
+      item?.product?.food_options ||
+      item?.product?.preparation_time ||
+      item?.product?.seller?.type === 'restaurant'
+    )
+  }
+
+  const isRestaurantOrder = (order) => {
+    return order?.seller?.type === 'restaurant' || order?.items?.some(isRestaurantItem)
+  }
+
+  const getStatusBadge = (status, isRestaurant = false) => {
     const statusConfig = {
-      assigned: { label: 'معين', color: 'bg-blue-100 text-blue-800' },
-      picked_up_from_seller: { label: 'تم الاستلام من البائع', color: 'bg-yellow-100 text-yellow-800' },
-      out_for_delivery: { label: 'جاري التوصيل', color: 'bg-orange-100 text-orange-800' },
-      delivered: { label: 'تم التسليم', color: 'bg-green-100 text-green-800' }
+      assigned: { 
+        label: isRestaurant ? 'طلب مطعم جديد 🍔' : 'معين', 
+        color: isRestaurant ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-blue-100 text-blue-800' 
+      },
+      picked_up_from_seller: { 
+        label: isRestaurant ? 'تم استلام الوجبة 🛵' : 'تم الاستلام من البائع', 
+        color: 'bg-yellow-100 text-yellow-800' 
+      },
+      out_for_delivery: { 
+        label: isRestaurant ? 'في طريق التوصيل للعميل 🚀' : 'جاري التوصيل', 
+        color: 'bg-orange-100 text-orange-800' 
+      },
+      delivered: { 
+        label: 'تم التسليم بنجاح ✅', 
+        color: 'bg-green-100 text-green-800' 
+      }
     }
     const config = statusConfig[status] || { label: status, color: 'bg-gray-100 text-gray-800' }
     return (
-      <span className={`px-3 py-1 text-sm font-medium rounded-full ${config.color}`}>
+      <span className={`px-3 py-1 text-sm font-semibold rounded-full ${config.color}`}>
         {config.label}
       </span>
     )
@@ -216,7 +252,14 @@ const DriverOrderDetails = () => {
         <div className="bg-white rounded-lg shadow-sm p-4">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">#{order.order_number}</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-2xl font-bold text-gray-900">#{order.order_number}</h2>
+                {isRestaurantOrder(order) && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                    🍔 طلب وجبة مطعم ساخنة
+                  </span>
+                )}
+              </div>
               <p className="text-sm text-gray-600 mt-1">
                 {new Date(order.created_at).toLocaleDateString('ar-SA', {
                   year: 'numeric',
@@ -227,7 +270,7 @@ const DriverOrderDetails = () => {
                 })}
               </p>
             </div>
-            {getStatusBadge(order.driver_status)}
+            {getStatusBadge(order.driver_status, isRestaurantOrder(order))}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -246,7 +289,7 @@ const DriverOrderDetails = () => {
           </div>
           <div className="bg-gray-50 p-3 rounded-lg mt-4 flex justify-between items-center">
              <div>
-                <p className="text-xs text-gray-600 mb-1">عدد المنتجات</p>
+                <p className="text-xs text-gray-600 mb-1">{isRestaurantOrder(order) ? 'عدد الوجبات' : 'عدد المنتجات'}</p>
                 <p className="text-lg font-bold text-gray-900">{order.items?.length || 0}</p>
              </div>
              <div>
@@ -264,7 +307,7 @@ const DriverOrderDetails = () => {
           <div className="space-y-3">
             <div className="flex items-center">
               <span className="text-gray-600 w-24 text-sm">الاسم:</span>
-              <span className="font-medium text-gray-900">{order.user?.name || 'غير محدد'}</span>
+              <span className="font-medium text-gray-900">{order.user?.name || `${order.user?.first_name || ''} ${order.user?.last_name || ''}`.trim() || 'غير محدد'}</span>
             </div>
             {order.user?.phone && (
               <div className="flex items-center">
@@ -293,17 +336,24 @@ const DriverOrderDetails = () => {
           </div>
         </div>
 
-        {/* Seller Info Card */}
+        {/* Seller / Restaurant Info Card */}
         {order.items && order.items.length > 0 && order.items[0]?.product?.seller && (
           <div className="bg-white rounded-lg shadow-sm p-4">
             <h3 className="font-bold text-gray-900 mb-4 flex items-center">
               <ShoppingBagIcon className="h-5 w-5 ml-2 text-indigo-600" />
-              موقع استلام البائع
+              {isRestaurantOrder(order) ? 'موقع استلام الوجبة (المطعم) 🍔' : 'موقع استلام البائع 🏬'}
             </h3>
             <div className="space-y-3">
               <div className="flex items-center">
-                <span className="text-gray-600 w-24 text-sm">اسم المتجر:</span>
-                <span className="font-medium text-gray-900">{order.items[0].product.seller.store_name || 'غير معروف'}</span>
+                <span className="text-gray-600 w-24 text-sm">{isRestaurantOrder(order) ? 'اسم المطعم:' : 'اسم المتجر:'}</span>
+                <span className="font-medium text-gray-900 flex items-center gap-2">
+                  {order.items[0].product.seller.store_name || 'غير معروف'}
+                  {isRestaurantOrder(order) && (
+                    <span className="px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800">
+                      مطعم ومأكولات
+                    </span>
+                  )}
+                </span>
               </div>
               {order.items[0].product.seller.address && (
                 <div className="flex items-start">
@@ -326,7 +376,7 @@ const DriverOrderDetails = () => {
                     className="inline-flex items-center gap-1 px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm"
                   >
                     <TruckIcon className="h-4 w-4" />
-                    توجيه لعنوان البائع (خرائط جوجل)
+                    {isRestaurantOrder(order) ? 'توجيه لموقع المطعم (خرائط جوجل) 🛵' : 'توجيه لعنوان البائع (خرائط جوجل)'}
                   </a>
                 </div>
               )}
@@ -430,39 +480,88 @@ const DriverOrderDetails = () => {
 
         {/* Order Items Card */}
         <div className="bg-white rounded-lg shadow-sm p-4">
-          <h3 className="font-bold text-gray-900 mb-4 flex items-center">
-            <ShoppingBagIcon className="h-5 w-5 ml-2" />
-            المنتجات
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold text-gray-900 flex items-center">
+              <ShoppingBagIcon className="h-5 w-5 ml-2 text-indigo-600" />
+              {isRestaurantOrder(order) ? 'قائمة الوجبات المطلوبة 🍔' : 'المنتجات'}
+            </h3>
+            <span className="text-xs text-gray-500 font-medium">
+              {order.items?.length || 0} {isRestaurantOrder(order) ? 'أصناف / وجبات' : 'منتجات'}
+            </span>
+          </div>
+
           <div className="space-y-3">
-            {order.items?.map((item, index) => (
-              <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                {item.image_url && (
-                  <img
-                    src={item.image_url}
-                    alt={item.product_name}
-                    className="w-16 h-16 object-cover rounded-lg"
-                  />
-                )}
-                <div className="flex-1">
-                  <p className="font-medium text-gray-900 text-sm">{item.product_name}</p>
-                  <p className="text-xs text-gray-600 mt-1">
-                    الكمية: {item.quantity} × {item.product?.currency} {parseFloat(item.price || 0).toFixed(2)}
-                  </p>
-                  {item.color && (
-                    <p className="text-xs text-gray-600">اللون: {item.color}</p>
+            {order.items?.map((item, index) => {
+              const opts = parseOptions(item.selected_options);
+              const isFood = isRestaurantItem(item);
+
+              return (
+                <div key={index} className="p-3 bg-gray-50 rounded-xl border border-gray-100 space-y-2">
+                  <div className="flex items-center gap-3">
+                    {item.image_url && (
+                      <img
+                        src={item.image_url}
+                        alt={item.product_name}
+                        className="w-16 h-16 object-cover rounded-lg shrink-0 border border-gray-200"
+                      />
+                    )}
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold text-gray-900 text-sm">{item.product_name}</p>
+                        {isFood && (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">
+                            🍔 وجبة
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-600 mt-1">
+                        الكمية: <strong className="text-gray-900">{item.quantity}</strong> × {item.product?.currency || 'SAR'} {parseFloat(item.price || 0).toFixed(2)}
+                      </p>
+                      {item.color && (
+                        <p className="text-xs text-gray-600">اللون: {item.color}</p>
+                      )}
+                      {item.size && !opts?.size && (
+                        <p className="text-xs text-gray-600">المقاس: {item.size}</p>
+                      )}
+                    </div>
+                    <div className="text-left">
+                      <p className="font-bold text-gray-900">
+                        {item.product?.currency || 'SAR'} {(parseFloat(item.price || 0) * (item.quantity || 1)).toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Food Customizations */}
+                  {opts && (
+                    <div className="pt-2 border-t border-gray-200/60 flex flex-wrap gap-1.5 text-xs">
+                      {opts.size && (
+                        <span className="px-2 py-0.5 bg-blue-50 text-blue-800 rounded font-medium border border-blue-200">
+                          الحجم: {opts.size.name}
+                        </span>
+                      )}
+                      {opts.extras?.map((e, i) => (
+                        <span key={i} className="px-2 py-0.5 bg-emerald-50 text-emerald-800 rounded font-medium border border-emerald-200">
+                          +{e.name}
+                        </span>
+                      ))}
+                      {opts.removals?.map((r, i) => (
+                        <span key={i} className="px-2 py-0.5 bg-red-50 text-red-700 rounded font-medium border border-red-200 line-through">
+                          بدون {r}
+                        </span>
+                      ))}
+                    </div>
                   )}
-                  {item.size && (
-                    <p className="text-xs text-gray-600">المقاس: {item.size}</p>
+
+                  {/* Special Kitchen Notes */}
+                  {item.special_instructions && (
+                    <div className="p-2 bg-amber-50/80 border border-amber-200 rounded-lg text-xs text-amber-900 font-medium flex items-start gap-1.5">
+                      <span className="font-bold shrink-0">📝 ملاحظة خاصة:</span>
+                      <span className="italic">{item.special_instructions}</span>
+                    </div>
                   )}
                 </div>
-                <div className="text-left">
-                  <p className="font-bold text-gray-900">
-                    {item.product?.currency} {(parseFloat(item.price || 0) * (item.quantity || 1)).toFixed(2)}
-                  </p>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -470,7 +569,7 @@ const DriverOrderDetails = () => {
         {!isDelivered && order.driver_status !== 'rejected' && (
           <div className="bg-white rounded-lg shadow-sm p-4">
             <h3 className="font-bold text-gray-900 mb-4 flex items-center">
-              <ClockIcon className="h-5 w-5 ml-2" />
+              <ClockIcon className="h-5 w-5 ml-2 text-indigo-600" />
               أوامر التوصيل المستلمة
             </h3>
             <div className="space-y-3">
@@ -482,7 +581,7 @@ const DriverOrderDetails = () => {
                     className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium flex items-center justify-center text-sm shadow-sm"
                   >
                     <CheckCircleIcon className="h-5 w-5 ml-1" />
-                    موافقة واستلام
+                    {isRestaurantOrder(order) ? 'موافقة والتوجه للمطعم 🛵' : 'موافقة واستلام'}
                   </button>
                   <button
                     onClick={() => handleStatusUpdate('rejected')}
@@ -499,10 +598,10 @@ const DriverOrderDetails = () => {
                 <button
                   onClick={() => handleStatusUpdate('out_for_delivery')}
                   disabled={updatingStatus}
-                  className="w-full px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium flex items-center justify-center"
+                  className="w-full px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium flex items-center justify-center shadow-sm"
                 >
                   <TruckIcon className="h-5 w-5 ml-2" />
-                  جاري التوصيل للعميل
+                  {isRestaurantOrder(order) ? 'استلمت الوجبة وبدأت التوصيل للعميل 🚀' : 'جاري التوصيل للعميل'}
                 </button>
               )}
               
@@ -510,10 +609,10 @@ const DriverOrderDetails = () => {
                 <button
                   onClick={() => handleStatusUpdate('delivered')}
                   disabled={updatingStatus}
-                  className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium flex items-center justify-center"
+                  className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium flex items-center justify-center shadow-sm"
                 >
                   <CheckCircleIcon className="h-5 w-5 ml-2" />
-                  تم التسليم بنجاح
+                  {isRestaurantOrder(order) ? 'تم تسليم الوجبة للعميل بنجاح ✅' : 'تم التسليم بنجاح'}
                 </button>
               )}
             </div>

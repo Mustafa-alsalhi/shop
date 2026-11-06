@@ -27,6 +27,8 @@ class Product extends Model
         'images',
         'gallery_images',
         'variants',
+        'food_options',
+        'preparation_time',
         'category_id',
         'seller_id',
         'seller_name',
@@ -50,6 +52,7 @@ class Product extends Model
         'images' => 'array',
         'gallery_images' => 'array',
         'variants' => 'array',
+        'food_options' => 'array',
         'is_active' => 'boolean',
         'is_featured' => 'boolean',
         'is_approved' => 'boolean',
@@ -57,6 +60,44 @@ class Product extends Model
         'sale_start_date' => 'datetime',
         'sale_end_date' => 'datetime',
     ];
+
+    public function getImageUrlAttribute($value)
+    {
+        if (empty($value)) {
+            return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600';
+        }
+
+        if (filter_var($value, FILTER_VALIDATE_URL)) {
+            return $value;
+        }
+
+        if (str_starts_with($value, '/storage/')) {
+            return url(ltrim($value, '/'));
+        }
+
+        if (str_starts_with($value, '/images/')) {
+            return url(ltrim($value, '/'));
+        }
+
+        if (str_starts_with($value, 'storage/')) {
+            return url($value);
+        }
+
+        if (str_starts_with($value, 'images/')) {
+            return url($value);
+        }
+
+        if (str_starts_with($value, '/')) {
+            return url($value);
+        }
+
+        return url('/images/products/' . $value);
+    }
+
+    public function isMeal(): bool
+    {
+        return ($this->seller && $this->seller->type && $this->seller->type !== 'store') || !empty($this->food_options);
+    }
 
     public function category()
     {

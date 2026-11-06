@@ -356,7 +356,7 @@ const CategoryBanner = () => {
                   msOverflowStyle: 'none'
                 }}
               >
-                {Array.isArray(categories) && categories.map((category, index) => (
+                {Array.isArray(categories) && categories.filter(cat => !cat.parent_id).map((category, index) => (
                   <div
                     key={category.id}
                     className="flex-none w-32 sm:w-36 md:w-40 lg:w-44 xl:w-48"

@@ -1,12 +1,12 @@
-import React from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import { XMarkIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon, ChevronRightIcon, ChevronDownIcon } from '@heroicons/react/24/outline'
 import {
-  selectIsMobileMenuOpen,
   closeMobileMenu,
 } from '../../store/slices/uiSlice'
 import { selectIsAuthenticated, selectUser } from '../../store/slices/authSlice'
+import activityService from '../../services/activityService'
 
 const MobileMenu = ({ isOpen }) => {
   const dispatch = useDispatch()
@@ -14,12 +14,67 @@ const MobileMenu = ({ isOpen }) => {
   const isAuthenticated = useSelector(selectIsAuthenticated)
   const user = useSelector(selectUser)
 
+  const [activitiesList, setActivitiesList] = useState([])
+  const [activitiesExpanded, setActivitiesExpanded] = useState(true)
+  const [currentActivityMode, setCurrentActivityMode] = useState(() => {
+    const params = new URLSearchParams(window.location.search)
+    const tab = params.get('tab')
+    if (tab) return tab === 'store' ? 'stores' : tab
+    return localStorage.getItem('preferred_activity_mode') || 'stores'
+  })
+
+  useEffect(() => {
+    const fetchActivities = async () => {
+      try {
+        const res = await activityService.getActivities()
+        if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+          setActivitiesList(res.data)
+        } else {
+          setActivitiesList([
+            { id: 1, name: 'المطاعم والوجبات', slug: 'restaurant', icon: '🍔' },
+            { id: 2, name: 'الكافيهات والحلويات', slug: 'cafe', icon: '☕' },
+            { id: 3, name: 'المخابز والمعجنات', slug: 'bakery', icon: '🥖' }
+          ])
+        }
+      } catch (error) {
+        console.error('Error fetching activities in MobileMenu:', error)
+        setActivitiesList([
+          { id: 1, name: 'المطاعم والوجبات', slug: 'restaurant', icon: '🍔' }
+        ])
+      }
+    }
+    fetchActivities()
+  }, [])
+
+  useEffect(() => {
+    const handleModeChangeEvent = (e) => {
+      if (e.detail) {
+        setCurrentActivityMode(e.detail === 'store' ? 'stores' : e.detail)
+      }
+    }
+    window.addEventListener('activityModeChanged', handleModeChangeEvent)
+    return () => window.removeEventListener('activityModeChanged', handleModeChangeEvent)
+  }, [])
+
   const handleClose = () => {
     dispatch(closeMobileMenu())
   }
 
   const handleLinkClick = (path) => {
     navigate(path)
+    handleClose()
+  }
+
+  const handleSelectActivity = (mode) => {
+    const normalized = mode === 'store' ? 'stores' : mode
+    setCurrentActivityMode(normalized)
+    localStorage.setItem('preferred_activity_mode', normalized)
+    window.dispatchEvent(new CustomEvent('activityModeChanged', { detail: normalized }))
+    if (normalized === 'stores') {
+      navigate('/?tab=stores')
+    } else {
+      navigate(`/?tab=${normalized}`)
+    }
     handleClose()
   }
 
@@ -93,7 +148,75 @@ const MobileMenu = ({ isOpen }) => {
                   <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-amber-600 transition-colors" />
                 </button>
               </li>
-              
+
+              {/* Activities Section (الأنشطة بدلاً من الفئات) */}
+              <li className="bg-amber-50/50 border border-amber-200/60 rounded-xl overflow-hidden shadow-sm">
+                <button
+                  type="button"
+                  onClick={() => setActivitiesExpanded((prev) => !prev)}
+                  className="w-full flex items-center justify-between p-4 text-gray-900 hover:bg-amber-100/50 transition-all duration-200"
+                >
+                  <div className="flex items-center space-x-reverse space-x-3">
+                    <div className="p-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg shadow-sm">
+                      <span className="text-base">✨</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-bold block">الأنشطة</span>
+                      <span className="text-[11px] text-amber-700">المتاجر الإلكترونية، المطاعم، والأنشطة</span>
+                    </div>
+                  </div>
+                  <ChevronDownIcon
+                    className={`h-5 w-5 text-amber-600 transition-transform duration-200 ${
+                      activitiesExpanded ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
+
+                {activitiesExpanded && (
+                  <div className="px-3 pb-3 pt-1 space-y-1.5 border-t border-amber-200/40 bg-white/80">
+                    <button
+                      type="button"
+                      onClick={() => handleSelectActivity('stores')}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-right text-sm font-bold transition-all ${
+                        currentActivityMode === 'stores'
+                          ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-sm'
+                          : 'text-gray-700 hover:bg-amber-50 hover:text-amber-700'
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        <span>🛍️</span>
+                        <span>المتاجر الإلكترونية</span>
+                      </span>
+                      <ChevronRightIcon className={`h-4 w-4 ${currentActivityMode === 'stores' ? 'text-white' : 'text-gray-400'}`} />
+                    </button>
+
+                    {activitiesList.map((act) => {
+                      const isActive =
+                        currentActivityMode === act.slug ||
+                        (currentActivityMode === 'restaurants' && act.slug === 'restaurant')
+                      return (
+                        <button
+                          key={act.id}
+                          type="button"
+                          onClick={() => handleSelectActivity(act.slug)}
+                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-right text-sm font-bold transition-all ${
+                            isActive
+                              ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-sm'
+                              : 'text-gray-700 hover:bg-amber-50 hover:text-orange-700'
+                          }`}
+                        >
+                          <span className="flex items-center gap-2">
+                            <span>{act.icon || '✨'}</span>
+                            <span>{act.name}</span>
+                          </span>
+                          <ChevronRightIcon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-gray-400'}`} />
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+              </li>
+
               <li>
                 <button
                   onClick={() => handleLinkClick('/products')}
@@ -125,23 +248,6 @@ const MobileMenu = ({ isOpen }) => {
                     <span className="font-medium">جميع المتاجر</span>
                   </div>
                   <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-cyan-600 transition-colors" />
-                </button>
-              </li>
-
-              <li>
-                <button
-                  onClick={() => handleLinkClick('/categories')}
-                  className="w-full flex items-center justify-between p-4 text-gray-700 hover:bg-gradient-to-r hover:from-amber-50 hover:to-orange-50 hover:text-amber-700 rounded-xl transition-all duration-200 group shadow-sm hover:shadow-md"
-                >
-                  <div className="flex items-center space-x-reverse space-x-3">
-                    <div className="p-2 bg-amber-100 rounded-lg group-hover:bg-amber-200 transition-colors">
-                      <svg className="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                      </svg>
-                    </div>
-                    <span className="font-medium">الفئات</span>
-                  </div>
-                  <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-amber-600 transition-colors" />
                 </button>
               </li>
 
@@ -270,7 +376,7 @@ const MobileMenu = ({ isOpen }) => {
                       <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-amber-600 transition-colors" />
                     </button>
                   </li>
-                  
+
                   {/* Admin Dashboard Link - Only for Admins */}
                   {user?.role === 'admin' && (
                     <li>
@@ -330,7 +436,7 @@ const MobileMenu = ({ isOpen }) => {
                       </button>
                     </li>
                   )}
-                  
+
                   {/* Coupons Link - For All Users */}
                   <li>
                     <button

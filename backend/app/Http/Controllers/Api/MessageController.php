@@ -44,9 +44,13 @@ class MessageController extends Controller
                 $lastMessage = $messages->first();
                 $unreadCount = $messages->where('receiver_id', $user->id)->where('is_read', false)->count();
 
+                // Check if this user is a seller to get the store name
+                $sellerProfile = \App\Models\Seller::where('user_id', $otherUser->id)->first();
+                $displayName = $sellerProfile && !empty($sellerProfile->store_name) ? $sellerProfile->store_name : $otherUser->name;
+
                 \Log::info('Conversation user data:', [
                     'user_id' => $otherUser->id,
-                    'name' => $otherUser->name,
+                    'name' => $displayName,
                     'email' => $otherUser->email,
                     'phone' => $otherUser->phone,
                     'address' => $otherUser->address,
@@ -55,7 +59,8 @@ class MessageController extends Controller
 
                 $result[] = [
                     'user_id' => $otherUser->id,
-                    'name' => $otherUser->name,
+                    'name' => $displayName,
+                    'store_name' => $sellerProfile ? $sellerProfile->store_name : null,
                     'email' => $otherUser->email,
                     'phone' => $otherUser->phone ?? null,
                     'address' => $otherUser->address ?? null,

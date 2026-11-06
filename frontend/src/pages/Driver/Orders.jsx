@@ -175,16 +175,33 @@ const DriverOrders = () => {
     }
   }
 
-  const getStatusBadge = (status) => {
+  const isRestaurantOrder = (order) => {
+    return order?.seller?.type === 'restaurant' ||
+      order?.items?.some(i => i.product?.seller?.type === 'restaurant' || i.selected_options || i.product?.food_options);
+  };
+
+  const getStatusBadge = (status, isRestaurant = false) => {
     const statusConfig = {
-      assigned: { label: 'معين', color: 'bg-blue-100 text-blue-800' },
-      picked_up_from_seller: { label: 'تم الاستلام من البائع', color: 'bg-yellow-100 text-yellow-800' },
-      out_for_delivery: { label: 'جاري التوصيل', color: 'bg-orange-100 text-orange-800' },
-      delivered: { label: 'تم التسليم', color: 'bg-green-100 text-green-800' }
+      assigned: { 
+        label: isRestaurant ? 'طلب مطعم جديد 🍔' : 'معين', 
+        color: isRestaurant ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-blue-100 text-blue-800' 
+      },
+      picked_up_from_seller: { 
+        label: isRestaurant ? 'تم استلام الوجبة 🛵' : 'تم الاستلام من البائع', 
+        color: 'bg-yellow-100 text-yellow-800' 
+      },
+      out_for_delivery: { 
+        label: isRestaurant ? 'في طريق التوصيل 🚀' : 'جاري التوصيل', 
+        color: 'bg-orange-100 text-orange-800' 
+      },
+      delivered: { 
+        label: 'تم التسليم بنجاح ✅', 
+        color: 'bg-green-100 text-green-800' 
+      }
     }
     const config = statusConfig[status] || { label: status, color: 'bg-gray-100 text-gray-800' }
     return (
-      <span className={`px-2 py-1 text-xs font-medium rounded-full ${config.color}`}>
+      <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${config.color}`}>
         {config.label}
       </span>
     )
@@ -478,8 +495,15 @@ const DriverOrders = () => {
               >
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <h3 className="font-bold text-gray-900 text-lg">#{order.order_number}</h3>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold text-gray-900 text-lg">#{order.order_number}</h3>
+                      {isRestaurantOrder(order) && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                          🍔 وجبة مطعم ساخنة
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500 mt-0.5">
                       {new Date(order.created_at).toLocaleDateString('ar-SA', {
                         year: 'numeric',
                         month: 'long',
@@ -487,26 +511,34 @@ const DriverOrders = () => {
                       })}
                     </p>
                   </div>
-                  {getStatusBadge(order.driver_status)}
+                  {getStatusBadge(order.driver_status, isRestaurantOrder(order))}
                 </div>
 
                 <div className="space-y-2">
+                  {order.items?.[0]?.product?.seller && (
+                    <div className="flex items-center text-sm text-gray-800 bg-gray-50 p-2 rounded-lg border border-gray-100">
+                      <ShoppingBagIcon className="h-4 w-4 ml-2 text-indigo-600 shrink-0" />
+                      <span className="text-gray-500 ml-1 text-xs">{isRestaurantOrder(order) ? 'المطعم:' : 'المتجر:'}</span>
+                      <span className="font-semibold">{order.items[0].product.seller.store_name}</span>
+                    </div>
+                  )}
+
                   <div className="flex items-center text-sm text-gray-600">
-                    <UserIcon className="h-4 w-4 ml-2" />
-                    <span className="font-medium">{order.user?.name || 'غير محدد'}</span>
+                    <UserIcon className="h-4 w-4 ml-2 text-gray-400 shrink-0" />
+                    <span className="font-medium">{order.user?.name || `${order.user?.first_name || ''} ${order.user?.last_name || ''}`.trim() || 'غير محدد'}</span>
                   </div>
 
                   {order.formatted_address && (
                     <div className="flex items-start text-sm text-gray-600">
-                      <MapPinIcon className="h-4 w-4 ml-2 mt-0.5" />
+                      <MapPinIcon className="h-4 w-4 ml-2 mt-0.5 text-gray-400 shrink-0" />
                       <span className="line-clamp-2">{order.formatted_address}</span>
                     </div>
                   )}
 
                   {order.user?.phone && (
                     <div className="flex items-center text-sm text-gray-600">
-                      <PhoneIcon className="h-4 w-4 ml-2" />
-                      <a href={`tel:${order.user.phone}`} className="text-blue-600 hover:text-blue-800">
+                      <PhoneIcon className="h-4 w-4 ml-2 text-gray-400 shrink-0" />
+                      <a href={`tel:${order.user.phone}`} className="text-blue-600 hover:text-blue-800" onClick={(e) => e.stopPropagation()}>
                         {order.user.phone}
                       </a>
                     </div>

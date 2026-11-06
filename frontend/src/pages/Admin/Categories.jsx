@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../../services/api'
+import activityService from '../../services/activityService'
 import { PhotoIcon, PlusIcon, PencilIcon, TrashIcon, FolderIcon } from '@heroicons/react/24/outline'
 
 const AdminCategories = () => {
   const navigate = useNavigate()
   const [categories, setCategories] = useState([])
+  const [activities, setActivities] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [showAddForm, setShowAddForm] = useState(false)
   const [editingCategory, setEditingCategory] = useState(null)
-  const [newCategory, setNewCategory] = useState({ name: '', description: '', image_url: '', show_on_homepage: false, sort_order: 0 })
+  const [filterType, setFilterType] = useState('all')
+  const [newCategory, setNewCategory] = useState({ name: '', type: 'store', description: '', image_url: '', show_on_homepage: false, sort_order: 0, parent_id: '' })
   const [previewImage, setPreviewImage] = useState('')
 
   useEffect(() => {
@@ -19,8 +22,14 @@ const AdminCategories = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await api.get('/admin/categories')
-      setCategories(response.data || [])
+      const [catRes, actRes] = await Promise.all([
+        api.get('/admin/categories'),
+        activityService.getAdminActivities().catch(() => ({ success: false, data: [] }))
+      ])
+      setCategories(catRes.data || [])
+      if (actRes.success && actRes.data) {
+        setActivities(actRes.data)
+      }
       setLoading(false)
     } catch (err) {
       setError('فشل في جلب الفئات: ' + err.message)
@@ -67,9 +76,15 @@ const AdminCategories = () => {
     try {
       const submitData = new FormData()
       submitData.append('name', newCategory.name.trim())
+      submitData.append('type', newCategory.type || 'store')
       submitData.append('description', newCategory.description?.trim() || '')
       submitData.append('show_on_homepage', newCategory.show_on_homepage ? '1' : '0')
       submitData.append('sort_order', newCategory.sort_order || '0')
+      if (newCategory.parent_id) {
+        submitData.append('parent_id', newCategory.parent_id)
+      } else {
+        submitData.append('parent_id', '') // Send empty for main category
+      }
 
       // Add image file if selected
       if (newCategory.image_file) {
@@ -95,7 +110,7 @@ const AdminCategories = () => {
         alert('تم إضافة الفئة بنجاح!')
       }
 
-      setNewCategory({ name: '', description: '', image_url: '', image_file: null, show_on_homepage: false, sort_order: 0 })
+      setNewCategory({ name: '', type: 'store', description: '', image_url: '', image_file: null, show_on_homepage: false, sort_order: 0, parent_id: '' })
       setPreviewImage('')
       setShowAddForm(false)
       fetchCategories() // Refresh categories list
@@ -112,11 +127,13 @@ const AdminCategories = () => {
     setEditingCategory(category)
     setNewCategory({
       name: category.name || '',
+      type: category.type || 'store',
       description: category.description || '',
       image_url: category.image_url || '',
       image_file: null,
       show_on_homepage: category.show_on_homepage || false,
-      sort_order: category.sort_order || 0
+      sort_order: category.sort_order || 0,
+      parent_id: category.parent_id || ''
     })
     // Set preview image with proper URL handling
     if (category.image_url) {
@@ -141,7 +158,7 @@ const AdminCategories = () => {
 
   const handleCancel = () => {
     setEditingCategory(null)
-    setNewCategory({ name: '', description: '', image_url: '', image_file: null, show_on_homepage: false, sort_order: 0 })
+    setNewCategory({ name: '', type: 'store', description: '', image_url: '', image_file: null, show_on_homepage: false, sort_order: 0, parent_id: '' })
     setPreviewImage('')
     setShowAddForm(false)
   }
@@ -224,7 +241,7 @@ const AdminCategories = () => {
               </h3>
             </div>
             <form onSubmit={handleSubmit}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                 <div>
                   <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                     اسم الفئة *
@@ -238,6 +255,40 @@ const AdminCategories = () => {
                   />
                 </div>
                 <div>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                    نوع النشاط *
+                  </label>
+                  <select
+                    value={newCategory.type || 'store'}
+                    onChange={(e) => setNewCategory({ ...newCategory, type: e.target.value })}
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-50 text-xs sm:text-sm"
+                  >
+                    <option value="store">🛍️ متجر تجاري عام (المتاجر الإلكترونية)</option>
+                    {activities.map((act) => (
+                      <option key={act.id} value={act.slug}>
+                        {act.icon} {act.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                    القسم الرئيسي
+                  </label>
+                  <select
+                    value={newCategory.parent_id || ''}
+                    onChange={(e) => setNewCategory({ ...newCategory, parent_id: e.target.value })}
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-50 text-xs sm:text-sm"
+                  >
+                    <option value="">بدون قسم رئيسي (جعلها فئة رئيسية)</option>
+                    {categories.filter(c => c.id !== editingCategory?.id).map(cat => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.type === 'restaurant' ? '🍔 ' : '🛍️ '} {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="sm:col-span-3">
                   <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                     وصف الفئة
                   </label>
@@ -362,10 +413,47 @@ const AdminCategories = () => {
         {/* Categories Grid */}
         <div className="bg-white shadow-xl rounded-xl sm:rounded-2xl border border-gray-100">
           <div className="px-4 py-3 sm:px-6 sm:py-5 border-b border-gray-100">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-              <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-900">
-                الفئات ({categories.length})
-              </h2>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-900">
+                  الفئات ({categories.length})
+                </h2>
+                <div className="flex items-center gap-1.5 bg-gray-100 p-1 rounded-lg">
+                  <button
+                    onClick={() => setFilterType('all')}
+                    className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+                      filterType === 'all'
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    الكل ({categories.length})
+                  </button>
+                  <button
+                    onClick={() => setFilterType('store')}
+                    className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+                      filterType === 'store'
+                        ? 'bg-amber-600 text-white shadow-sm'
+                        : 'text-gray-600 hover:text-amber-700'
+                    }`}
+                  >
+                    🛍️ المتاجر ({categories.filter(c => c.type === 'store' || !c.type).length})
+                  </button>
+                  {activities.map((act) => (
+                    <button
+                      key={act.id}
+                      onClick={() => setFilterType(act.slug)}
+                      className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+                        filterType === act.slug
+                          ? 'bg-orange-600 text-white shadow-sm'
+                          : 'text-gray-600 hover:text-orange-700'
+                      }`}
+                    >
+                      {act.icon} {act.name} ({categories.filter(c => c.type === act.slug).length})
+                    </button>
+                  ))}
+                </div>
+              </div>
               <div className="flex items-center space-x-reverse space-x-2">
                 <div className="h-2 w-2 rounded-full bg-green-500"></div>
                 <span className="text-xs sm:text-sm text-gray-600">متصل بقاعدة البيانات</span>
@@ -374,10 +462,44 @@ const AdminCategories = () => {
           </div>
           <div className="p-3 sm:p-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
-              {categories.map((category) => (
+              {categories
+                .filter(c => {
+                  if (filterType === 'all') return true;
+                  if (filterType === 'store') return c.type === 'store' || !c.type;
+                  return c.type === filterType;
+                })
+                .map((category) => (
                 <div key={category.id} className="bg-white border border-gray-200 rounded-lg sm:rounded-xl p-3 sm:p-6 hover:shadow-lg transition-all duration-300 hover:scale-105">
                   <div className="flex justify-between items-start mb-3 sm:mb-4">
-                    <h3 className="text-sm sm:text-base lg:text-lg font-bold text-gray-900 truncate max-w-32 sm:max-w-none">{category.name}</h3>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <h3 className="text-sm sm:text-base lg:text-lg font-bold text-gray-900 truncate">{category.name}</h3>
+                        {(() => {
+                          const act = activities.find(a => a.slug === category.type);
+                          if (act) {
+                            return (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-100 text-orange-800 border border-orange-200">
+                                {act.icon} {act.name}
+                              </span>
+                            );
+                          }
+                          return (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                              🛍️ متجر
+                            </span>
+                          );
+                        })()}
+                      </div>
+                      {category.parent ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-gray-100 text-gray-700 mt-1">
+                          يتبع: {category.parent.name}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-amber-50 text-amber-700 mt-1">
+                          فئة رئيسية
+                        </span>
+                      )}
+                    </div>
                     <div className="flex space-x-reverse space-x-1 sm:space-x-2">
                       <button
                         onClick={() => handleEdit(category)}

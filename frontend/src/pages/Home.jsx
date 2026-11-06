@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react'
 
-
-
-import { Link } from 'react-router-dom'
-
-
+import { Link, useSearchParams } from 'react-router-dom'
 
 import { useSelector, useDispatch } from 'react-redux'
+import RestaurantSection from '../components/Restaurant/RestaurantSection'
+import ActivitySection from '../components/Activity/ActivitySection'
+import activityService from '../services/activityService'
 
 
 
@@ -113,8 +112,65 @@ const Home = () => {
 
 
   const dispatch = useDispatch()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [activeMode, setActiveMode] = useState(() => {
+    const tabParam = searchParams.get('tab')
+    if (tabParam) return tabParam === 'store' ? 'stores' : tabParam
+    return localStorage.getItem('preferred_activity_mode') || 'stores'
+  })
 
+  const [activitiesList, setActivitiesList] = useState([])
 
+  useEffect(() => {
+    const tabParam = searchParams.get('tab')
+    if (tabParam) {
+      const normalized = tabParam === 'store' ? 'stores' : tabParam
+      setActiveMode(normalized)
+      localStorage.setItem('preferred_activity_mode', normalized)
+    }
+  }, [searchParams])
+
+  useEffect(() => {
+    const handleExternalModeChange = (e) => {
+      if (e.detail) {
+        const normalized = e.detail === 'store' ? 'stores' : e.detail
+        setActiveMode(normalized)
+        localStorage.setItem('preferred_activity_mode', normalized)
+      }
+    }
+    window.addEventListener('activityModeChanged', handleExternalModeChange)
+    return () => window.removeEventListener('activityModeChanged', handleExternalModeChange)
+  }, [])
+
+  useEffect(() => {
+    const fetchActivitiesList = async () => {
+      try {
+        const res = await activityService.getActivities()
+        if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+          setActivitiesList(res.data)
+        } else {
+          setActivitiesList([
+            { id: 1, name: 'المطاعم والوجبات', slug: 'restaurant', icon: '🍔', banner_title: 'اطلب أشهى الوجبات من أفضل المطاعم القريبة منك', banner_subtitle: 'استمتع بألذ المأكولات اليمنية، البرجر، البيتزا والمشويات مع تتبع مباشر وتوصيل سريع ومضمون.', banner_bg: 'from-amber-600 via-orange-600 to-amber-700', place_label: 'مطعم', item_label: 'وجبة' }
+          ])
+        }
+      } catch (e) {
+        console.error('Error fetching activities:', e)
+      }
+    }
+    fetchActivitiesList()
+  }, [])
+
+  const handleModeChange = (mode) => {
+    const normalized = mode === 'store' ? 'stores' : mode
+    setActiveMode(normalized)
+    localStorage.setItem('preferred_activity_mode', normalized)
+    window.dispatchEvent(new CustomEvent('activityModeChanged', { detail: normalized }))
+    if (normalized && normalized !== 'stores') {
+      setSearchParams({ tab: normalized })
+    } else {
+      setSearchParams({})
+    }
+  }
 
   const featuredProducts = useSelector(selectFeaturedProducts)
 
@@ -5635,13 +5691,72 @@ const topSellersIntervalRef = useRef(null)
 
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 overflow-x-hidden">
 
+      {/* Activity Mode Switcher: Fixed Stores vs Dynamic Activities */}
+      <div className="bg-white/95 backdrop-blur-md border-b border-amber-100 shadow-sm sticky top-0 z-40 py-2.5 px-4 rtl" dir="rtl">
+        <div className="max-w-7xl mx-auto flex items-center justify-center">
+          <div className="inline-flex items-center gap-1.5 bg-gray-100/90 p-1.5 rounded-2xl shadow-inner border border-gray-200/50 overflow-x-auto max-w-full scrollbar-none">
+            {/* 1. المتاجر الإلكترونية (ثابتة تماماً) */}
+            <button
+              onClick={() => handleModeChange('stores')}
+              className={`flex items-center gap-2 py-2 px-4 sm:px-6 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all duration-300 flex-shrink-0 ${
+                activeMode === 'stores'
+                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md shadow-amber-500/30 scale-[1.02]'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+              }`}
+            >
+              <span className="text-base sm:text-lg">🛍️</span>
+              <span>المتاجر الإلكترونية</span>
+            </button>
 
+            {/* 2. الأنشطة المضافة من لوحة التحكم (ديناميكية) */}
+            {activitiesList.map((act) => {
+              const isActive = activeMode === act.slug || (activeMode === 'restaurants' && act.slug === 'restaurant')
+              return (
+                <button
+                  key={act.id}
+                  onClick={() => handleModeChange(act.slug)}
+                  className={`flex items-center gap-2 py-2 px-4 sm:px-6 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all duration-300 flex-shrink-0 ${
+                    isActive
+                      ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-md shadow-orange-500/30 scale-[1.02]'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+                  }`}
+                >
+                  <span className="text-base sm:text-lg">{act.icon || '✨'}</span>
+                  <span>{act.name}</span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      </div>
 
-      {/* Advertisement Banner */}
+      {activeMode !== 'stores' ? (
+        <>
+          <AdvertisementBanner
+            activityType={
+              (
+                activitiesList.find(a => a.slug === activeMode || (activeMode === 'restaurants' && a.slug === 'restaurant')) ||
+                activitiesList[0] ||
+                { slug: activeMode }
+              ).slug
+            }
+          />
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <ActivitySection
+              hideBanner={true}
+              activity={
+                activitiesList.find(a => a.slug === activeMode || (activeMode === 'restaurants' && a.slug === 'restaurant')) ||
+                activitiesList[0] ||
+                { slug: activeMode, name: 'النشاط', icon: '✨' }
+              }
+            />
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Advertisement Banner */}
 
-
-
-      <AdvertisementBanner />
+          <AdvertisementBanner activityType="store" />
 
 
 
@@ -7779,8 +7894,8 @@ const topSellersIntervalRef = useRef(null)
 
 
       </section>
-
-
+        </>
+      )}
 
     </div>
 

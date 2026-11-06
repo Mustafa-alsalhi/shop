@@ -40,10 +40,15 @@ class SellerOrderController extends Controller
         Log::info('Order IDs with seller products:', ['order_ids' => $orderIds]);
 
         // Get orders
-        $orders = Order::with(['items.product', 'user', 'paymentRequests'])
+        $query = Order::with(['items.product', 'user', 'paymentRequests'])
             ->whereIn('id', $orderIds)
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->orderBy('created_at', 'desc');
+
+        if ($request->has('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        $orders = $query->paginate(20);
             
         Log::info('Orders fetched:', ['count' => $orders->count()]);
         
@@ -90,7 +95,7 @@ class SellerOrderController extends Controller
         }
 
         $request->validate([
-            'status' => 'required|in:pending,processing,shipped,delivered,cancelled'
+            'status' => 'required|in:pending,processing,shipped,delivered,cancelled,accepted,preparing,ready,assigned_to_courier,picked_up,on_the_way'
         ]);
 
         $order = Order::whereHas('items', function ($query) use ($sellerId) {
@@ -99,11 +104,36 @@ class SellerOrderController extends Controller
             });
         })->findOrFail($id);
 
-        // Check if seller is explicitly changing status from pending to processing (i.e. approving it)
-        $isNewlyApproved = ($order->status === 'pending' && $request->status === 'processing');
+        // Check if seller is explicitly changing status from pending to processing or accepted
+        $isNewlyApproved = ($order->status === 'pending' && in_array($request->status, ['processing', 'accepted']));
 
         $order->status = $request->status;
         $order->save();
+
+        $statusArabicMap = [
+            'pending' => 'قيد الانتظار',
+            'accepted' => 'تم قبول الطلب',
+            'preparing' => 'جاري تجهيز الوجبة',
+            'ready' => 'الطلب جاهز للاستلام والتوصيل',
+            'assigned_to_courier' => 'تم إسناد الطلب للمندوب',
+            'picked_up' => 'استلم المندوب الطلب',
+            'on_the_way' => 'الطلب في الطريق إليك',
+            'processing' => 'قيد المعالجة والتجهيز',
+            'shipped' => 'تم الشحن',
+            'delivered' => 'تم التوصيل بنجاح',
+            'cancelled' => 'تم إلغاء الطلب',
+        ];
+        $statusText = $statusArabicMap[$request->status] ?? $request->status;
+
+        // إشعار للعميل بتحديث حالة الطلب
+        \App\Models\Notification::create([
+            'user_id' => $order->user_id,
+            'type' => 'info',
+            'title' => 'تحديث حالة الطلب',
+            'message' => 'تم تحديث حالة طلبك رقم ' . $order->order_number . ' إلى: ' . $statusText,
+            'link' => '/orders/' . $order->id,
+            'read' => false,
+        ]);
 
         if ($isNewlyApproved) {
             try {
@@ -251,6 +281,16 @@ class SellerOrderController extends Controller
             'store_name' => $seller->store_name,
             'store_description' => $seller->description,
             'store_logo' => $seller->avatar,
+            'avatar' => $seller->avatar,
+            'cover_image' => $seller->cover_image,
+            'store_banner' => $seller->cover_image,
+            'type' => $seller->type ?? 'store',
+            'is_open' => (bool)$seller->is_open,
+            'accepting_orders' => (bool)$seller->accepting_orders,
+            'preparation_time' => $seller->preparation_time,
+            'min_order_amount' => $seller->min_order_amount,
+            'cuisine_type' => $seller->cuisine_type,
+            'working_hours' => $seller->working_hours,
             
             // Contact info from users table
             'phone' => $user->phone,
@@ -302,13 +342,29 @@ class SellerOrderController extends Controller
         Log::info('Updating seller:', ['seller_id' => $seller->id]);
         Log::info('Request data:', ['data' => $request->all()]);
 
-        $validator = Validator::make($request->all(), [
+        $inputData = $request->all();
+        if ($request->has('is_open')) {
+            $inputData['is_open'] = $request->boolean('is_open');
+        }
+        if ($request->has('accepting_orders')) {
+            $inputData['accepting_orders'] = $request->boolean('accepting_orders');
+        }
+
+        $validator = Validator::make($inputData, [
             'store_name' => 'nullable|string|max:255',
             'store_description' => 'nullable|string',
             'store_logo' => 'nullable|string',
             'store_logo_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'store_banner' => 'nullable|string',
             'store_banner_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'cover_image' => 'nullable|string',
+            'cover_image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'is_open' => 'nullable',
+            'accepting_orders' => 'nullable',
+            'preparation_time' => 'nullable',
+            'min_order_amount' => 'nullable|numeric|min:0',
+            'cuisine_type' => 'nullable|string|max:100',
+            'working_hours' => 'nullable',
             'phone' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
             'address' => 'nullable|string',
@@ -343,11 +399,11 @@ class SellerOrderController extends Controller
         ];
         
         // Add location fields if present
-        if ($request->has('seller_address')) {
-            $sellerData['address'] = $request->seller_address;
+        if ($request->has('address') || $request->has('seller_address')) {
+            $sellerData['address'] = mb_substr($request->address ?? $request->seller_address, 0, 500, "UTF-8");
         }
-        if ($request->has('seller_city')) {
-            $sellerData['city'] = $request->seller_city;
+        if ($request->has('city') || $request->has('seller_city')) {
+            $sellerData['city'] = mb_substr($request->city ?? $request->seller_city, 0, 250, "UTF-8");
         }
         if ($request->has('latitude')) {
             $sellerData['latitude'] = $request->latitude;
@@ -356,22 +412,58 @@ class SellerOrderController extends Controller
             $sellerData['longitude'] = $request->longitude;
         }
         
-        // Handle image upload
-        if ($request->hasFile('store_logo_file')) {
-            $image = $request->file('store_logo_file');
+        // Handle image upload (Logo / Avatar)
+        if ($request->hasFile('store_logo_file') || $request->hasFile('avatar_file')) {
+            $image = $request->file('store_logo_file') ?? $request->file('avatar_file');
             $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
             $image->move(storage_path('app/public/images/sellers'), $imageName);
-            $sellerData['avatar'] = asset('storage/images/sellers/' . $imageName);
+            @copy(storage_path('app/public/images/sellers/' . $imageName), public_path('storage/images/sellers/' . $imageName));
+            @copy(storage_path('app/public/images/sellers/' . $imageName), public_path('images/sellers/' . $imageName));
+            $sellerData['avatar'] = url('storage/images/sellers/' . $imageName);
+            $sellerData['avatar_image'] = url('storage/images/sellers/' . $imageName);
             Log::info('Logo uploaded:', ['path' => $sellerData['avatar']]);
-        } elseif ($request->store_logo) {
+        } elseif ($request->filled('store_logo')) {
             $sellerData['avatar'] = $request->store_logo;
+            $sellerData['avatar_image'] = $request->store_logo;
+        }
+        // Restaurant specific fields
+        if ($request->has('is_open')) {
+            $sellerData['is_open'] = $request->boolean('is_open');
+        }
+        if ($request->has('accepting_orders')) {
+            $sellerData['accepting_orders'] = $request->boolean('accepting_orders');
+        }
+        if ($request->has('preparation_time')) {
+            $sellerData['preparation_time'] = $request->preparation_time;
+        }
+        if ($request->has('min_order_amount')) {
+            $sellerData['min_order_amount'] = $request->min_order_amount;
+        }
+        if ($request->has('cuisine_type')) {
+            $sellerData['cuisine_type'] = $request->cuisine_type;
+        }
+        if ($request->has('working_hours')) {
+            $sellerData['working_hours'] = $request->working_hours;
+        }
+        // Handle cover image upload (Cover / Banner)
+        if ($request->hasFile('cover_image_file') || $request->hasFile('store_banner_file')) {
+            $cover = $request->file('cover_image_file') ?? $request->file('store_banner_file');
+            $coverName = time() . '_cover_' . uniqid() . '.' . $cover->getClientOriginalExtension();
+            $cover->move(storage_path('app/public/images/sellers'), $coverName);
+            @copy(storage_path('app/public/images/sellers/' . $coverName), public_path('storage/images/sellers/' . $coverName));
+            @copy(storage_path('app/public/images/sellers/' . $coverName), public_path('images/sellers/' . $coverName));
+            $sellerData['cover_image'] = url('storage/images/sellers/' . $coverName);
+            Log::info('Restaurant cover image uploaded successfully:', ['url' => $sellerData['cover_image']]);
+        } elseif ($request->filled('cover_image')) {
+            $sellerData['cover_image'] = $request->cover_image;
+        } elseif ($request->filled('store_banner')) {
+            $sellerData['cover_image'] = $request->store_banner;
         }
 
         // KYC & Financial Info Updates
-        if ($request->has('business_type')) $sellerData['business_type'] = $request->business_type;
+        // KYC & Financial Info Updates
         if ($request->has('kuraimi_account_name')) $sellerData['kuraimi_account_name'] = $request->kuraimi_account_name;
         if ($request->has('kuraimi_account_number')) $sellerData['kuraimi_account_number'] = $request->kuraimi_account_number;
-        if ($request->has('other_networks_account')) $sellerData['other_networks_account'] = $request->other_networks_account;
 
         $uploadFile = function($file, $folder) {
             if (!$file) return null;
@@ -392,38 +484,46 @@ class SellerOrderController extends Controller
             $sellerData['signed_contract_image'] = $uploadFile($request->file('signed_contract_file'), 'images/sellers/documents');
         }
         
-        Log::info('Seller data to update:', ['data' => $sellerData]);
-        
-        $seller->update($sellerData);
-        
-        Log::info('Seller table updated:', ['seller_id' => $seller->id]);
+        try {
+            $seller->update($sellerData);
+            Log::info('Seller table updated:', ['seller_id' => $seller->id]);
 
-        // Update user table with contact info
-        $userData = [
-            'phone' => $request->phone,
-            'email' => $request->email,
-            'address' => $request->address,
-            'city' => $request->city,
-            'country' => $request->country,
-            'postal_code' => $request->postal_code,
-        ];
-        
-        Log::info('User data to update:', ['data' => $userData]);
-        
-        $user->update($userData);
-        
-        Log::info('User table updated:', ['user_id' => $user->id]);
+            // Update user table with contact info
+            $userData = [
+                'phone' => $request->phone,
+                'email' => $request->email,
+                'address' => $request->address ? mb_substr($request->address, 0, 500, "UTF-8") : null,
+                'city' => $request->city ? mb_substr($request->city, 0, 250, "UTF-8") : null,
+                'country' => $request->country,
+                'postal_code' => $request->postal_code,
+            ];
+            
+            Log::info('User data to update:', ['data' => $userData]);
+            
+            // Remove nulls to avoid SQL constraint violations on required fields like email
+            $userData = array_filter($userData, function($val) { return $val !== null; });
 
-        // Return combined data
-        $seller->refresh();
-        $user->refresh();
+            $user->update($userData);
+            Log::info('User table updated:', ['user_id' => $user->id]);
 
-        return response()->json([
-            'message' => 'Settings updated successfully',
-            'data' => [
-                'seller' => $seller,
-                'user' => $user
-            ]
-        ]);
+            // Return combined data
+            $seller->refresh();
+            $user->refresh();
+
+            return response()->json([
+                'message' => 'Settings updated successfully',
+                'data' => [
+                    'seller' => $seller,
+                    'user' => $user
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error updating settings: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'حدث خطأ غير متوقع: ' . $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ], 500);
+        }
     }
 }

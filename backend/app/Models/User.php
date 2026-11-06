@@ -48,6 +48,18 @@ class User extends Authenticatable
     ];
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['seller_status'];
+
+    public function getSellerStatusAttribute()
+    {
+        return $this->seller ? $this->seller->status : null;
+    }
+
+    /**
      * The attributes that should be cast.
      *
      * @var array<string, string>

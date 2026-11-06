@@ -127,13 +127,13 @@ const AdminProductForm = () => {
       setLoading(true)
       const response = await api.get(`/admin/products/${id}`)
       const product = response.data
-      
+
       // Convert image URL to absolute if needed
       let imageUrl = product.image_url || ''
       if (imageUrl && !imageUrl.startsWith('http')) {
         imageUrl = `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://shop-production-8385.up.railway.app'}${imageUrl.startsWith('/') ? imageUrl : '/' + imageUrl}`
       }
-      
+
       setFormData(prev => ({
         ...prev,
         name: product.name || '',
@@ -144,6 +144,8 @@ const AdminProductForm = () => {
         stock: product.stock || '',
         sku: product.sku || '',
         category_id: product.category_id || '',
+        original_category_id: product.category_id || '', // used to help resolve in useEffect
+        subcategory_id: '',
         seller_id: product.seller_id || '',
         seller_category_id: product.seller_category_id || '',
         currency: product.currency || 'USD',
@@ -159,7 +161,7 @@ const AdminProductForm = () => {
         variants: product.variants || []
       }))
       setPreviewImage(imageUrl)
-      
+
       // Handle gallery images
       const galleryImages = product.gallery_images || []
       const processedGalleryImages = galleryImages.map(img => {
@@ -169,13 +171,35 @@ const AdminProductForm = () => {
         return img
       })
       setGalleryPreviews(processedGalleryImages)
-      
+
       setLoading(false)
     } catch (err) {
       setError('Failed to fetch product: ' + err.message)
       setLoading(false)
     }
   }
+
+  // Parse original category ID into main and subcategory
+  useEffect(() => {
+    if (isEditing && categories.length > 0 && formData.original_category_id) {
+      const cat = categories.find(c => c.id === parseInt(formData.original_category_id));
+      if (cat && cat.parent_id) {
+        setFormData(prev => ({
+          ...prev,
+          category_id: cat.parent_id,
+          subcategory_id: cat.id,
+          original_category_id: '' // Clear to avoid re-running
+        }));
+      } else if (cat) {
+        setFormData(prev => ({
+          ...prev,
+          category_id: cat.id,
+          subcategory_id: '',
+          original_category_id: ''
+        }));
+      }
+    }
+  }, [categories, isEditing, formData.original_category_id]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -211,7 +235,7 @@ const AdminProductForm = () => {
       reader.onloadend = () => {
         newPreviews.push(reader.result)
         newGalleryImages.push(file)
-        
+
         if (newPreviews.length === files.length) {
           setGalleryPreviews(prev => [...prev, ...newPreviews])
           setFormData(prev => ({
@@ -242,7 +266,7 @@ const AdminProductForm = () => {
   const updateVariant = (index, field, value) => {
     setFormData(prev => ({
       ...prev,
-      variants: prev.variants.map((variant, i) => 
+      variants: prev.variants.map((variant, i) =>
         i === index ? { ...variant, [field]: value } : variant
       )
     }))
@@ -275,6 +299,15 @@ const AdminProductForm = () => {
         throw new Error('Category is required')
       }
 
+      // Subcategory Validation logic
+      const hasSubCategories = categories.some(c => c.parent_id === parseInt(formData.category_id));
+      if (hasSubCategories && !formData.subcategory_id) {
+        setError('يرجى اختيار القسم الفرعي للفئة المحددة.');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setLoading(false);
+        return;
+      }
+
       // Create FormData for file upload
       const submitData = new FormData()
       submitData.append('name', formData.name.trim())
@@ -285,6 +318,9 @@ const AdminProductForm = () => {
       submitData.append('stock', parseInt(formData.stock))
       submitData.append('sku', formData.sku?.trim() || '')
       submitData.append('category_id', parseInt(formData.category_id))
+      if (formData.subcategory_id) {
+        submitData.append('subcategory_id', parseInt(formData.subcategory_id))
+      }
       submitData.append('currency', formData.currency)
       if (formData.tax_id) {
         submitData.append('tax_id', parseInt(formData.tax_id))
@@ -338,18 +374,18 @@ const AdminProductForm = () => {
         })
         alert('Product created successfully!')
       }
-      
+
       navigate('/admin/products')
     } catch (err) {
       let errorMessage = err.message
-      
+
       if (err.response?.data?.errors) {
         const errors = err.response.data.errors
         errorMessage = Object.values(errors).flat().join(', ')
       } else if (err.response?.data?.message) {
         errorMessage = err.response.data.message
       }
-      
+
       setError(`Failed to ${isEditing ? 'update' : 'create'} product: ${errorMessage}`)
       setLoading(false)
     }
@@ -406,20 +442,7 @@ const AdminProductForm = () => {
                 />
               </div>
 
-              {/* SKU */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  SKU
-                </label>
-                <input
-                  type="text"
-                  name="sku"
-                  value={formData.sku}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="أدخل SKU"
-                />
-              </div>
+
 
               {/* Price */}
               <div>
@@ -497,24 +520,50 @@ const AdminProductForm = () => {
               </div>
 
               {/* Category */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  الفئة *
-                </label>
-                <select
-                  name="category_id"
-                  value={formData.category_id}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">اختر فئة</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    الفئة الرئيسية *
+                  </label>
+                  <select
+                    name="category_id"
+                    value={formData.category_id}
+                    onChange={(e) => setFormData(prev => ({ ...prev, category_id: e.target.value, subcategory_id: '' }))}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">اختر الفئة الرئيسية</option>
+                    {categories.filter(c => !c.parent_id).map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Subcategory */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    الفئة الفرعية
+                  </label>
+                  <select
+                    name="subcategory_id"
+                    value={formData.subcategory_id}
+                    onChange={handleChange}
+                    disabled={!formData.category_id || !categories.some(c => c.parent_id === parseInt(formData.category_id))}
+                    className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 ${(!formData.category_id || !categories.some(c => c.parent_id === parseInt(formData.category_id))) ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                  >
+                    <option value="">
+                      {!formData.category_id ? 'اختر فئة رئيسية أولاً' :
+                        (!categories.some(c => c.parent_id === parseInt(formData.category_id)) ? 'لا يوجد أقسام فرعية' : 'اختر القسم الفرعي')}
                     </option>
-                  ))}
-                </select>
+                    {formData.category_id && categories.filter(c => c.parent_id === parseInt(formData.category_id)).map((subCat) => (
+                      <option key={subCat.id} value={subCat.id}>
+                        {subCat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               {/* Seller */}
@@ -739,8 +788,8 @@ const AdminProductForm = () => {
                   name="image_url"
                   value={formData.image_url}
                   onChange={(e) => {
-                    setFormData(prev => ({ 
-                      ...prev, 
+                    setFormData(prev => ({
+                      ...prev,
                       image_url: e.target.value,
                       image_file: null // Clear file when URL is entered
                     }))
@@ -784,7 +833,7 @@ const AdminProductForm = () => {
                     </p>
                   </div>
                 </div>
-                
+
                 {/* Gallery Previews */}
                 {galleryPreviews.length > 0 && (
                   <div className="mt-4 grid grid-cols-3 gap-4">
@@ -824,7 +873,7 @@ const AdminProductForm = () => {
                     إضافة طراز
                   </button>
                 </div>
-                
+
                 {formData.variants.map((variant, index) => (
                   <div key={index} className="border border-gray-200 rounded-lg p-4 mb-4">
                     <div className="grid grid-cols-2 gap-4 mb-4">
@@ -891,7 +940,7 @@ const AdminProductForm = () => {
                     </button>
                   </div>
                 ))}
-                
+
                 {formData.variants.length === 0 && (
                   <p className="text-sm text-gray-500">
                     لم تتم إضافة طرازات. انقر على "إضافة طراز" لإضافة تنوعات المنتج مثل الألوان، المقاسات، إلخ.

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import {
   UserIcon,
   BuildingStorefrontIcon,
@@ -13,9 +13,11 @@ import {
 } from '@heroicons/react/24/outline'
 import api from '../../services/api'
 import { showSuccessNotification, showErrorNotification } from '../../store/slices/uiSlice'
+import { getImageUrl } from '../../utils/imageUrl'
 import LocationPicker from './LocationPicker'
 
 const SellerSettings = () => {
+  const dispatch = useDispatch()
   const user = useSelector((state) => state.auth.user)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -46,6 +48,13 @@ const SellerSettings = () => {
     commercial_register_file: null,
     id_card_file: null,
     signed_contract_file: null,
+    type: 'store',
+    is_open: true,
+    accepting_orders: true,
+    preparation_time: 30,
+    min_order_amount: 0,
+    cuisine_type: '',
+    working_hours: '',
   })
 
   const [previewLogo, setPreviewLogo] = useState('')
@@ -67,11 +76,15 @@ const SellerSettings = () => {
       const sellerData = response.data.data || response.data
       
       if (sellerData) {
+        const logoUrl = sellerData.avatar || sellerData.store_logo || ''
+        const bannerUrl = sellerData.cover_image || sellerData.store_banner || ''
+
         setFormData({
           store_name: sellerData.store_name || '',
           store_description: sellerData.store_description || '',
-          store_logo: sellerData.store_logo || '',
-          store_banner: sellerData.store_banner || '',
+          store_logo: logoUrl,
+          store_banner: bannerUrl,
+          cover_image: bannerUrl,
           phone: sellerData.phone || user?.phone || '',
           email: sellerData.email || user?.email || '',
           address: sellerData.address || '',
@@ -88,9 +101,16 @@ const SellerSettings = () => {
           kuraimi_account_name: sellerData.kuraimi_account_name || '',
           kuraimi_account_number: sellerData.kuraimi_account_number || '',
           other_networks_account: sellerData.other_networks_account || '',
+          type: sellerData.type || 'store',
+          is_open: sellerData.is_open !== undefined ? Boolean(sellerData.is_open) : true,
+          accepting_orders: sellerData.accepting_orders !== undefined ? Boolean(sellerData.accepting_orders) : true,
+          preparation_time: sellerData.preparation_time || 30,
+          min_order_amount: sellerData.min_order_amount || 0,
+          cuisine_type: sellerData.cuisine_type || '',
+          working_hours: sellerData.working_hours || '',
         })
-        setPreviewLogo(sellerData.store_logo || '')
-        setPreviewBanner(sellerData.store_banner || '')
+        setPreviewLogo(logoUrl ? getImageUrl(logoUrl) : '')
+        setPreviewBanner(bannerUrl ? getImageUrl(bannerUrl) : '')
         setPreviewDocs({
           commercial: sellerData.commercial_register_image || '',
           idCard: sellerData.id_card_image || '',
@@ -99,7 +119,7 @@ const SellerSettings = () => {
       }
     } catch (error) {
       console.error('Failed to fetch settings:', error)
-      showErrorNotification('فشل في تحميل الإعدادات')
+      dispatch(showErrorNotification('فشل في تحميل الإعدادات'))
     } finally {
       setLoading(false)
     }
@@ -117,13 +137,17 @@ const SellerSettings = () => {
     const file = e.target.files[0]
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
-        showErrorNotification('حجم الصورة يجب أن يكون أقل من 2MB')
+        dispatch(showErrorNotification('حجم الصورة يجب أن يكون أقل من 2MB'))
         return
       }
       const reader = new FileReader()
       reader.onload = (event) => {
         setPreviewLogo(event.target.result)
-        setFormData(prev => ({ ...prev, store_logo_file: file }))
+        setFormData(prev => ({ 
+          ...prev, 
+          store_logo_file: file,
+          avatar_file: file 
+        }))
       }
       reader.readAsDataURL(file)
     }
@@ -133,13 +157,17 @@ const SellerSettings = () => {
     const file = e.target.files[0]
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        showErrorNotification('حجم الصورة يجب أن يكون أقل من 5MB')
+        dispatch(showErrorNotification('حجم الصورة يجب أن يكون أقل من 5MB'))
         return
       }
       const reader = new FileReader()
       reader.onload = (event) => {
         setPreviewBanner(event.target.result)
-        setFormData(prev => ({ ...prev, store_banner_file: file }))
+        setFormData(prev => ({ 
+          ...prev, 
+          store_banner_file: file,
+          cover_image_file: file 
+        }))
       }
       reader.readAsDataURL(file)
     }
@@ -173,8 +201,14 @@ const SellerSettings = () => {
       
       submitData.append('_method', 'PUT')
       
+      const fileAndSpecialKeys = [
+        'store_logo_file', 'store_banner_file', 'cover_image_file',
+        'commercial_register_file', 'id_card_file', 'signed_contract_file',
+        'is_open', 'accepting_orders', 'latitude', 'longitude'
+      ]
+
       Object.keys(formData).forEach(key => {
-        if (key !== 'store_logo_file' && key !== 'store_banner_file') {
+        if (!fileAndSpecialKeys.includes(key)) {
           let value = formData[key] ?? ''
           submitData.append(key, value)
         }
@@ -182,10 +216,13 @@ const SellerSettings = () => {
       
       if (formData.store_logo_file) {
         submitData.append('store_logo_file', formData.store_logo_file)
+        submitData.append('avatar_file', formData.store_logo_file)
       }
       
-      if (formData.store_banner_file) {
-        submitData.append('store_banner_file', formData.store_banner_file)
+      if (formData.store_banner_file || formData.cover_image_file) {
+        const coverFile = formData.cover_image_file || formData.store_banner_file
+        submitData.append('store_banner_file', coverFile)
+        submitData.append('cover_image_file', coverFile)
       }
 
       if (formData.commercial_register_file) {
@@ -198,6 +235,17 @@ const SellerSettings = () => {
 
       if (formData.signed_contract_file) {
         submitData.append('signed_contract_file', formData.signed_contract_file)
+      }
+
+      // Always send boolean fields cleanly as '1' or '0'
+      submitData.append('is_open', formData.is_open ? '1' : '0')
+      submitData.append('accepting_orders', formData.accepting_orders ? '1' : '0')
+
+      if (formData.type === 'restaurant') {
+        submitData.append('preparation_time', formData.preparation_time || '30')
+        submitData.append('min_order_amount', formData.min_order_amount || '0')
+        submitData.append('cuisine_type', formData.cuisine_type || '')
+        submitData.append('working_hours', formData.working_hours || '')
       }
       
       // Allow saving nulls by not removing them, backend receives missing instead if we ignore nulls, let's just make sure lat long are preserved
@@ -218,14 +266,14 @@ const SellerSettings = () => {
       })
       
       if (response.ok) {
-        showSuccessNotification('تم تحديث الإعدادات بنجاح')
+        dispatch(showSuccessNotification('تم حفظ إعدادات المطعم وصورة الغلاف بنجاح'))
         fetchSettings()
       } else {
         throw new Error('Failed to update settings')
       }
     } catch (error) {
       console.error('Failed to update settings:', error)
-      showErrorNotification('فشل في تحديث الإعدادات')
+      dispatch(showErrorNotification('فشل في تحديث الإعدادات'))
     } finally {
       setSaving(false)
     }
@@ -247,11 +295,125 @@ const SellerSettings = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Restaurant Specific Status Card */}
+        {formData.type === 'restaurant' && (
+          <div className="bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-transparent border-2 border-orange-500/30 rounded-xl p-6 shadow-sm">
+            <h3 className="text-lg font-bold text-orange-950 mb-4 flex items-center gap-2">
+              <span className="text-2xl">🍔</span>
+              إعدادات المطعم والطلبات الفورية
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Is Open Toggle */}
+              <div className="bg-white p-4 rounded-xl border border-orange-200/60 shadow-sm flex items-center justify-between">
+                <div>
+                  <h4 className="font-bold text-gray-900 text-sm">حالة المطعم (مفتوح / مغلق)</h4>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {formData.is_open ? 'المطعم يستقبل العملاء حالياً' : 'المطعم مغلق حالياً ولا يمكن الشراء'}
+                  </p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.is_open}
+                    onChange={(e) => setFormData(prev => ({ ...prev, is_open: e.target.checked }))}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                </label>
+              </div>
+
+              {/* Accepting Orders Toggle */}
+              <div className="bg-white p-4 rounded-xl border border-orange-200/60 shadow-sm flex items-center justify-between">
+                <div>
+                  <h4 className="font-bold text-gray-900 text-sm">استقبال الطلبات الفورية</h4>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {formData.accepting_orders ? 'يمكن للعملاء إرسال طلبات جديدة الآن' : 'إيقاف استقبال طلبات التوصيل مؤقتاً'}
+                  </p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.accepting_orders}
+                    onChange={(e) => setFormData(prev => ({ ...prev, accepting_orders: e.target.checked }))}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"></div>
+                </label>
+              </div>
+
+              {/* Preparation Time */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  متوسط وقت تحضير الوجبة (بالدقائق)
+                </label>
+                <input
+                  type="number"
+                  name="preparation_time"
+                  value={formData.preparation_time}
+                  onChange={handleInputChange}
+                  min="5"
+                  max="180"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                  placeholder="مثال: 30"
+                />
+              </div>
+
+              {/* Min Order Amount */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  الحد الأدنى للطلب
+                </label>
+                <input
+                  type="number"
+                  name="min_order_amount"
+                  value={formData.min_order_amount}
+                  onChange={handleInputChange}
+                  min="0"
+                  step="0.5"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                  placeholder="0 (بدون حد أدنى)"
+                />
+              </div>
+
+              {/* Cuisine Type */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  نوع المطبخ والتخصص
+                </label>
+                <input
+                  type="text"
+                  name="cuisine_type"
+                  value={formData.cuisine_type}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                  placeholder="مثال: مأكولات يمنية، برجر، بيتزا، مشاوي"
+                />
+              </div>
+
+              {/* Working Hours */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  ساعات العمل وأوقات الدوام
+                </label>
+                <input
+                  type="text"
+                  name="working_hours"
+                  value={formData.working_hours}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                  placeholder="مثال: يومياً من 11:00 صباحاً إلى 01:00 بعد منتصف الليل"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Store Info */}
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <BuildingStorefrontIcon className="h-5 w-5 text-amber-600" />
-            معلومات المتجر
+            {formData.type === 'restaurant' ? 'معلومات المطعم' : 'معلومات المتجر'}
           </h3>
           
           <div className="space-y-4">
@@ -298,7 +460,9 @@ const SellerSettings = () => {
                 <div className="flex-1">
                   <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                     <CameraIcon className="h-5 w-5 text-gray-600" />
-                    <span className="text-sm text-gray-700">رفع شعار</span>
+                    <span className="text-sm text-gray-700">
+                      {formData.type === 'restaurant' ? 'رفع شعار المطعم' : 'رفع شعار المتجر'}
+                    </span>
                     <input
                       type="file"
                       accept="image/*"
@@ -313,7 +477,7 @@ const SellerSettings = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                صورة الغلاف
+                {formData.type === 'restaurant' ? 'صورة غلاف المطعم (تظهر في الصفحة الرئيسية وصفحة تفاصيل المطعم)' : 'صورة الغلاف / البانر'}
               </label>
               <div className="flex items-center gap-4">
                 {previewBanner && (
@@ -326,7 +490,9 @@ const SellerSettings = () => {
                 <div className="flex-1">
                   <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                     <CameraIcon className="h-5 w-5 text-gray-600" />
-                    <span className="text-sm text-gray-700">رفع صورة الغلاف</span>
+                    <span className="text-sm text-gray-700">
+                      {formData.type === 'restaurant' ? 'رفع صورة غلاف المطعم' : 'رفع صورة الغلاف'}
+                    </span>
                     <input
                       type="file"
                       accept="image/*"

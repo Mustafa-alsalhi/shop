@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Cart;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -124,7 +125,7 @@ class OrderController extends Controller
         $user = $request->user();
         Log::info('User ID:', ['user_id' => $user->id]);
         
-        $cartItems = Cart::with('product')->where('user_id', $user->id)->get();
+        $cartItems = Cart::with(['product.seller', 'product.tax'])->where('user_id', $user->id)->get();
         Log::info('Cart items count:', ['count' => $cartItems->count()]);
 
         if ($cartItems->isEmpty()) {
@@ -132,6 +133,18 @@ class OrderController extends Controller
             return response()->json([
                 'message' => 'Cart is empty'
             ], 400);
+        }
+
+        // التحقق من حالة المطعم قبل قبول الطلب
+        foreach ($cartItems as $cItem) {
+            if ($cItem->product && $cItem->product->seller && $cItem->product->seller->type === 'restaurant') {
+                $rest = $cItem->product->seller;
+                if (!$rest->is_open || !$rest->accepting_orders) {
+                    return response()->json([
+                        'message' => "عذراً، المطعم ({$rest->store_name}) مغلق حالياً أو متوقف مؤقتاً عن استقبال الطلبات."
+                    ], 400);
+                }
+            }
         }
 
         try {
@@ -236,15 +249,6 @@ class OrderController extends Controller
                 if ($imageUrl && str_starts_with($imageUrl, '/')) {
                     $imageUrl = url($imageUrl);
                 }
-
-                Log::info('Processing order item:', [
-                    'product_id' => $cartItem->product_id,
-                    'product_name' => $cartItem->product->name,
-                    'cart_image_url' => $cartItem->image_url,
-                    'product_image_url' => $cartItem->product->image_url,
-                    'final_image_url' => $imageUrl,
-                    'cart_item_id' => $cartItem->id
-                ]);
                 
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -262,6 +266,8 @@ class OrderController extends Controller
                     'variant_name' => $cartItem->variant_name ?? null,
                     'variant_value' => $cartItem->variant_value ?? null,
                     'selected_image_index' => $cartItem->selected_image_index ?? null,
+                    'selected_options' => $cartItem->selected_options ?? null,
+                    'special_instructions' => $cartItem->special_instructions ?? null,
                 ]);
 
                 // Update product stock and sold count
@@ -275,6 +281,16 @@ class OrderController extends Controller
 
             DB::commit();
             Log::info('✅ Order created successfully:', ['order_id' => $order->id]);
+            
+            // إضافة إشعار للعميل بإنشاء الطلب بنجاح
+            Notification::create([
+                'user_id' => $user->id,
+                'type' => 'success',
+                'title' => 'تم إنشاء طلبك بنجاح',
+                'message' => 'رقم الطلب الخاص بك هو ' . $order->order_number,
+                'read' => false,
+                'link' => '/orders/' . $order->id,
+            ]);
 
             // Load the complete order with items for response
             $completeOrder = Order::with(['items.product'])->find($order->id);
@@ -300,9 +316,21 @@ class OrderController extends Controller
                     $sellerItems = $sellerData['items'];
                     $sellerUser = $seller->user;
                     
-                    if ($sellerUser && $sellerUser->email) {
-                        \Illuminate\Support\Facades\Mail::to($sellerUser->email)
-                            ->send(new \App\Mail\SellerOrderNotificationMail($completeOrder, $seller, $sellerItems));
+                    if ($sellerUser) {
+                        // In-app notification for seller
+                        \App\Models\Notification::create([
+                            'user_id' => $sellerUser->id,
+                            'type' => 'success',
+                            'title' => 'طلب جديد!',
+                            'message' => "لديك طلب جديد برقم {$completeOrder->order_number} يحتاج إلى مراجعتك.",
+                            'link' => '/seller/orders',
+                            'read' => false,
+                        ]);
+
+                        if ($sellerUser->email) {
+                            \Illuminate\Support\Facades\Mail::to($sellerUser->email)
+                                ->send(new \App\Mail\SellerOrderNotificationMail($completeOrder, $seller, $sellerItems));
+                        }
                     }
                 }
             } catch (\Exception $mailEx) {

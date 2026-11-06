@@ -30,4 +30,10 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'quick_connect' => [
+        'url' => env('QUICK_CONNECT_API_URL', 'https://aalcgjgocszngpcqzjih.supabase.co/functions/v1/public-api'),
+        'key' => env('QUICK_CONNECT_API_KEY', 'qc_live_d66bc38904eeeb17eb0a6e27097c7ff1588657b235ad76e7'),
+        'channel' => env('QUICK_CONNECT_CHANNEL', 'whatsapp'),
+    ],
+
 ];

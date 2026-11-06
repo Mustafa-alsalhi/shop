@@ -25,11 +25,14 @@ class OrderItem extends Model
         'variant_name',
         'variant_value',
         'selected_image_index',
+        'selected_options',
+        'special_instructions',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
         'total' => 'decimal:2',
+        'selected_options' => 'array',
     ];
 
     public function order()

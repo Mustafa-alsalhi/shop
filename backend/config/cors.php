@@ -15,11 +15,15 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'storage/*', 'images/*'],
 
     'allowed_methods' => ['*'],
 
+<<<<<<< HEAD
     'allowed_origins' => ['http://localhost:3000', 'http://localhost:3001', 'https://asalaa.up.railway.app', 'https://asalaabac.up.railway.app'],
+=======
+    'allowed_origins' => ['*'],
+>>>>>>> 2d63415 (feat: add activity-based banners, header activities dropdown, and WhatsApp OTP phone auth)
 
     'allowed_origins_patterns' => [],
 
@@ -29,6 +33,6 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => true,
+    'supports_credentials' => false,
 
 ];

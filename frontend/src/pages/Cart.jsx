@@ -270,9 +270,16 @@ const Cart = () => {
 
                       {/* Product Details */}
                       <div className="flex-1">
-                        <h3 className="font-semibold text-amber-800 text-right">
-                          {item.product_name}
-                        </h3>
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <h3 className="font-semibold text-amber-800 text-right">
+                            {item.product_name}
+                          </h3>
+                          {item.seller_type === 'restaurant' && (
+                            <span className="text-[11px] bg-orange-100 text-orange-700 font-bold px-2 py-0.5 rounded-full border border-orange-200">
+                              🍔 وجبة مطعم
+                            </span>
+                          )}
+                        </div>
                         {item.variant_attributes && (
                           <p className="text-sm text-amber-600 text-right">
                             {Object.entries(item.variant_attributes)
@@ -280,7 +287,54 @@ const Cart = () => {
                               .join(', ')}
                           </p>
                         )}
-                        <p className="text-sm text-amber-600 text-right">
+                        {/* Restaurant Food Options */}
+                        {(item.selected_options || item.special_instructions) && (() => {
+                          let opts = null;
+                          try {
+                            opts = typeof item.selected_options === 'string' 
+                              ? JSON.parse(item.selected_options || '{}') 
+                              : (item.selected_options || {});
+                          } catch (e) {
+                            opts = {};
+                          }
+                          return (
+                            <div className="my-1.5 space-y-1 text-xs text-gray-700 bg-amber-50/80 p-2.5 rounded-lg border border-amber-200/60 max-w-md">
+                              {opts.size && (
+                                <div className="flex items-center gap-1 font-medium text-amber-900">
+                                  <span>الحجم:</span>
+                                  <span className="font-bold">{opts.size.name}</span>
+                                  {opts.size.price > 0 && <span className="text-amber-600 text-[11px]">(+{opts.size.price} {item.currency || 'USD'})</span>}
+                                </div>
+                              )}
+                              {opts.extras && opts.extras.length > 0 && (
+                                <div className="flex items-center gap-1 flex-wrap text-emerald-800">
+                                  <span className="font-medium text-gray-700">إضافات:</span>
+                                  {opts.extras.map((extra, idx) => (
+                                    <span key={idx} className="bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded text-[11px] font-medium">
+                                      +{extra.name} {extra.price > 0 && `(+${extra.price})`}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                              {opts.removals && opts.removals.length > 0 && (
+                                <div className="flex items-center gap-1 flex-wrap text-rose-800">
+                                  <span className="font-medium text-gray-700">استبعاد:</span>
+                                  {opts.removals.map((rem, idx) => (
+                                    <span key={idx} className="bg-rose-100 text-rose-800 px-1.5 py-0.5 rounded text-[11px] font-medium">
+                                      بدون {rem}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                              {item.special_instructions && (
+                                <p className="text-amber-800 text-[11px] mt-1 pt-1 border-t border-amber-200/50">
+                                  <span className="font-semibold text-amber-900">ملاحظات التحضير:</span> {item.special_instructions}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })()}
+                        <p className="text-xs text-amber-600/70 text-right">
                           SKU: {item.sku}
                         </p>
                       </div>

@@ -10,6 +10,14 @@ const authService = {
     return await apiRequest.post('/register', userData)
   },
 
+  verifyRegisterOtp: async (data) => {
+    return await apiRequest.post('/verify-register-otp', data)
+  },
+
+  resendRegisterOtp: async (data) => {
+    return await apiRequest.post('/resend-register-otp', data)
+  },
+
   logout: async () => {
     return await apiRequest.post('/logout')
   },
@@ -26,8 +34,9 @@ const authService = {
     return await apiRequest.post('/auth/change-password', passwordData)
   },
 
-  forgotPassword: async (email) => {
-    return await apiRequest.post('/forgot-password', { email })
+  forgotPassword: async (identifier) => {
+    const payload = typeof identifier === 'object' ? identifier : { phone: identifier }
+    return await apiRequest.post('/forgot-password', payload)
   },
 
   resetPassword: async (resetData) => {

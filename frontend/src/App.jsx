@@ -49,6 +49,7 @@ const AddUser = lazy(() => import('./pages/Admin/AddUser'))
 const EditUser = lazy(() => import('./pages/Admin/EditUser'))
 const AdminBanners = lazy(() => import('./pages/Admin/Banners'))
 const AdminCategories = lazy(() => import('./pages/Admin/Categories'))
+const AdminActivities = lazy(() => import('./pages/Admin/Activities'))
 const AdminCoupons = lazy(() => import('./pages/Admin/Coupons'))
 const AdminSettings = lazy(() => import('./pages/Admin/Settings'))
 const AdminShippingCompanies = lazy(() => import('./pages/Admin/ShippingCompanies'))
@@ -91,7 +92,9 @@ const Offers = lazy(() => import('./pages/Offers'))
 const OfferDetails = lazy(() => import('./pages/OfferDetails'))
 const Seller = lazy(() => import('./pages/Seller'))
 const Sellers = lazy(() => import('./pages/Sellers'))
+const RestaurantDetail = lazy(() => import('./pages/RestaurantDetail'))
 const Policy = lazy(() => import('./pages/Policy'))
+const BecomeSeller = lazy(() => import('./pages/BecomeSeller'))
 const NotFound = lazy(() => import('./pages/Errors/NotFound'))
 const ServerError = lazy(() => import('./pages/Errors/ServerError'))
 
@@ -171,6 +174,10 @@ function App() {
 
           <Route path="sellers" element={<Sellers />} />
 
+          <Route path="restaurant/:id" element={<RestaurantDetail />} />
+          <Route path="place/:id" element={<RestaurantDetail />} />
+          <Route path="restaurants" element={<Navigate to="/?tab=restaurants" replace />} />
+
 
 
           {/* Info Pages */}
@@ -196,6 +203,8 @@ function App() {
           <Route path="forgot-password-email" element={<ForgotPasswordEmail />} />
 
           <Route path="reset-password" element={<ResetPassword />} />
+
+          <Route path="become-seller" element={<BecomeSeller />} />
 
         </Route>
 
@@ -244,7 +253,7 @@ function App() {
           <Route path="banners" element={<AdminBanners />} />
 
           <Route path="categories" element={<AdminCategories />} />
-
+          <Route path="activities" element={<AdminActivities />} />
           <Route path="coupons" element={<AdminCoupons />} />
 
           <Route path="shipping-companies" element={<AdminShippingCompanies />} />

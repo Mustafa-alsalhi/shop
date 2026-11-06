@@ -140,53 +140,43 @@ const ProductDetail = () => {
 
 
     // Add images array if exists and contains real images
-
     if (product?.images) {
-
-      const parsedImages = typeof product.images === 'string' ? JSON.parse(product.images) : product.images;
-
-      if (Array.isArray(parsedImages)) {
-
-        const realImages = parsedImages.filter(img =>
-
-          img &&
-
-          !img.includes('placeholder') &&
-
-          !img.includes('picsum') &&
-
-          !img.includes('via.placeholder.com')
-
-        );
-
-        images.push(...realImages);
-
+      let parsedImages = [];
+      if (typeof product.images === 'string') {
+        try { parsedImages = JSON.parse(product.images); } catch(e) {}
+      } else if (Array.isArray(product.images)) {
+        parsedImages = product.images;
       }
 
+      if (Array.isArray(parsedImages)) {
+        const realImages = parsedImages.filter(img =>
+          img &&
+          !img.includes('placeholder') &&
+          !img.includes('picsum') &&
+          !img.includes('via.placeholder.com')
+        );
+        images.push(...realImages);
+      }
     }
 
-
-
     // Add gallery images if exists and contains real images
-
     if (product?.gallery_images) {
+      let galleryImages = [];
+      if (typeof product.gallery_images === 'string') {
+        try { galleryImages = JSON.parse(product.gallery_images); } catch(e) {}
+      } else if (Array.isArray(product.gallery_images)) {
+        galleryImages = product.gallery_images;
+      }
 
-      const galleryImages = Array.isArray(product.gallery_images) ? product.gallery_images : [];
-
-      const realGalleryImages = galleryImages.filter(img =>
-
-        img &&
-
-        !img.includes('placeholder') &&
-
-        !img.includes('picsum') &&
-
-        !img.includes('via.placeholder.com')
-
-      );
-
-      images.push(...realGalleryImages);
-
+      if (Array.isArray(galleryImages)) {
+        const realGalleryImages = galleryImages.filter(img =>
+          img &&
+          !img.includes('placeholder') &&
+          !img.includes('picsum') &&
+          !img.includes('via.placeholder.com')
+        );
+        images.push(...realGalleryImages);
+      }
     }
 
 
@@ -654,11 +644,7 @@ const ProductDetail = () => {
                       {/* Main Image with Zoom */}
 
                       <div
-
-                        className="relative overflow-hidden rounded-xl bg-gray-100 cursor-zoom-in group"
-
-                        style={{ height: '250px sm:h-300px md:h-350px lg:h-400px' }}
-
+                        className="relative overflow-hidden rounded-xl bg-gray-100 cursor-zoom-in group h-[250px] sm:h-[300px] md:h-[350px] lg:h-[400px]"
                       >
 
                         {/* Skeleton Loading */}

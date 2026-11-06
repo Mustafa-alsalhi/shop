@@ -86,17 +86,46 @@ const OrderTracking = () => {
   if (loading) return <LoadingSpinner />
   if (error || !order) return <div className="text-center py-20 text-red-500 font-bold">{error || 'الطلب غير موجود'}</div>
 
+  const isRestaurant = order.is_restaurant_order || 
+    ['accepted', 'preparing', 'ready', 'assigned_to_courier', 'picked_up', 'on_the_way'].includes(order.status) ||
+    order.items?.some(i => i.product?.seller?.type === 'restaurant' || i.seller_type === 'restaurant');
+
   // Determine current step
-  const steps = [
+  const steps = isRestaurant ? [
+    { 
+      id: 'pending', 
+      title: 'استلام الطلب', 
+      icon: ShoppingBagIcon, 
+      description: order.status === 'accepted' ? 'تم قبول طلبك بالمطعم' : 'تم إرسال طلبك للمطعم وهو قيد المراجعة' 
+    },
+    { 
+      id: 'preparing', 
+      title: 'تحضير الطعام', 
+      icon: ShoppingBagIcon, 
+      description: order.status === 'ready' ? 'الوجبة جاهزة بانتظار استلام المندوب' : 'يقوم الشيف بتحضير وجبتك الساخنة الآن 👨‍🍳' 
+    },
+    { 
+      id: 'on_the_way', 
+      title: 'التوصيل السريع', 
+      icon: TruckIcon, 
+      description: order.driver ? `المندوب (${order.driver?.first_name || order.driver?.name || 'سائق التوصيل'}) في الطريق إليك 🛵` : 'المندوب استلم الوجبة وفي الطريق إليك' 
+    },
+    { 
+      id: 'delivered', 
+      title: 'بالعافية!', 
+      icon: CheckCircleIcon, 
+      description: 'تم تسليم الوجبة بنجاح، نتمنى لك وجبة شهية' 
+    }
+  ] : [
     { id: 'pending', title: 'تم استلام الطلب', icon: ShoppingBagIcon, description: 'تم استلام طلبك وهو قيد المراجعة' },
     { id: 'processing', title: 'قيد التجهيز', icon: ShoppingBagIcon, description: 'يقوم البائع بتجهيز طلبك الآن' },
     { id: 'shipped', title: 'جاري التوصيل', icon: TruckIcon, description: order.driver ? `التوصيل بواسطة المندوب: ${order.driver?.first_name || order.driver?.name || ''}` : 'تم تسليم الطلب للمندوب' },
     { id: 'delivered', title: 'تم التسليم', icon: CheckCircleIcon, description: 'تم تسليم الطلب بنجاح' }
-  ]
+  ];
 
   let currentStepIndex = 0
-  if (order.status === 'processing') currentStepIndex = 1
-  if (order.status === 'shipped' || order.driver_status === 'out_for_delivery' || order.driver_status === 'picked_up_from_seller') currentStepIndex = 2
+  if (['processing', 'accepted', 'preparing', 'ready'].includes(order.status)) currentStepIndex = 1
+  if (['shipped', 'assigned_to_courier', 'picked_up', 'on_the_way'].includes(order.status) || order.driver_status === 'out_for_delivery' || order.driver_status === 'picked_up_from_seller') currentStepIndex = 2
   if (order.status === 'delivered') currentStepIndex = 3
   if (order.status === 'cancelled') currentStepIndex = -1
 

@@ -127,6 +127,16 @@ const cartSlice = createSlice({
     clearAppliedCoupon: (state) => {
       state.appliedCoupon = null
     },
+    setCartData: (state, action) => {
+      const data = action.payload || {}
+      state.items = data.items || []
+      state.subtotal = data.subtotal || 0
+      state.tax = data.tax || 0
+      state.total = data.total || 0
+      state.totalItems = data.total_items || (data.items ? data.items.reduce((sum, item) => sum + (item.quantity || 1), 0) : 0)
+      state.error = null
+      state.isLoading = false
+    },
     // Optimistic updates for better UX
     optimisticUpdateItem: (state, action) => {
       const { id, quantity } = action.payload
@@ -288,6 +298,7 @@ const cartSlice = createSlice({
 })
 
 export const {
+  setCartData,
   toggleCart,
   openCart,
   closeCart,

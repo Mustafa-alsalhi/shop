@@ -19,7 +19,8 @@ class Banner extends Model
         'link_text',
         'is_active',
         'sort_order',
-        'position'
+        'position',
+        'type'
     ];
 
     protected $casts = [
@@ -42,7 +43,39 @@ class Banner extends Model
      */
     public function scopeByPosition($query, $position)
     {
+        if ($position === 'home') {
+            return $query->where(function ($q) {
+                $q->where('position', 'home')
+                  ->orWhereNull('position')
+                  ->orWhere('position', '');
+            });
+        }
+
         return $query->where('position', $position);
+    }
+
+    /**
+     * Scope to get banners by activity type (e.g. store, restaurant, cafe, etc.)
+     */
+    public function scopeByType($query, $type)
+    {
+        if (!$type) {
+            return $query;
+        }
+
+        if ($type === 'store' || $type === 'stores') {
+            return $query->where(function ($q) {
+                $q->whereIn('type', ['store', 'stores', 'all'])
+                  ->orWhereNull('type')
+                  ->orWhere('type', '');
+            });
+        }
+
+        if ($type === 'restaurant' || $type === 'restaurants') {
+            return $query->whereIn('type', ['restaurant', 'restaurants', 'all']);
+        }
+
+        return $query->whereIn('type', [$type, 'all']);
     }
 
     /**
@@ -84,12 +117,13 @@ class Banner extends Model
     }
 
     /**
-     * Get active banners for a specific position
+     * Get active banners for a specific position and activity type
      */
-    public static function getActiveBanners($position = 'home')
+    public static function getActiveBanners($position = 'home', $type = 'store')
     {
         return self::active()
             ->byPosition($position)
+            ->byType($type)
             ->ordered()
             ->get();
     }

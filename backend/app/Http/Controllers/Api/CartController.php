@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\Product;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
@@ -13,6 +14,8 @@ class CartController extends Controller
     {
         \Log::info('=== CART INDEX REQUEST ===');
         \Log::info('User ID:', [$request->user()->id]);
+
+        $this->deduplicateUserCart($request->user()->id);
 
         $cartItems = Cart::with(['product.tax', 'variant'])
             ->where('user_id', $request->user()->id)
@@ -103,9 +106,12 @@ class CartController extends Controller
             'variant_name' => 'nullable|string',
             'variant_value' => 'nullable|string',
             'selected_image_index' => 'nullable|integer',
+            'selected_options' => 'nullable|array',
+            'special_instructions' => 'nullable|string',
+            'force_clear' => 'nullable|boolean',
         ]);
 
-        $product = Product::findOrFail($request->product_id);
+        $product = Product::with('seller')->findOrFail($request->product_id);
 
         if ($product->stock < $request->quantity) {
             return response()->json([
@@ -113,38 +119,89 @@ class CartController extends Controller
             ], 400);
         }
 
-        // Check if cart item exists
-        $existingItem = Cart::where('user_id', $request->user()->id)
+        $seller = $product->seller;
+        $isRestaurantItem = $seller && $seller->type === 'restaurant';
+        $sellerType = $isRestaurantItem ? 'restaurant' : 'store';
+
+        // تحقق من تعارض المطاعم في السلة
+        $existingCartItems = Cart::with('product.seller')->where('user_id', $request->user()->id)->get();
+        if ($existingCartItems->isNotEmpty()) {
+            if ($request->boolean('force_clear')) {
+                Cart::where('user_id', $request->user()->id)->delete();
+            } else {
+                // فحص إذا كان في السلة وجبات من مطعم آخر
+                foreach ($existingCartItems as $cartItm) {
+                    $itemSeller = $cartItm->product ? $cartItm->product->seller : null;
+                    if ($itemSeller) {
+                        if ($isRestaurantItem && $itemSeller->type === 'restaurant' && $itemSeller->id !== $seller->id) {
+                            return response()->json([
+                                'conflict' => true,
+                                'conflict_type' => 'different_restaurant',
+                                'message' => "لديك وجبات من مطعم ({$itemSeller->store_name}) في السلة. هل تريد إفراغ السلة وبدء طلب جديد من ({$seller->store_name})؟",
+                                'current_restaurant' => $itemSeller->store_name,
+                                'new_restaurant' => $seller->store_name
+                            ], 409);
+                        }
+                    }
+                }
+            }
+        }
+
+        // احتساب سعر الوجبة متضمناً الإضافات المختارة
+        $finalPrice = $request->price ?? ($product->sale_price ?: $product->price);
+        if ($request->filled('selected_options') && is_array($request->selected_options)) {
+            $optionsExtraCost = 0;
+            // حساب تكلفة الإضافات المدفوعة
+            if (isset($request->selected_options['extras']) && is_array($request->selected_options['extras'])) {
+                foreach ($request->selected_options['extras'] as $extra) {
+                    if (isset($extra['price']) && is_numeric($extra['price'])) {
+                        $optionsExtraCost += (float)$extra['price'];
+                    }
+                }
+            }
+            // في حال وجود حجم مخصص بسعر محدد
+            if (isset($request->selected_options['size']) && isset($request->selected_options['size']['price'])) {
+                $finalPrice = (float)$request->selected_options['size']['price'];
+            }
+            $finalPrice += $optionsExtraCost;
+        }
+
+        $normalizedReqOptions = $this->normalizeOptions($request->selected_options);
+
+        // Check if cart item exists (مطابقة المنتج والإضافات بدقة)
+        $existingItems = Cart::where('user_id', $request->user()->id)
             ->where('product_id', $request->product_id)
             ->where('product_variant_id', $request->variant_id)
-            ->first();
+            ->get();
 
-        if ($existingItem) {
-            // Update existing item
-            $existingItem->quantity = $request->quantity;
-            $existingItem->product_name = $request->product_name;
-            $existingItem->price = $request->price;
-            $existingItem->image_url = $request->image_url;
-            $existingItem->sku = $request->sku;
-            $existingItem->weight = $request->weight;
-            $existingItem->dimensions = $request->dimensions;
-            $existingItem->category = $request->category;
-            $existingItem->brand = $request->brand;
-            $existingItem->description = $request->description;
-            $existingItem->short_description = $request->short_description;
-            $existingItem->status = $request->status;
-            $existingItem->featured = $request->featured;
-            $existingItem->variant_attributes = $request->variant_attributes;
-            $existingItem->currency = $request->currency;
-            $existingItem->color = $request->color;
-            $existingItem->color_code = $request->color_code;
-            $existingItem->size = $request->size;
-            $existingItem->variant_name = $request->variant_name;
-            $existingItem->variant_value = $request->variant_value;
-            $existingItem->selected_image_index = $request->selected_image_index;
-            $existingItem->save();
-            $cartItem = $existingItem;
-            \Log::info('Updated existing cart item');
+        $matchingItem = null;
+        foreach ($existingItems as $item) {
+            $normalizedItemOptions = $this->normalizeOptions($item->selected_options);
+
+            $optionsMatch = false;
+            if ($normalizedReqOptions === null && $normalizedItemOptions === null) {
+                $optionsMatch = true;
+            } elseif ($normalizedReqOptions !== null && $normalizedItemOptions !== null) {
+                $optionsMatch = (json_encode($normalizedReqOptions) === json_encode($normalizedItemOptions));
+            }
+
+            $reqInstructions = trim($request->special_instructions ?? '');
+            $itemInstructions = trim($item->special_instructions ?? '');
+            $instructionsMatch = ($reqInstructions === $itemInstructions);
+
+            if ($optionsMatch && $instructionsMatch) {
+                $matchingItem = $item;
+                break;
+            }
+        }
+
+        if ($matchingItem) {
+            // زيادة الكمية للمنتج المطابق بدلاً من إنشاء عنصر مكرر
+            $matchingItem->quantity += $request->quantity;
+            $matchingItem->price = $finalPrice;
+            $matchingItem->special_instructions = $request->special_instructions;
+            $matchingItem->save();
+            $cartItem = $matchingItem;
         } else {
             // Create new cart item
             $cartItem = Cart::create([
@@ -152,28 +209,41 @@ class CartController extends Controller
                 'product_id' => $request->product_id,
                 'product_variant_id' => $request->variant_id,
                 'quantity' => $request->quantity,
-                'product_name' => $request->product_name,
-                'price' => $request->price,
-                'image_url' => $request->image_url,
-                'sku' => $request->sku,
+                'product_name' => $request->product_name ?? $product->name,
+                'price' => $finalPrice,
+                'image_url' => $request->image_url ?? $product->image_url,
+                'sku' => $request->sku ?? $product->sku,
                 'weight' => $request->weight,
                 'dimensions' => $request->dimensions,
                 'category' => $request->category,
                 'brand' => $request->brand,
                 'description' => $request->description,
                 'short_description' => $request->short_description,
-                'status' => $request->status,
-                'featured' => $request->featured,
+                'status' => $request->status ?? 'active',
+                'featured' => $request->featured ?? false,
                 'variant_attributes' => $request->variant_attributes,
-                'currency' => $request->currency,
+                'currency' => $request->currency ?? 'USD',
                 'color' => $request->color,
                 'color_code' => $request->color_code,
                 'size' => $request->size,
                 'variant_name' => $request->variant_name,
                 'variant_value' => $request->variant_value,
                 'selected_image_index' => $request->selected_image_index,
+                'selected_options' => $normalizedReqOptions,
+                'special_instructions' => $request->special_instructions,
+                'seller_type' => $sellerType,
             ]);
-            \Log::info('Created new cart item');
+        }
+
+        // إشعار للإضافة للسلة
+        if (isset($cartItem) && $cartItem->wasRecentlyCreated) {
+            Notification::create([
+                'user_id' => $request->user()->id,
+                'type' => 'success',
+                'title' => 'تمت الإضافة للسلة',
+                'message' => 'تم إضافة ' . ($request->product_name ?? 'المنتج') . ' إلى سلة التسوق',
+                'read' => false,
+            ]);
         }
 
         \Log::info('=== CART ITEM SAVED ===');
@@ -307,5 +377,80 @@ class CartController extends Controller
         return response()->json([
             'message' => 'Cart cleared successfully'
         ]);
+    }
+
+    private function normalizeOptions($opts)
+    {
+        if (empty($opts)) {
+            return null;
+        }
+
+        if (is_string($opts)) {
+            $decoded = json_decode($opts, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $opts = $decoded;
+            } else {
+                return null;
+            }
+        }
+
+        if (!is_array($opts)) {
+            return null;
+        }
+
+        $size = !empty($opts['size']) ? $opts['size'] : null;
+        $extras = !empty($opts['extras']) && is_array($opts['extras']) ? $opts['extras'] : [];
+        $removals = !empty($opts['removals']) && is_array($opts['removals']) ? $opts['removals'] : [];
+
+        // If all options are empty or default, normalize to null
+        if (empty($size) && empty($extras) && empty($removals)) {
+            return null;
+        }
+
+        if (!empty($extras)) {
+            usort($extras, function ($a, $b) {
+                $nameA = is_array($a) ? ($a['name'] ?? '') : (string)$a;
+                $nameB = is_array($b) ? ($b['name'] ?? '') : (string)$b;
+                return strcmp($nameA, $nameB);
+            });
+        }
+        if (!empty($removals)) {
+            sort($removals);
+        }
+
+        return [
+            'size' => $size,
+            'extras' => array_values($extras),
+            'removals' => array_values($removals),
+        ];
+    }
+
+    private function deduplicateUserCart($userId)
+    {
+        try {
+            $items = Cart::where('user_id', $userId)->get();
+            if ($items->count() < 2) {
+                return;
+            }
+
+            $seen = [];
+            foreach ($items as $item) {
+                $normOptions = $this->normalizeOptions($item->selected_options);
+                $optionsKey = $normOptions ? json_encode($normOptions) : 'none';
+                $instructionsKey = trim($item->special_instructions ?? '');
+                $key = "{$item->product_id}_{$item->product_variant_id}_{$optionsKey}_{$instructionsKey}";
+
+                if (isset($seen[$key])) {
+                    $primaryItem = $seen[$key];
+                    $primaryItem->quantity += $item->quantity;
+                    $primaryItem->save();
+                    $item->delete();
+                } else {
+                    $seen[$key] = $item;
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error deduplicating user cart:', ['error' => $e->getMessage()]);
+        }
     }
 }

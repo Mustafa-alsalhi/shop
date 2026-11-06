@@ -43,6 +43,8 @@ use App\Http\Controllers\Api\SellerMessageController;
 use App\Http\Controllers\Api\SellerReportController;
 
 use App\Http\Controllers\Api\DriverController;
+use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\RestaurantController;
 
 
 
@@ -170,7 +172,22 @@ use App\Http\Controllers\Api\DriverController;
         Route::get('/products/{id}/related', [ProductController::class, 'related']);
         Route::get('/categories', [CategoryController::class, 'index']);
         Route::get('/categories/homepage', [CategoryController::class, 'getHomepageCategories']);
+        Route::get('/restaurant-categories', [CategoryController::class, 'getRestaurantCategories']);
         Route::get('/banners', [BannerController::class, 'getActiveBanners']);
+
+        // Restaurants routes (Public)
+        Route::get('/restaurants', [RestaurantController::class, 'index']);
+        Route::get('/restaurants/featured', [RestaurantController::class, 'featured']);
+        Route::get('/restaurants/meals', [RestaurantController::class, 'popularMeals']);
+        Route::get('/restaurants/{id}', [RestaurantController::class, 'show']);
+
+        // Dynamic Activities routes (Public)
+        Route::get('/activities', [\App\Http\Controllers\Api\ActivityController::class, 'index']);
+        Route::get('/activities/{slug}', [\App\Http\Controllers\Api\ActivityController::class, 'show']);
+        Route::get('/activities/{slug}/places', [\App\Http\Controllers\Api\ActivityController::class, 'places']);
+        Route::get('/activities/{slug}/categories', [\App\Http\Controllers\Api\ActivityController::class, 'categories']);
+        Route::get('/activities/{slug}/popular-items', [\App\Http\Controllers\Api\ActivityController::class, 'popularItems']);
+        Route::get('/activities/places/{id}', [\App\Http\Controllers\Api\ActivityController::class, 'placeDetail']);
     });
 
 
@@ -194,12 +211,15 @@ use App\Http\Controllers\Api\DriverController;
     // Auth routes
     Route::middleware(['maintenance'])->group(function () {
         Route::post('/register', [AuthController::class, 'register']);
+        Route::post('/verify-register-otp', [AuthController::class, 'verifyRegisterOtp']);
+        Route::post('/resend-register-otp', [AuthController::class, 'resendRegisterOtp']);
         Route::post('/login', [AuthController::class, 'login']);
         Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
         Route::post('/reset-password', [AuthController::class, 'resetPassword']);
         Route::post('/verify-login-otp', [AuthController::class, 'verifyLoginOtp']);
         Route::post('/resend-login-otp', [AuthController::class, 'resendLoginOtp']);
         Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+        Route::post('/seller/register', [AuthController::class, 'registerSeller']); // Optionally authenticated
     });
 
 
@@ -209,9 +229,6 @@ use App\Http\Controllers\Api\DriverController;
     Route::middleware(['auth:sanctum', 'maintenance'])->group(function () {
 
         Route::get('/user', [AuthController::class, 'getCurrentUser']);
-
-        
-
         // Profile routes
 
         Route::put('/user/profile', [AuthController::class, 'updateProfile']);
@@ -229,6 +246,9 @@ use App\Http\Controllers\Api\DriverController;
         Route::delete('/cart/{id}', [CartController::class, 'destroy']);
 
         Route::delete('/cart', [CartController::class, 'clearCart']);
+
+        // Review routes
+        Route::post('/products/{id}/reviews', [ReviewController::class, 'store']);
 
         // Checkout route for dynamic delivery calculation
         Route::post('/checkout/calculate-delivery', [OrderController::class, 'calculateDelivery']);
@@ -541,6 +561,14 @@ use App\Http\Controllers\Api\DriverController;
         Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index']);
         Route::put('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'update']);
 
+        // Activities management routes (Admin)
+        Route::get('/activities', [\App\Http\Controllers\Api\ActivityController::class, 'adminIndex']);
+        Route::post('/activities', [\App\Http\Controllers\Api\ActivityController::class, 'store']);
+        Route::get('/activities/{id}', [\App\Http\Controllers\Api\ActivityController::class, 'adminShow']);
+        Route::put('/activities/{id}', [\App\Http\Controllers\Api\ActivityController::class, 'update']);
+        Route::delete('/activities/{id}', [\App\Http\Controllers\Api\ActivityController::class, 'destroy']);
+        Route::patch('/activities/{id}/toggle', [\App\Http\Controllers\Api\ActivityController::class, 'toggle']);
+
         // Backup management routes (Admin)
         Route::post('/backups/create', [\App\Http\Controllers\Admin\BackupController::class, 'createBackup']);
         Route::get('/backups', [\App\Http\Controllers\Admin\BackupController::class, 'listBackups']);
@@ -584,6 +612,9 @@ use App\Http\Controllers\Api\DriverController;
         Route::get('/statistics', [\App\Http\Controllers\Api\SellerOrderController::class, 'getStatistics']);
         Route::get('/payment-requests', [\App\Http\Controllers\Api\SellerOrderController::class, 'getPaymentRequests']);
         
+        // Seller taxes routes
+        Route::get('/taxes/active', [\App\Http\Controllers\Admin\TaxController::class, 'active']);
+        
         // Notifications routes (Seller)
         Route::get('/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'getNotifications']);
         Route::post('/notifications/mark-all-read', [\App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead']);
@@ -591,7 +622,7 @@ use App\Http\Controllers\Api\DriverController;
         
         // Seller settings routes
         Route::get('/settings', [\App\Http\Controllers\Api\SellerOrderController::class, 'getSettings']);
-        Route::put('/settings', [\App\Http\Controllers\Api\SellerOrderController::class, 'updateSettings']);
+        Route::match(['post', 'put'], '/settings', [\App\Http\Controllers\Api\SellerOrderController::class, 'updateSettings']);
         
         // Seller offers routes
         Route::get('/offers', [SellerOfferController::class, 'index']);

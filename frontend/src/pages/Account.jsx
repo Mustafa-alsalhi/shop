@@ -428,13 +428,24 @@ const Account = () => {
               </div>
             </div>
           </div>
-          <button
-            onClick={() => setIsEditingProfile(true)}
-            className="bg-white/20 hover:bg-white/30 backdrop-blur-sm px-3 py-2 sm:px-4 rounded-lg sm:rounded-xl font-medium transition-all duration-200 flex items-center text-sm sm:text-base w-full sm:w-auto justify-center"
-          >
-            <PencilIcon className="h-4 w-4 mr-2" />
-            تعديل الملف الشخصي
-          </button>
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <button
+              onClick={() => setIsEditingProfile(true)}
+              className="bg-white/20 hover:bg-white/30 backdrop-blur-sm px-3 py-2 sm:px-4 rounded-lg sm:rounded-xl font-medium transition-all duration-200 flex items-center text-sm sm:text-base w-full sm:w-auto justify-center"
+            >
+              <PencilIcon className="h-4 w-4 mr-2" />
+              تعديل الملف الشخصي
+            </button>
+            {user?.role !== 'seller' && user?.role !== 'admin' && (
+              <button
+                onClick={() => navigate('/become-seller')}
+                className="bg-amber-500 hover:bg-amber-600 shadow-xl backdrop-blur-sm px-3 py-2 sm:px-4 rounded-lg sm:rounded-xl font-medium transition-all duration-200 flex items-center text-sm sm:text-base w-full sm:w-auto justify-center text-white"
+              >
+                <ShoppingBagIcon className="h-4 w-4 mr-2" />
+                كن بائعاً (أنشئ متجرك الخاص)
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

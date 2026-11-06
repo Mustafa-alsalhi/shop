@@ -1,26 +1,33 @@
 import React, { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
-import axios from 'axios'
 
-const AdvertisementBanner = () => {
+const AdvertisementBanner = ({ activityType = 'store' }) => {
   const navigate = useNavigate()
   const [banners, setBanners] = useState([])
   const [loading, setLoading] = useState(true)
   const [currentSlide, setCurrentSlide] = useState(0)
-  
-  useEffect(() => {
-    fetchBanners()
-  }, [])
 
-  const fetchBanners = async () => {
+  const normalizedType =
+    !activityType || activityType === 'stores'
+      ? 'store'
+      : activityType === 'restaurants'
+      ? 'restaurant'
+      : activityType
+
+  useEffect(() => {
+    setCurrentSlide(0)
+    fetchBanners(normalizedType)
+  }, [normalizedType])
+
+  const fetchBanners = async (type) => {
     try {
-      const response = await api.get('/banners?position=home')
-      const bannerData = response.data.data || []
+      setLoading(true)
+      const response = await api.get(`/banners?position=home&type=${encodeURIComponent(type)}`)
+      const bannerData = response.data?.data || []
       setBanners(bannerData)
     } catch (error) {
       console.error('Error fetching banners:', error)
-      // Don't show dummy data - just show empty
       setBanners([])
     } finally {
       setLoading(false)
@@ -29,11 +36,11 @@ const AdvertisementBanner = () => {
 
   // Auto-slide functionality
   useEffect(() => {
-    if (banners.length === 0) return
-    
+    if (banners.length <= 1) return
+
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % banners.length)
-    }, 4000) // Change slide every 4 seconds
+    }, 4000)
 
     return () => clearInterval(interval)
   }, [banners.length])
@@ -56,15 +63,26 @@ const AdvertisementBanner = () => {
       event.preventDefault()
       event.stopPropagation()
     }
-    
-    // If no link_url provided, default to /products
+
+    if (!linkUrl && normalizedType !== 'store') {
+      const sectionEl = document.getElementById('activity-section-content')
+      if (sectionEl) {
+        sectionEl.scrollIntoView({ behavior: 'smooth' })
+      }
+      return
+    }
+
     const targetUrl = linkUrl || '/products'
-    
+
+    if (targetUrl.startsWith('http://') || targetUrl.startsWith('https://')) {
+      window.location.href = targetUrl
+      return
+    }
+
     try {
       navigate(targetUrl)
     } catch (error) {
       console.error('Navigation error:', error)
-      // Fallback to window.location
       window.location.href = targetUrl
     }
   }
@@ -80,24 +98,22 @@ const AdvertisementBanner = () => {
   }
 
   if (banners.length === 0) {
-    return null // Don't show anything if no banners
+    return null
   }
 
-  const currentBanner = banners[currentSlide]
-
   return (
-    <div 
+    <div
       id="banner-container"
-      className="relative w-full h-48 sm:h-56 md:h-64 lg:h-80 xl:h-96 overflow-hidden rounded-lg banner-container" 
+      className="relative w-full h-48 sm:h-56 md:h-64 lg:h-80 xl:h-96 overflow-hidden rounded-lg banner-container"
       dir="rtl"
     >
       {/* Banner Images Container */}
-      <div 
+      <div
         id="banner-images-container"
         className="flex h-full transition-transform duration-700 ease-in-out"
         style={{ transform: `translateX(${currentSlide * 100}%)` }}
       >
-        {banners.map((banner, index) => (
+        {banners.map((banner) => (
           <div key={banner.id} className="relative w-full h-full flex-shrink-0 banner-slide">
             {banner.full_image_url || banner.image_url ? (
               <img
@@ -107,11 +123,16 @@ const AdvertisementBanner = () => {
                 onClick={(e) => handleBannerClick(banner.link_url, e)}
                 onError={(e) => {
                   e.target.style.display = 'none'
-                  e.target.nextElementSibling.style.display = 'flex'
+                  if (e.target.nextElementSibling) {
+                    e.target.nextElementSibling.style.display = 'flex'
+                  }
                 }}
               />
             ) : null}
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center" style={{ display: (banner.full_image_url || banner.image_url) ? 'none' : 'flex' }}>
+            <div
+              className="absolute inset-0 bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center"
+              style={{ display: (banner.full_image_url || banner.image_url) ? 'none' : 'flex' }}
+            >
               <div className="text-center">
                 <span className="text-4xl mb-2 block">🎉</span>
                 <p className="text-gray-600 text-sm">جاري تحميل الإعلان...</p>
@@ -123,12 +144,12 @@ const AdvertisementBanner = () => {
                 </button>
               </div>
             </div>
-            
-            {/* Overlay - Removed orange background */}
+
+            {/* Overlay */}
             <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-transparent">
               <div className="h-full flex items-center justify-center p-4 sm:p-6 md:p-8">
                 <div className="text-center text-white max-w-xs sm:max-w-md md:max-w-lg lg:max-w-2xl xl:max-w-3xl">
-                  <h2 
+                  <h2
                     className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold mb-2 sm:mb-3 md:mb-4 px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 bg-black/30 backdrop-blur-sm border-2 border-white/20 rounded-lg sm:rounded-xl cursor-pointer hover:bg-black/40 hover:border-white/30 hover:text-white hover:shadow-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 sm:gap-3 banner-title"
                     onClick={(e) => handleBannerClick(banner.link_url, e)}
                   >

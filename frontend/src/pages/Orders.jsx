@@ -95,6 +95,18 @@ const Orders = () => {
     switch (status) {
       case 'pending':
         return 'text-amber-700 bg-amber-100 border-amber-200'
+      case 'accepted':
+        return 'text-emerald-800 bg-emerald-100 border-emerald-200'
+      case 'preparing':
+        return 'text-orange-800 bg-orange-100 border-orange-200'
+      case 'ready':
+        return 'text-teal-800 bg-teal-100 border-teal-200'
+      case 'assigned_to_courier':
+        return 'text-indigo-800 bg-indigo-100 border-indigo-200'
+      case 'picked_up':
+        return 'text-cyan-800 bg-cyan-100 border-cyan-200'
+      case 'on_the_way':
+        return 'text-sky-800 bg-sky-100 border-sky-200'
       case 'processing':
         return 'text-blue-700 bg-blue-100 border-blue-200'
       case 'shipped':
@@ -112,6 +124,16 @@ const Orders = () => {
     switch (status) {
       case 'pending':
         return <ClockIcon className="h-4 w-4" />
+      case 'accepted':
+        return <CheckCircleIcon className="h-4 w-4 text-emerald-600" />
+      case 'preparing':
+        return <span className="text-sm">👨‍🍳</span>
+      case 'ready':
+        return <CheckCircleIcon className="h-4 w-4 text-teal-600" />
+      case 'assigned_to_courier':
+      case 'picked_up':
+      case 'on_the_way':
+        return <TruckIcon className="h-4 w-4 text-sky-600" />
       case 'processing':
         return <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
       case 'shipped':
@@ -128,17 +150,29 @@ const Orders = () => {
   const getStatusText = (status) => {
     switch (status) {
       case 'pending':
-        return 'في انتظار'
+        return 'في انتظار التأكيد'
+      case 'accepted':
+        return 'تم قبول الطلب بالمطعم'
+      case 'preparing':
+        return 'جاري تحضير الطعام 👨‍🍳'
+      case 'ready':
+        return 'جاهز للاستلام والتوصيل'
+      case 'assigned_to_courier':
+        return 'تم تعيين مندوب التوصيل'
+      case 'picked_up':
+        return 'المندوب استلم الطلب 🛵'
+      case 'on_the_way':
+        return 'في الطريق إليك 🛵💨'
       case 'processing':
         return 'قيد المعالجة'
       case 'shipped':
         return 'تم تجهيز الطلب'
       case 'delivered':
-        return 'تم التسليم'
+        return 'تم التسليم بنجاح'
       case 'cancelled':
         return 'ملغي'
       default:
-        return 'غير معروف'
+        return 'قيد المتابعة'
     }
   }
 
@@ -520,6 +554,28 @@ const Orders = () => {
                             />
                             <div className="flex-1">
                               <h4 className="font-medium text-amber-900">{item.product_name}</h4>
+                              {(item.selected_options || item.special_instructions) && (() => {
+                                let opts = null;
+                                try {
+                                  opts = typeof item.selected_options === 'string' ? JSON.parse(item.selected_options || '{}') : (item.selected_options || {});
+                                } catch (e) {
+                                  opts = {};
+                                }
+                                return (
+                                  <div className="my-1 text-xs text-amber-800 bg-amber-100/60 p-2 rounded-md">
+                                    {opts.size && <span className="font-semibold ml-2">الحجم: {opts.size.name}</span>}
+                                    {opts.extras && opts.extras.length > 0 && (
+                                      <span className="text-emerald-800 ml-2">+ {opts.extras.map(e => e.name).join(', ')}</span>
+                                    )}
+                                    {opts.removals && opts.removals.length > 0 && (
+                                      <span className="text-rose-800 ml-2">بدون {opts.removals.join(', ')}</span>
+                                    )}
+                                    {item.special_instructions && (
+                                      <span className="block text-gray-700 italic mt-0.5">ملاحظات: {item.special_instructions}</span>
+                                    )}
+                                  </div>
+                                );
+                              })()}
                               <p className="text-sm text-gray-600">الكمية: {item.quantity}</p>
                             </div>
                             <div className="text-right">

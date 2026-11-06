@@ -4,23 +4,87 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Banner;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
 class BannerController extends Controller
 {
+    private static bool $columnChecked = false;
+
+    /**
+     * Ensure the 'type' column exists on the banners table
+     */
+    private function ensureTypeColumn(): void
+    {
+        if (self::$columnChecked) {
+            return;
+        }
+
+        try {
+            if (Schema::hasTable('banners') && !Schema::hasColumn('banners', 'type')) {
+                Schema::table('banners', function (Blueprint $table) {
+                    $table->string('type')->default('store')->after('position');
+                    $table->index('type');
+                });
+            }
+            self::$columnChecked = true;
+        } catch (\Throwable $e) {
+            // Ignore schema inspection errors if any
+        }
+    }
+
+    /**
+     * Clear cached banner entries
+     */
+    private function clearBannerCache(?string $type = null, ?string $position = null): void
+    {
+        try {
+            Cache::forget('api_active_banners_home');
+            Cache::forget('api_active_banners_category');
+            Cache::forget('api_active_banners_product');
+            if ($position) {
+                Cache::forget("api_active_banners_{$position}");
+            }
+            if ($type) {
+                Cache::forget("api_active_banners_home_{$type}");
+                if ($position) {
+                    Cache::forget("api_active_banners_{$position}_{$type}");
+                }
+            }
+        } catch (\Throwable $e) {
+            // Ignore cache errors
+        }
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
+        $this->ensureTypeColumn();
+
         $query = Banner::query();
 
         // Filter by position if provided
-        if ($request->has('position')) {
+        if ($request->filled('position')) {
             $query->byPosition($request->position);
+        }
+
+        // Filter by activity type if provided
+        if ($request->filled('type') && $request->type !== 'all') {
+            if ($request->type === 'store' || $request->type === 'stores') {
+                $query->where(function ($q) {
+                    $q->whereIn('type', ['store', 'stores'])
+                      ->orWhereNull('type')
+                      ->orWhere('type', '');
+                });
+            } else {
+                $query->where('type', $request->type);
+            }
         }
 
         // Filter by active status if provided
@@ -42,15 +106,18 @@ class BannerController extends Controller
      */
     public function store(Request $request)
     {
+        $this->ensureTypeColumn();
+
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'image_url' => 'required|string|max:500',
-            'link_url' => 'nullable|url|max:500',
+            'link_url' => 'nullable|string|max:500',
             'link_text' => 'nullable|string|max:255',
             'is_active' => 'boolean',
             'sort_order' => 'integer|min:0',
-            'position' => 'required|string|in:home,category,product',
+            'position' => 'nullable|string|max:50',
+            'type' => 'nullable|string|max:50',
         ]);
 
         if ($validator->fails()) {
@@ -61,7 +128,13 @@ class BannerController extends Controller
             ], 422);
         }
 
-        $banner = Banner::create($request->all());
+        $data = $request->all();
+        $data['position'] = !empty($data['position']) ? $data['position'] : 'home';
+        $data['type'] = !empty($data['type']) ? $data['type'] : 'store';
+
+        $banner = Banner::create($data);
+
+        $this->clearBannerCache($banner->type, $banner->position);
 
         return response()->json([
             'success' => true,
@@ -75,6 +148,8 @@ class BannerController extends Controller
      */
     public function show(string $id)
     {
+        $this->ensureTypeColumn();
+
         $banner = Banner::find($id);
 
         if (!$banner) {
@@ -96,6 +171,8 @@ class BannerController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $this->ensureTypeColumn();
+
         $banner = Banner::find($id);
 
         if (!$banner) {
@@ -109,11 +186,12 @@ class BannerController extends Controller
             'title' => 'sometimes|required|string|max:255',
             'description' => 'sometimes|nullable|string|max:1000',
             'image_url' => 'sometimes|required|string|max:500',
-            'link_url' => 'sometimes|nullable|url|max:500',
+            'link_url' => 'sometimes|nullable|string|max:500',
             'link_text' => 'sometimes|nullable|string|max:255',
             'is_active' => 'sometimes|boolean',
             'sort_order' => 'sometimes|integer|min:0',
-            'position' => 'sometimes|required|string|in:home,category,product',
+            'position' => 'sometimes|nullable|string|max:50',
+            'type' => 'sometimes|nullable|string|max:50',
         ]);
 
         if ($validator->fails()) {
@@ -124,7 +202,21 @@ class BannerController extends Controller
             ], 422);
         }
 
-        $banner->update($request->all());
+        $oldType = $banner->type;
+        $oldPosition = $banner->position;
+
+        $data = $request->all();
+        if (array_key_exists('type', $data) && empty($data['type'])) {
+            $data['type'] = 'store';
+        }
+        if (array_key_exists('position', $data) && empty($data['position'])) {
+            $data['position'] = 'home';
+        }
+
+        $banner->update($data);
+
+        $this->clearBannerCache($oldType, $oldPosition);
+        $this->clearBannerCache($banner->type, $banner->position);
 
         return response()->json([
             'success' => true,
@@ -138,6 +230,8 @@ class BannerController extends Controller
      */
     public function destroy(string $id)
     {
+        $this->ensureTypeColumn();
+
         $banner = Banner::find($id);
 
         if (!$banner) {
@@ -147,6 +241,9 @@ class BannerController extends Controller
             ], 404);
         }
 
+        $oldType = $banner->type;
+        $oldPosition = $banner->position;
+
         // Delete the image file if it exists
         if ($banner->image_url && !str_starts_with($banner->image_url, 'http')) {
             $imagePath = str_replace('/storage/', '', $banner->image_url);
@@ -154,6 +251,8 @@ class BannerController extends Controller
         }
 
         $banner->delete();
+
+        $this->clearBannerCache($oldType, $oldPosition);
 
         return response()->json([
             'success' => true,
@@ -167,7 +266,7 @@ class BannerController extends Controller
     public function uploadImage(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
 
         if ($validator->fails()) {
@@ -206,14 +305,16 @@ class BannerController extends Controller
      */
     public function getActiveBanners(Request $request)
     {
+        $this->ensureTypeColumn();
+
         $position = $request->get('position', 'home');
-        
-        $banners = \Illuminate\Support\Facades\Cache::remember("api_active_banners_{$position}", 600, function () use ($position) {
-            return Banner::active()
-                ->byPosition($position)
-                ->ordered()
-                ->get();
-        });
+        $type = $request->get('type', 'store');
+
+        $banners = Banner::active()
+            ->byPosition($position)
+            ->byType($type)
+            ->ordered()
+            ->get();
 
         return response()->json([
             'success' => true,

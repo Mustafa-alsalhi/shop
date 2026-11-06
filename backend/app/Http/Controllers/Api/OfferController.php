@@ -44,11 +44,14 @@ class OfferController extends Controller
     {
         $page = $request->get('page', 1);
         $showInHome = $request->has('show_in_home') && $request->boolean('show_in_home') ? '1' : '0';
-        $cacheKey = "api_offers_active_home_{$showInHome}_page_{$page}";
+        $cacheKey = "api_offers_active_home_{$showInHome}_with_products_v2_page_{$page}";
 
-        $offers = Cache::remember($cacheKey, 600, function () use ($request, $showInHome) {
+        $offers = Cache::remember($cacheKey, 60, function () use ($request, $showInHome) {
             $now = now();
             $query = Offer::withCount('products')
+                ->with(['products' => function($q) {
+                    $q->where('is_active', true)->take(10);
+                }])
                 ->where('status', 'active')
                 ->where(function ($q) use ($now) {
                     $q->whereNull('start_date')->orWhere('start_date', '<=', $now);
@@ -64,7 +67,46 @@ class OfferController extends Controller
 
             $query->orderBy('sort_order')->orderBy('created_at', 'desc');
 
-            return $query->paginate(12);
+            $paginated = $query->paginate(12);
+
+            // Calculate discounted prices for each product in each offer
+            $paginated->getCollection()->transform(function ($offer) {
+                $offer->products->transform(function ($product) use ($offer) {
+                    $pivot = $product->pivot;
+                    $originalPrice = $product->price;
+                    
+                    if ($pivot && $pivot->special_price) {
+                        $discountedPrice = $pivot->special_price;
+                    } else {
+                        switch ($offer->discount_type) {
+                            case 'percentage':
+                                $discountedPrice = $originalPrice - ($originalPrice * ($offer->discount_value / 100));
+                                break;
+                            case 'fixed':
+                                $discountedPrice = max(0, $originalPrice - $offer->discount_value);
+                                break;
+                            case 'free_shipping':
+                                $discountedPrice = $originalPrice;
+                                break;
+                            default:
+                                $discountedPrice = $originalPrice;
+                        }
+                    }
+
+                    $discountPercentage = $originalPrice > 0 
+                        ? round((($originalPrice - $discountedPrice) / $originalPrice) * 100) 
+                        : 0;
+
+                    $product->original_price = $originalPrice;
+                    $product->sale_price = round($discountedPrice, 2);
+                    $product->discount_percentage = $discountPercentage;
+                    
+                    return $product;
+                });
+                return $offer;
+            });
+
+            return $paginated;
         });
 
         return response()->json($offers);

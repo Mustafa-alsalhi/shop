@@ -11,6 +11,187 @@ use Illuminate\Support\Facades\Log;
 
 class DriverController extends Controller
 {
+    public function getOrders(Request $request)
+    {
+        $status = $request->query('status', 'processing'); 
+        // processing = ready for pickup/available for all drivers nearby
+        // shipped = assigned to a specific driver
+
+        $query = \App\Models\Order::with(['items.product.seller', 'user'])
+                   ->where('status', $status);
+                   
+        // If driver assigned, limit to this driver
+        if ($status == 'shipped') {
+           $query->where('driver_id', $request->user()->id);
+        }
+
+        $orders = $query->orderBy('created_at', 'desc')->get();
+        
+        $mapped = $orders->map(function ($order) {
+            $restaurantLat = null;
+            $restaurantLng = null;
+            $restaurantName = 'متجر المنصة';
+            $restaurantAddress = 'صنعاء';
+            
+            if ($order->items->first() && $order->items->first()->product && $order->items->first()->product->seller) {
+                $seller = $order->items->first()->product->seller;
+                $restaurantLat = $seller->latitude;
+                $restaurantLng = $seller->longitude;
+                $restaurantName = $seller->store_name ?? 'متجر البائع';
+                $restaurantAddress = $seller->address ?? $seller->city;
+            }
+
+            $shippingAddress = is_array($order->shipping_address) ? $order->shipping_address : [];
+            
+            $rLat = $restaurantLat ?? 15.3500;
+            $rLng = $restaurantLng ?? 44.2000;
+            $cLat = $order->latitude ?? 15.3694;
+            $cLng = $order->longitude ?? 44.1910;
+            
+            $dist = $this->calculateDistance($rLat, $rLng, $cLat, $cLng);
+            
+            $orderItems = $order->items->map(function($item) {
+                return [
+                   'name' => $item->product_name ?? ($item->product ? $item->product->name : 'منتج'),
+                   'qty' => $item->quantity,
+                   'image' => $item->image_url ?? ''
+                ];
+            });
+
+            return [
+               'id' => $order->order_number,
+               'db_id' => $order->id,
+               'restaurant' => $restaurantName,
+               'restaurant_address' => $restaurantAddress,
+               'restaurant_lat' => $restaurantLat ?? 15.3500, // Default slightly offset
+               'restaurant_lng' => $restaurantLng ?? 44.2000,
+               'customer_address' => ltrim(($shippingAddress['city'] ?? '') . ' - ' . ($shippingAddress['address'] ?? ''), ' - '),
+               'customer_lat' => $order->latitude ?? 15.3694,
+               'customer_lng' => $order->longitude ?? 44.1910,
+               'customerInfo' => [
+                   'name' => $shippingAddress['name'] ?? 'العميل',
+                   'phone' => $shippingAddress['phone'] ?? '',
+                   'address' => $shippingAddress['address'] ?? ''
+               ],
+               'distance' => round($dist, 1) . ' كم',
+               'delivery_fee' => ($order->shipping ?? 15) * 0.8, // 80% to driver
+               'time' => round($dist * 3) . ' دقيقة', // avg 3 mins per km
+               'items' => $orderItems,
+               'total_amount' => $order->total_amount,
+               'payment_method' => $order->payment_method ?? 'cod',
+               'payment_status' => $order->payment_status ?? 'pending',
+               'status' => $order->status,
+               'date' => $order->created_at->format('Y-m-d h:i A')
+            ];
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $mapped
+        ]);
+    }
+
+    private function calculateDistance($lat1, $lon1, $lat2, $lon2) {
+        $earthRadius = 6371; // km
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+        $a = sin($dLat/2) * sin($dLat/2) + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLon/2) * sin($dLon/2);
+        $c = 2 * atan2(sqrt($a), sqrt(1-$a));
+        return $earthRadius * $c;
+    }
+
+    public function getCompletedOrders(Request $request) {
+        $orders = \App\Models\Order::with(['items.product.seller', 'user'])
+                   ->where('status', 'delivered')
+                   ->where('driver_id', $request->user()->id)
+                   ->orderBy('created_at', 'desc')->get();
+                   
+        $mapped = $orders->map(function ($order) {
+            $restaurantLat = null;
+            $restaurantLng = null;
+            $restaurantName = 'متجر المنصة';
+            $restaurantAddress = 'صنعاء';
+            
+            if ($order->items->first() && $order->items->first()->product && $order->items->first()->product->seller) {
+                $seller = $order->items->first()->product->seller;
+                $restaurantLat = $seller->latitude;
+                $restaurantLng = $seller->longitude;
+                $restaurantName = $seller->store_name ?? 'متجر البائع';
+                $restaurantAddress = $seller->address ?? $seller->city;
+            }
+
+            $shippingAddress = is_array($order->shipping_address) ? $order->shipping_address : [];
+            
+            $rLat = $restaurantLat ?? 15.3500;
+            $rLng = $restaurantLng ?? 44.2000;
+            $cLat = $order->latitude ?? 15.3694;
+            $cLng = $order->longitude ?? 44.1910;
+            
+            $dist = $this->calculateDistance($rLat, $rLng, $cLat, $cLng);
+            
+            $orderItems = $order->items->map(function($item) {
+                return [
+                   'name' => $item->product_name ?? ($item->product ? $item->product->name : 'منتج'),
+                   'qty' => $item->quantity,
+                   'image' => $item->image_url ?? ''
+                ];
+            });
+
+            return [
+               'id' => $order->order_number,
+               'db_id' => $order->id,
+               'restaurant' => $restaurantName,
+               'restaurant_address' => $restaurantAddress,
+               'restaurant_lat' => $restaurantLat ?? 15.3500,
+               'restaurant_lng' => $restaurantLng ?? 44.2000,
+               'customer_address' => ltrim(($shippingAddress['city'] ?? '') . ' - ' . ($shippingAddress['address'] ?? ''), ' - '),
+               'customer_lat' => $order->latitude ?? 15.3694,
+               'customer_lng' => $order->longitude ?? 44.1910,
+               'customerInfo' => [
+                   'name' => $shippingAddress['name'] ?? 'العميل',
+                   'phone' => $shippingAddress['phone'] ?? '',
+                   'address' => $shippingAddress['address'] ?? ''
+               ],
+               'distance' => round($dist, 1) . ' كم',
+               'delivery_fee' => ($order->shipping ?? 15) * 0.8,
+               'time' => round($dist * 3) . ' دقيقة',
+               'items' => $orderItems,
+               'total_amount' => $order->total_amount,
+               'payment_method' => $order->payment_method ?? 'cod',
+               'payment_status' => $order->payment_status ?? 'pending',
+               'status' => 'مكتمل',
+               'date' => $order->created_at->format('Y-m-d h:i A')
+            ];
+        });
+        
+        return response()->json(['status' => 'success', 'data' => $mapped]);
+    }
+
+    public function updateOrderStatus(Request $request, $id) {
+        $order = \App\Models\Order::where('order_number', $id)->orWhere('id', $id)->firstOrFail();
+        
+        if ($request->status == 'shipped') {
+           $order->driver_id = $request->user()->id; // Assign driver
+        }
+        
+        $order->status = $request->status; 
+        // e.g. shipped (in transit), delivered
+        $order->save();
+        
+        return response()->json(['status' => 'success']);
+    }
+
+    public function updateLocation(Request $request) {
+        // Here we could update driver live location if driver table has lat/lng 
+        // But for UI simulation we return 200 OK
+        return response()->json(['status' => 'success']);
+    }
+
+    public function updateStatus(Request $request) {
+        // Toggle online / offline
+        return response()->json(['status' => 'success']);
+    }
+
     /**
      * Display a listing of drivers.
      */
@@ -102,11 +283,26 @@ class DriverController extends Controller
     /**
      * Get the logged in driver profile settings
      */
+    public function getProfile(Request $request)
+    {
+        return $this->getDriverProfile($request);
+    }
+
     public function getDriverProfile(Request $request)
     {
         $user = $request->user();
         if ($user->role !== 'driver') {
             return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        // Auto-create driver profile if it doesn't exist (e.g. created manually in DB)
+        if (!$user->driver) {
+             \App\Models\Driver::create([
+                 'user_id' => $user->id,
+                 'vehicle_type' => 'motorcycle',
+                 'is_verified' => true,
+             ]);
+             $user->refresh();
         }
 
         $user->load('driver');
@@ -320,8 +516,8 @@ class DriverController extends Controller
                     'order_number' => $order->order_number,
                     'customer_name' => $order->user ? $order->user->first_name . ' ' . $order->user->last_name : 'عميل غير محدد',
                     'status' => $order->status,
-                    'shipping_fee' => $order->shipping,
-                    'driver_profit' => $order->shipping * 0.80,
+                    'shipping_fee' => $order->shipping ?? 15,
+                    'driver_profit' => ($order->shipping ?? 15) * 0.80,
                     'items_count' => $order->items->count(),
                     'created_at' => $order->created_at->format('Y-m-d H:i')
                 ];
@@ -343,5 +539,17 @@ class DriverController extends Controller
                 'recent_orders' => $latestOrders
             ]
         ]);
+    }
+    
+    /**
+     * Show detailed statistics for the authenticated driver.
+     */
+    public function getStatistics(Request $request)
+    {
+        $user = $request->user();
+        if ($user->role !== 'driver') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+        return $this->showStatistics($user->id);
     }
 }

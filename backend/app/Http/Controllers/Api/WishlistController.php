@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Wishlist;
 use App\Models\Product;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 
 class WishlistController extends Controller
@@ -83,6 +84,17 @@ class WishlistController extends Controller
                 'currency' => $request->currency,
             ]);
             \Log::info('Created new wishlist item');
+        }
+
+        // إشعار للإضافة للمفضلة
+        if (isset($wishlistItem) && $wishlistItem->wasRecentlyCreated) {
+            Notification::create([
+                'user_id' => $request->user()->id,
+                'type' => 'success',
+                'title' => 'تمت الإضافة للمفضلة',
+                'message' => 'تم إضافة ' . ($request->product_name ?? 'المنتج') . ' إلى مفضلتك',
+                'read' => false,
+            ]);
         }
 
         \Log::info('=== WISHLIST ITEM SAVED ===');

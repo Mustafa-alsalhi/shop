@@ -129,8 +129,8 @@ const AdminDashboard = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-amber-600 mb-4"></div>
-        <p className="text-gray-500 font-medium">جاري تحميل لوحة التحكم...</p>
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-teal-600 mb-4"></div>
+        <p className="text-teal-700 font-bold">جاري تحميل لوحة التحكم...</p>
       </div>
     )
   }
@@ -159,27 +159,27 @@ const AdminDashboard = () => {
       {/* Dynamic Header */}
       <div className="bg-white px-8 py-6 mb-8 border-b border-gray-200 shadow-sm flex flex-col md:flex-row items-center justify-between">
         <div className="flex items-center gap-4">
-           <div className="p-3 bg-gradient-to-br from-gray-900 to-gray-800 text-white rounded-xl shadow-lg">
+           <div className="p-3 bg-teal-700 text-white rounded-xl shadow-lg">
              <ChartBarIcon className="w-8 h-8" />
            </div>
            <div>
-             <h1 className="text-2xl font-black text-gray-900">المركز الرئيسي للإدارة</h1>
-             <p className="text-gray-500 text-sm mt-1 font-medium">نظرة استراتيجية ومؤشرات الأداء للمنصة وكافة البائعين.</p>
+             <h1 className="text-2xl font-black text-teal-800">المركز الرئيسي للإدارة</h1>
+             <p className="text-teal-600 text-sm mt-1 font-medium">نظرة استراتيجية ومؤشرات الأداء للمنصة وكافة البائعين.</p>
            </div>
         </div>
         <div className="mt-4 md:mt-0 flex items-center gap-3">
            <button 
              onClick={exportDashboardReport}
-             className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md transition-all flex items-center gap-2"
+             className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md transition-all flex items-center gap-2"
            >
              <DocumentArrowDownIcon className="w-5 h-5" />
              <span className="hidden sm:inline">تحميل تقرير شامل</span>
            </button>
            <div className="text-left hidden md:block">
-             <p className="text-sm font-bold text-gray-900">{user?.name}</p>
-             <p className="text-xs text-green-500 font-medium tracking-wider">♦ مدير النظام النشط</p>
+             <p className="text-sm font-bold text-teal-800">{user?.name}</p>
+             <p className="text-xs text-teal-500 font-bold tracking-wider">♦ مدير النظام النشط</p>
            </div>
-           <div className="w-12 h-12 bg-gray-200 rounded-full border-2 border-white shadow-md flex items-center justify-center font-bold text-xl text-gray-600">
+           <div className="w-12 h-12 bg-slate-100 rounded-full border-2 border-white shadow-md flex items-center justify-center font-bold text-xl text-teal-700">
              {user?.name?.charAt(0)?.toUpperCase()}
            </div>
         </div>
@@ -231,74 +231,74 @@ const AdminDashboard = () => {
         </div>
 
         {/* Revenue Flow Breakdown (Timeframes) */}
-        <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2 pt-6">
-          <BanknotesIcon className="w-6 h-6 text-green-600" />
+        <h2 className="text-xl font-bold text-teal-800 flex items-center gap-2 pt-6">
+          <BanknotesIcon className="w-6 h-6 text-teal-600" />
           التدفقات النقدية والمبيعات الزمنية (المتجر كامل)
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-           <div className="bg-white rounded-xl shadow border-l-4 border-blue-500 overflow-hidden group">
+           <div className="bg-white rounded-xl shadow-md border-l-4 border-teal-500 overflow-hidden group">
              <div className="p-5 flex items-center gap-4">
-               <div className="p-4 bg-blue-50 rounded-xl group-hover:scale-110 transition-transform"><BoltIcon className="w-7 h-7 text-blue-600" /></div>
+               <div className="p-4 bg-teal-50 rounded-xl group-hover:scale-110 transition-transform"><BoltIcon className="w-7 h-7 text-teal-600" /></div>
                <div>
-                 <p className="text-xs text-gray-500 font-bold mb-1">اليوم</p>
+                 <p className="text-xs text-teal-600 font-bold mb-1">اليوم</p>
                  <h4 className="text-2xl font-black text-gray-900">{formatCurrency(stats.today_revenue)} <span className="text-sm text-gray-400 font-normal">ريال</span></h4>
-                 <p className="text-xs mt-1 text-blue-600 font-semibold">{stats.today_orders} عملية شراء</p>
+                 <p className="text-xs mt-1 text-teal-600 font-semibold">{stats.today_orders} عملية شراء</p>
                </div>
              </div>
            </div>
 
-           <div className="bg-white rounded-xl shadow border-l-4 border-indigo-500 overflow-hidden group">
+           <div className="bg-white rounded-xl shadow-md border-l-4 border-orange-500 overflow-hidden group">
              <div className="p-5 flex items-center gap-4">
-               <div className="p-4 bg-indigo-50 rounded-xl group-hover:scale-110 transition-transform"><ArrowTrendingUpIcon className="w-7 h-7 text-indigo-600" /></div>
+               <div className="p-4 bg-orange-50 rounded-xl group-hover:scale-110 transition-transform"><ArrowTrendingUpIcon className="w-7 h-7 text-orange-500" /></div>
                <div>
-                 <p className="text-xs text-gray-500 font-bold mb-1">هذا الأسبوع</p>
+                 <p className="text-xs text-teal-600 font-bold mb-1">هذا الأسبوع</p>
                  <h4 className="text-2xl font-black text-gray-900">{formatCurrency(stats.this_week_revenue)} <span className="text-sm text-gray-400 font-normal">ريال</span></h4>
-                 <p className="text-xs mt-1 text-indigo-600 font-semibold">{stats.this_week_orders} عملية شراء</p>
+                 <p className="text-xs mt-1 text-orange-500 font-semibold">{stats.this_week_orders} عملية شراء</p>
                </div>
              </div>
            </div>
 
-           <div className="bg-white rounded-xl shadow border-l-4 border-purple-500 overflow-hidden group">
+           <div className="bg-white rounded-xl shadow-md border-l-4 border-teal-600 overflow-hidden group">
              <div className="p-5 flex items-center gap-4">
-               <div className="p-4 bg-purple-50 rounded-xl group-hover:scale-110 transition-transform"><ChartBarIcon className="w-7 h-7 text-purple-600" /></div>
+               <div className="p-4 bg-teal-50 rounded-xl group-hover:scale-110 transition-transform"><ChartBarIcon className="w-7 h-7 text-teal-600" /></div>
                <div>
-                 <p className="text-xs text-gray-500 font-bold mb-1">هذا الشهر</p>
+                 <p className="text-xs text-teal-600 font-bold mb-1">هذا الشهر</p>
                  <h4 className="text-2xl font-black text-gray-900">{formatCurrency(stats.this_month_revenue)} <span className="text-sm text-gray-400 font-normal">ريال</span></h4>
-                 <p className="text-xs mt-1 text-purple-600 font-semibold">{stats.this_month_orders} عملية شراء</p>
+                 <p className="text-xs mt-1 text-teal-600 font-semibold">{stats.this_month_orders} عملية شراء</p>
                </div>
              </div>
            </div>
 
-           <div className="bg-gray-900 text-white rounded-xl shadow border-l-4 border-amber-500 overflow-hidden group relative">
+           <div className="bg-teal-700 text-white rounded-xl shadow-md border-l-4 border-orange-500 overflow-hidden group relative">
              <div className="absolute right-0 top-0 opacity-10 pointer-events-none"><CurrencyDollarIcon className="w-32 h-32" /></div>
              <div className="p-5 flex items-center gap-4 relative z-10">
-               <div className="p-4 bg-gray-800 rounded-xl"><CurrencyDollarIcon className="w-7 h-7 text-amber-500" /></div>
+               <div className="p-4 bg-teal-800 rounded-xl"><CurrencyDollarIcon className="w-7 h-7 text-orange-400" /></div>
                <div>
-                 <p className="text-xs text-gray-400 font-bold mb-1">هذا العام</p>
-                 <h4 className="text-2xl font-black text-white">{formatCurrency(stats.this_year_revenue)} <span className="text-sm text-gray-500 font-normal">ريال</span></h4>
-                 <p className="text-xs mt-1 text-amber-400 font-semibold">{stats.this_year_orders} عملية شراء</p>
+                 <p className="text-xs text-teal-100 font-bold mb-1">هذا العام</p>
+                 <h4 className="text-2xl font-black text-white">{formatCurrency(stats.this_year_revenue)} <span className="text-sm text-teal-200 font-normal">ريال</span></h4>
+                 <p className="text-xs mt-1 text-orange-300 font-semibold">{stats.this_year_orders} عملية شراء</p>
                </div>
              </div>
            </div>
         </div>
 
         {/* Sellers Performance (Crucial for Admin) */}
-        <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2 pt-6">
-          <BuildingStorefrontIcon className="w-6 h-6 text-indigo-600" />
+        <h2 className="text-xl font-bold text-teal-800 flex items-center gap-2 pt-6">
+          <BuildingStorefrontIcon className="w-6 h-6 text-orange-500" />
           مقارنة أداء البائعين ومبيعات المتاجر
         </h2>
-        <div className="bg-white shadow-xl rounded-2xl border border-gray-100 overflow-hidden">
+        <div className="bg-white shadow-md rounded-2xl border border-gray-100 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-indigo-50/50">
+              <thead className="bg-teal-700">
                 <tr>
-                  <th className="px-6 py-4 text-right text-xs font-black text-gray-600 uppercase tracking-wider">اسم المتجر / البائع</th>
-                  <th className="px-6 py-4 text-center text-xs font-black text-gray-600 uppercase tracking-wider">إجمالي الطلبات المُباعة</th>
-                  <th className="px-6 py-4 text-center text-xs font-black text-gray-600 uppercase tracking-wider">الطلبات المسلمة بنجاح</th>
-                  <th className="px-6 py-4 text-center text-xs font-black text-blue-600 uppercase tracking-wider">مبيعات اليوم</th>
-                  <th className="px-6 py-4 text-center text-xs font-black text-indigo-600 uppercase tracking-wider">مبيعات الأسبوع</th>
-                  <th className="px-6 py-4 text-center text-xs font-black text-purple-600 uppercase tracking-wider">مبيعات الشهر</th>
-                  <th className="px-6 py-4 text-center text-xs font-black text-green-600 uppercase tracking-wider">إجمالي المبيعات</th>
+                  <th className="px-6 py-4 text-right text-xs font-black text-white uppercase tracking-wider">اسم المتجر / البائع</th>
+                  <th className="px-6 py-4 text-center text-xs font-black text-white uppercase tracking-wider">إجمالي الطلبات المُباعة</th>
+                  <th className="px-6 py-4 text-center text-xs font-black text-white uppercase tracking-wider">الطلبات المسلمة بنجاح</th>
+                  <th className="px-6 py-4 text-center text-xs font-black text-teal-100 uppercase tracking-wider">مبيعات اليوم</th>
+                  <th className="px-6 py-4 text-center text-xs font-black text-teal-200 uppercase tracking-wider">مبيعات الأسبوع</th>
+                  <th className="px-6 py-4 text-center text-xs font-black text-white uppercase tracking-wider">مبيعات الشهر</th>
+                  <th className="px-6 py-4 text-center text-xs font-black text-orange-300 uppercase tracking-wider">إجمالي المبيعات</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-100">
@@ -325,16 +325,16 @@ const AdminDashboard = () => {
                            {seller.completed_orders} <span className="text-xs">عرض 👁️</span>
                          </button>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600 text-center">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-teal-600 text-center">
                         {formatCurrency(seller.today_sales)} <span className="text-xs font-normal">ريال</span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-indigo-600 text-center">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-teal-700 text-center">
                         {formatCurrency(seller.week_sales)} <span className="text-xs font-normal">ريال</span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-purple-600 text-center">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-teal-800 text-center">
                         {formatCurrency(seller.month_sales)} <span className="text-xs font-normal">ريال</span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-black text-green-600 text-center bg-green-50/30">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-black text-orange-600 text-center bg-orange-50/50">
                         {formatCurrency(seller.total_sales)} <span className="text-xs font-normal">ريال</span>
                       </td>
                     </tr>
@@ -351,10 +351,10 @@ const AdminDashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-4">
           
           {/* Top Selling Products */}
-          <div className="bg-white shadow-xl rounded-2xl border border-gray-100 overflow-hidden">
-            <div className="px-6 py-5 border-b border-gray-100 flex items-center gap-3 bg-gray-50">
-               <div className="p-2 bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg"><CubeIcon className="w-5 h-5 text-white" /></div>
-               <h3 className="text-lg font-bold text-gray-900">أكثر المنتجات مبيعاً</h3>
+          <div className="bg-white shadow-md rounded-2xl border border-gray-100 overflow-hidden">
+            <div className="px-6 py-5 border-b border-gray-100 flex items-center gap-3 bg-teal-50">
+               <div className="p-2 bg-gradient-to-r from-teal-500 to-teal-700 rounded-lg"><CubeIcon className="w-5 h-5 text-white" /></div>
+               <h3 className="text-lg font-bold text-teal-800">أكثر المنتجات مبيعاً</h3>
             </div>
             <div className="p-2">
               <table className="min-w-full">
@@ -381,10 +381,10 @@ const AdminDashboard = () => {
           </div>
 
           {/* Recent Global Orders */}
-          <div className="bg-white shadow-xl rounded-2xl border border-gray-100 overflow-hidden">
-            <div className="px-6 py-5 border-b border-gray-100 flex items-center gap-3 bg-gray-50">
-               <div className="p-2 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg"><TruckIcon className="w-5 h-5 text-white" /></div>
-               <h3 className="text-lg font-bold text-gray-900">أحدث العمليات الشرائية</h3>
+          <div className="bg-white shadow-md rounded-2xl border border-gray-100 overflow-hidden">
+            <div className="px-6 py-5 border-b border-gray-100 flex items-center gap-3 bg-teal-50">
+               <div className="p-2 bg-gradient-to-r from-teal-500 to-teal-700 rounded-lg"><TruckIcon className="w-5 h-5 text-white" /></div>
+               <h3 className="text-lg font-bold text-teal-800">أحدث العمليات الشرائية</h3>
             </div>
             <div className="p-2">
               <table className="min-w-full">
@@ -425,23 +425,23 @@ const AdminDashboard = () => {
 
       {/* Dynamic Modal for Completed Orders */}
       {showOrdersModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden animate-fade-in-up">
-            <div className="bg-indigo-600 px-6 py-4 flex justify-between items-center text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-teal-900/60 backdrop-blur-sm transition-opacity">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden animate-fade-in-up">
+            <div className="bg-teal-700 px-6 py-4 flex justify-between items-center text-white">
               <h3 className="text-lg font-bold flex items-center gap-2">
                 <TruckIcon className="w-6 h-6" />
                 الطلبات المستلمة بنجاح - المتجر: {selectedSellerName}
               </h3>
               <button 
                 onClick={() => setShowOrdersModal(false)}
-                className="text-indigo-200 hover:text-white transition-colors"
+                className="text-teal-200 hover:text-white transition-colors"
                 title="إغلاق"
               >
-                <div className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-indigo-700 font-bold text-xl">✕</div>
+                <div className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-teal-600 font-bold text-xl">✕</div>
               </button>
             </div>
             
-            <div className="p-6 max-h-[60vh] overflow-y-auto bg-gray-50">
+            <div className="p-6 max-h-[60vh] overflow-y-auto bg-slate-50">
                {selectedSellerOrders && selectedSellerOrders.length > 0 ? (
                  <div className="grid gap-4">
                    {selectedSellerOrders.map(order => (

@@ -8,6 +8,26 @@ import { fetchCart } from '../../store/slices/cartSlice'
 import { fetchWishlist } from '../../store/slices/wishlistSlice'
 import api from '../../services/api'
 
+const normalizeYemeniPhoneInput = (rawValue) => {
+  if (!rawValue) return ''
+  const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩', '۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹']
+  const englishDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+  let cleaned = String(rawValue)
+  arabicDigits.forEach((d, idx) => {
+    cleaned = cleaned.replaceAll(d, englishDigits[idx])
+  })
+  return cleaned
+}
+
+const isValidYemeniPhone = (rawPhone) => {
+  const cleaned = normalizeYemeniPhoneInput(rawPhone).replace(/\D+/g, '')
+  let digits = cleaned
+  if (digits.startsWith('00967')) digits = digits.slice(5)
+  else if (digits.startsWith('967') && digits.length >= 12) digits = digits.slice(3)
+  if (digits.length === 10 && digits.startsWith('0')) digits = digits.slice(1)
+  return /^7[01378]\d{7}$/.test(digits)
+}
+
 const Login = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -17,29 +37,26 @@ const Login = () => {
   const error = useSelector(selectError)
 
   const [formData, setFormData] = useState({
-    email: '',
+    phone: '',
     password: '',
   })
   const [showPassword, setShowPassword] = useState(false)
   const [validationErrors, setValidationErrors] = useState({})
 
-  // OTP states
-  const [step, setStep] = useState(1) // 1: email/password, 2: OTP
+  // OTP fallback states
+  const [step, setStep] = useState(1) // 1: phone/password, 2: OTP
   const [otp, setOtp] = useState('')
-  const [otpEmail, setOtpEmail] = useState('')
+  const [otpPhone, setOtpPhone] = useState('')
   const [otpLoading, setOtpLoading] = useState(false)
   const [otpError, setOtpError] = useState('')
   const [resendCountdown, setResendCountdown] = useState(0)
 
-  // Get redirect path from location state
   const from = location.state?.from?.pathname || '/'
 
   useEffect(() => {
-    // Clear any previous errors
     dispatch(clearError())
   }, [dispatch])
 
-  // Countdown timer for resend OTP
   useEffect(() => {
     let interval
     if (resendCountdown > 0) {
@@ -52,9 +69,9 @@ const Login = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+    const finalValue = name === 'phone' ? normalizeYemeniPhoneInput(value) : value
+    setFormData(prev => ({ ...prev, [name]: finalValue }))
 
-    // Clear validation error for this field
     if (validationErrors[name]) {
       setValidationErrors(prev => ({ ...prev, [name]: '' }))
     }
@@ -62,11 +79,12 @@ const Login = () => {
 
   const validateForm = () => {
     const errors = {}
+    const trimmedPhone = formData.phone?.trim() || ''
 
-    if (!formData.email) {
-      errors.email = 'البريد الإلكتروني مطلوب'
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = 'البريد الإلكتروني غير صحيح'
+    if (!trimmedPhone) {
+      errors.phone = 'رقم الجوال مطلوب'
+    } else if (!trimmedPhone.includes('@') && !isValidYemeniPhone(trimmedPhone)) {
+      errors.phone = 'يرجى إدخال رقم جوال يمني صحيح يبدأ بـ 77 أو 73 أو 71 أو 70 (9 أرقام)'
     }
 
     if (!formData.password) {
@@ -89,30 +107,27 @@ const Login = () => {
     try {
       const result = await dispatch(loginUser(formData))
       if (result.meta.requestStatus === 'fulfilled') {
-        // Check if OTP is required
         if (result.payload.requires_otp) {
           setStep(2)
-          setOtpEmail(result.payload.email)
+          setOtpPhone(result.payload.phone || formData.phone)
           setResendCountdown(60)
-          dispatch(showSuccessNotification('تم إرسال رمز التحقق إلى بريدك الإلكتروني'))
+          dispatch(showSuccessNotification('تم إرسال رمز التحقق إلى رقم جوالك'))
         } else {
-          // Normal login (for backward compatibility)
           dispatch(showSuccessNotification('تم تسجيل الدخول بنجاح!'))
           dispatch(fetchCart())
           dispatch(fetchWishlist())
-          
-          let targetPath = from;
-          // Extract user role from Redux payload
-          const userRole = result.payload.user?.role;
+
+          let targetPath = from
+          const userRole = result.payload.user?.role
           if (from === '/' || from === '/login') {
-            if (userRole === 'admin') targetPath = '/admin/dashboard';
-            else if (userRole === 'seller') targetPath = '/seller/dashboard';
-            else if (userRole === 'driver') targetPath = '/driver/dashboard';
+            if (userRole === 'admin') targetPath = '/admin/dashboard'
+            else if (userRole === 'seller') targetPath = '/seller/dashboard'
+            else if (userRole === 'driver') targetPath = '/driver/dashboard'
           }
           navigate(targetPath, { replace: true })
         }
       }
-    } catch (error) {
+    } catch (err) {
       dispatch(showErrorNotification('فشل تسجيل الدخول'))
     }
   }
@@ -124,35 +139,34 @@ const Login = () => {
 
     try {
       const response = await api.post('/verify-login-otp', {
-        email: otpEmail,
-        otp: otp
+        phone: otpPhone,
+        otp: otp,
       })
 
       if (response.data.token) {
-        // Store token and user data in Redux
         dispatch({
           type: 'auth/login/fulfilled',
           payload: {
             user: response.data.user,
-            token: response.data.token
-          }
+            token: response.data.token,
+          },
         })
 
         dispatch(showSuccessNotification('تم تسجيل الدخول بنجاح!'))
         dispatch(fetchCart())
         dispatch(fetchWishlist())
-        
-        let targetPath = from;
-        const userRole = response.data.user?.role;
+
+        let targetPath = from
+        const userRole = response.data.user?.role
         if (from === '/' || from === '/login') {
-          if (userRole === 'admin') targetPath = '/admin/dashboard';
-          else if (userRole === 'seller') targetPath = '/seller/dashboard';
-          else if (userRole === 'driver') targetPath = '/driver/dashboard';
+          if (userRole === 'admin') targetPath = '/admin/dashboard'
+          else if (userRole === 'seller') targetPath = '/seller/dashboard'
+          else if (userRole === 'driver') targetPath = '/driver/dashboard'
         }
         navigate(targetPath, { replace: true })
       }
-    } catch (error) {
-      setOtpError(error.response?.data?.message || 'رمز التحقق غير صحيح')
+    } catch (err) {
+      setOtpError(err.response?.data?.message || 'رمز التحقق غير صحيح')
     } finally {
       setOtpLoading(false)
     }
@@ -166,19 +180,19 @@ const Login = () => {
 
     try {
       await api.post('/resend-login-otp', {
-        email: otpEmail
+        phone: otpPhone,
       })
       setResendCountdown(60)
       dispatch(showSuccessNotification('تم إعادة إرسال رمز التحقق'))
-    } catch (error) {
-      setOtpError(error.response?.data?.message || 'فشل في إعادة إرسال الرمز')
+    } catch (err) {
+      setOtpError(err.response?.data?.message || 'فشل في إعادة إرسال الرمز')
     } finally {
       setOtpLoading(false)
     }
   }
 
   const handleOtpChange = (e) => {
-    const value = e.target.value.replace(/\D/g, '').slice(0, 6)
+    const value = normalizeYemeniPhoneInput(e.target.value).replace(/\D/g, '').slice(0, 6)
     setOtp(value)
     setOtpError('')
   }
@@ -199,13 +213,13 @@ const Login = () => {
               مرحباً بعودتك
             </h2>
             <p className="text-amber-100 text-sm">
-              قم بتسجيل الدخول إلى حسابك
+              قم بتسجيل الدخول باستخدام رقم جوالك وكلمة المرور
             </p>
           </div>
 
           {/* Form Container */}
           <div className="px-8 py-6">
-            {/* Step 1: Email & Password Form */}
+            {/* Step 1: Phone & Password Form */}
             {step === 1 && (
               <form className="space-y-6" onSubmit={handleSubmit}>
                 {/* Error Message */}
@@ -215,32 +229,38 @@ const Login = () => {
                   </div>
                 )}
 
-                {/* Email */}
+                {/* Mobile Number */}
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-amber-700 mb-2">
-                    البريد الإلكتروني
+                  <label htmlFor="phone" className="block text-sm font-medium text-amber-700 mb-2">
+                    رقم الجوال
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                       <svg className="h-5 w-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                       </svg>
                     </div>
                     <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="أدخل بريدك الإلكتروني"
-                      autoComplete="email"
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      dir="ltr"
+                      placeholder="771234567"
+                      autoComplete="tel"
                       required
-                      value={formData.email}
+                      value={formData.phone}
                       onChange={handleChange}
-                      className={`w-full pr-10 pl-3 py-3 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 backdrop-blur-sm ${validationErrors.email ? 'border-rose-500 focus:ring-rose-500 focus:border-rose-500' : ''}`}
+                      className={`w-full pr-10 pl-16 py-3 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 backdrop-blur-sm text-right ${validationErrors.phone ? 'border-rose-500 focus:ring-rose-500 focus:border-rose-500' : ''}`}
                     />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <span className="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-1 rounded" dir="ltr">
+                        +967
+                      </span>
+                    </div>
                   </div>
-                  {validationErrors.email && (
+                  {validationErrors.phone && (
                     <p className="mt-1 text-sm text-rose-600">
-                      {validationErrors.email}
+                      {validationErrors.phone}
                     </p>
                   )}
                 </div>
@@ -335,8 +355,8 @@ const Login = () => {
               <form className="space-y-6" onSubmit={handleOtpSubmit}>
                 {/* Success Message */}
                 <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
-                  <p className="text-sm">تم إرسال رمز التحقق إلى بريدك الإلكتروني</p>
-                  <p className="text-xs mt-1 text-green-600">{otpEmail}</p>
+                  <p className="text-sm">تم إرسال رمز التحقق في رسالة نصية إلى رقم جوالك</p>
+                  <p className="text-xs mt-1 text-green-600 font-bold" dir="ltr">+967 {otpPhone}</p>
                 </div>
 
                 {/* OTP Error */}
@@ -361,6 +381,8 @@ const Login = () => {
                       id="otp"
                       name="otp"
                       type="text"
+                      inputMode="numeric"
+                      dir="ltr"
                       placeholder="أدخل الرمز المكون من 6 أرقام"
                       maxLength={6}
                       value={otp}
@@ -434,6 +456,16 @@ const Login = () => {
                   إنشاء حساب جديد
                 </Link>
               </p>
+              <div className="mt-4">
+                <button
+                  type="button"
+                  onClick={() => navigate('/become-seller')}
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2 w-full border-2 border-amber-500 text-amber-600 rounded-lg hover:bg-amber-50 font-bold transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                  كن بائعاً (أنشئ متجرك الخاص)
+                </button>
+              </div>
             </div>
           </div>
         </div>

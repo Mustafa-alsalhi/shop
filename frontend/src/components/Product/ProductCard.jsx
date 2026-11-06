@@ -109,6 +109,11 @@ const ProductCard = ({ product }) => {
 
         {/* Badges */}
         <div className="absolute top-1 sm:top-2 left-1 sm:left-2 flex flex-col gap-1">
+          {(product.seller?.type === 'restaurant' || product.food_options || product.preparation_time) && (
+            <span className="bg-gradient-to-r from-orange-500 to-amber-600 text-white px-1.5 py-0.5 sm:px-2 sm:py-1 text-xs rounded-full shadow-md font-bold flex items-center gap-1">
+              <span>🍔</span> وجبة
+            </span>
+          )}
           {product.is_featured && (
             <span className="bg-gradient-to-r from-amber-600 to-amber-700 text-white px-1.5 py-0.5 sm:px-2 sm:py-1 text-xs rounded-full shadow-md">
               مميز
@@ -152,12 +157,19 @@ const ProductCard = ({ product }) => {
 
       {/* Product Info */}
       <div className="p-3 sm:p-4 flex flex-col flex-grow">
-        {/* Category */}
-        {product.category && (
-          <p className="text-xs sm:text-sm text-amber-600 font-medium mb-1">
-            {product.category.name}
-          </p>
-        )}
+        {/* Category & Prep Time */}
+        <div className="flex items-center justify-between mb-1">
+          {product.category && (
+            <p className="text-xs sm:text-sm text-amber-600 font-medium truncate">
+              {product.category.name}
+            </p>
+          )}
+          {product.preparation_time && (
+            <span className="text-[11px] text-gray-500 font-medium">
+              ⏱️ {product.preparation_time} د
+            </span>
+          )}
+        </div>
 
         {/* Product Name */}
         <Link

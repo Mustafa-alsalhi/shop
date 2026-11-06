@@ -15,11 +15,9 @@ use Illuminate\Support\Str;
 
 
 class AdminController extends Controller
-
 {
 
     public function __construct()
-
     {
 
         $this->middleware(['auth:sanctum', 'admin']);
@@ -32,10 +30,14 @@ class AdminController extends Controller
     {
         try {
             $now = now();
-            $today = clone $now; $today->startOfDay();
-            $thisWeek = clone $now; $thisWeek->startOfWeek();
-            $thisMonth = clone $now; $thisMonth->startOfMonth();
-            $thisYear = clone $now; $thisYear->startOfYear();
+            $today = clone $now;
+            $today->startOfDay();
+            $thisWeek = clone $now;
+            $thisWeek->startOfWeek();
+            $thisMonth = clone $now;
+            $thisMonth->startOfMonth();
+            $thisYear = clone $now;
+            $thisYear->startOfYear();
 
             // Store wide stats
             $totalProducts = \App\Models\Product::count();
@@ -43,6 +45,27 @@ class AdminController extends Controller
             $totalUsers = \App\Models\User::count();
             $totalCategories = \App\Models\Category::count();
             $totalSellers = \App\Models\Seller::where('status', 'active')->count();
+
+            // إحصائيات منفصلة: المتاجر vs المطاعم
+            $storesCount = \App\Models\Seller::where(function($q){ $q->where('type', 'store')->orWhereNull('type'); })->count();
+            $restaurantsCount = \App\Models\Seller::where('type', 'restaurant')->count();
+            
+            $storeProductsCount = \App\Models\Product::whereHas('seller', function($q){
+                $q->where('type', 'store')->orWhereNull('type');
+            })->count();
+            $restaurantMealsCount = \App\Models\Product::whereHas('seller', function($q){
+                $q->where('type', 'restaurant');
+            })->count();
+
+            $restaurantOrdersCount = \App\Models\Order::whereHas('items.product.seller', function($q){
+                $q->where('type', 'restaurant');
+            })->count();
+            $storeOrdersCount = $totalOrders - $restaurantOrdersCount;
+
+            $restaurantRevenue = \App\Models\Order::whereHas('items.product.seller', function($q){
+                $q->where('type', 'restaurant');
+            })->sum('total_amount') ?? 0;
+            $storeRevenue = (\App\Models\Order::sum('total_amount') ?? 0) - $restaurantRevenue;
 
             // Store Revenue stats
             $todayOrders = \App\Models\Order::where('created_at', '>=', $today)->count();
@@ -63,9 +86,11 @@ class AdminController extends Controller
             // Top selling products
             $topSellingProducts = [];
             try {
-                $topSellingProducts = \App\Models\OrderItem::select('product_id', 
-                            \DB::raw('SUM(quantity) as total_sales'), 
-                            \DB::raw('SUM(quantity * price) as total_revenue'))
+                $topSellingProducts = \App\Models\OrderItem::select(
+                    'product_id',
+                    \DB::raw('SUM(quantity) as total_sales'),
+                    \DB::raw('SUM(quantity * price) as total_revenue')
+                )
                     ->with(['product:id,name,seller_id', 'product.seller:id,store_name'])
                     ->whereHas('product')
                     ->groupBy('product_id')
@@ -80,23 +105,24 @@ class AdminController extends Controller
                             'revenue' => $item->total_revenue ?? 0
                         ];
                     });
-            } catch (\Exception $e) {}
+            } catch (\Exception $e) {
+            }
 
             // Sellers Performance Table
             $sellersPerformance = [];
             try {
                 // Fetch all active sellers and join with products and order_items
                 $sellers = \App\Models\Seller::where('status', 'active')->get();
-                foreach($sellers as $seller) {
-                    $sellerItems = \App\Models\OrderItem::whereHas('product', function($q) use ($seller) {
+                foreach ($sellers as $seller) {
+                    $sellerItems = \App\Models\OrderItem::whereHas('product', function ($q) use ($seller) {
                         $q->where('seller_id', $seller->id);
                     });
 
                     // Count DISTINCT orders that this seller fulfilled
-                    $sellerCompletedOrdersQuery = (clone $sellerItems)->whereHas('order', function($q) {
+                    $sellerCompletedOrdersQuery = (clone $sellerItems)->whereHas('order', function ($q) {
                         $q->where('status', 'delivered');
                     });
-                    
+
                     $sellerTotalOrders = (clone $sellerItems)->distinct('order_id')->count('order_id');
                     $sellerCompletedOrders = (clone $sellerCompletedOrdersQuery)->distinct('order_id')->count('order_id');
 
@@ -134,9 +160,9 @@ class AdminController extends Controller
                         'total_sales' => $sellerTotalSales ?: 0,
                     ];
                 }
-                
+
                 // Sort by total sales descending
-                usort($sellersPerformance, function($a, $b) {
+                usort($sellersPerformance, function ($a, $b) {
                     return $b['total_sales'] <=> $a['total_sales'];
                 });
             } catch (\Exception $e) {
@@ -177,7 +203,19 @@ class AdminController extends Controller
                     'total_users' => $totalUsers,
                     'total_categories' => $totalCategories,
                     'total_sellers' => $totalSellers,
-                    
+                    'stores' => [
+                        'count' => $storesCount,
+                        'products_count' => $storeProductsCount,
+                        'orders_count' => $storeOrdersCount,
+                        'revenue' => $storeRevenue,
+                    ],
+                    'restaurants' => [
+                        'count' => $restaurantsCount,
+                        'meals_count' => $restaurantMealsCount,
+                        'orders_count' => $restaurantOrdersCount,
+                        'revenue' => $restaurantRevenue,
+                    ],
+
                     'total_revenue' => $totalRevenue,
                     'today_orders' => $todayOrders,
                     'today_revenue' => $todayRevenue,
@@ -187,7 +225,7 @@ class AdminController extends Controller
                     'this_month_revenue' => $thisMonthRevenue,
                     'this_year_orders' => $thisYearOrders,
                     'this_year_revenue' => $thisYearRevenue,
-                    
+
                     'pending_orders' => $pendingOrdersCount,
                 ],
                 'top_selling_products' => $topSellingProducts,
@@ -208,7 +246,6 @@ class AdminController extends Controller
 
 
     public function users()
-
     {
 
         $users = \App\Models\User::orderBy('created_at', 'desc')->paginate(10);
@@ -220,12 +257,11 @@ class AdminController extends Controller
 
 
     public function products(Request $request)
-
     {
 
         $query = \App\Models\Product::with('category');
 
-        
+
 
         // Filter by category
 
@@ -241,7 +277,7 @@ class AdminController extends Controller
 
         }
 
-        
+
 
         // Filter by status
 
@@ -279,7 +315,7 @@ class AdminController extends Controller
 
         }
 
-        
+
 
         // Search
 
@@ -291,19 +327,19 @@ class AdminController extends Controller
 
                 $q->where('name', 'like', '%' . $search . '%')
 
-                  ->orWhere('description', 'like', '%' . $search . '%');
+                    ->orWhere('description', 'like', '%' . $search . '%');
 
             });
 
         }
 
-        
+
 
         // Order by created_at desc by default
 
         $products = $query->orderBy('created_at', 'desc')->get();
 
-        
+
 
         return response()->json($products);
 
@@ -312,7 +348,6 @@ class AdminController extends Controller
 
 
     public function storeProduct(Request $request)
-
     {
 
         try {
@@ -362,6 +397,22 @@ class AdminController extends Controller
                 'sku' => 'nullable|string|max:100',
 
                 'category_id' => 'required|exists:categories,id',
+                'subcategory_id' => [
+                    function ($attribute, $value, $fail) use ($request) {
+                        if ($request->filled('category_id')) {
+                            $hasChildren = \App\Models\Category::where('parent_id', $request->category_id)->exists();
+                            if ($hasChildren && empty($value)) {
+                                $fail('الفئة الفرعية مطلوبة لأن الفئة الرئيسية المختارة تحتوي على أقسام فرعية.');
+                            }
+                            if (!empty($value)) {
+                                $validSub = \App\Models\Category::where('id', $value)->where('parent_id', $request->category_id)->exists();
+                                if (!$validSub) {
+                                    $fail('الفئة الفرعية المختارة غير صالحة أو لا تتبع الفئة الرئيسية.');
+                                }
+                            }
+                        }
+                    }
+                ],
 
                 'seller_id' => 'nullable|exists:sellers,id',
 
@@ -384,8 +435,11 @@ class AdminController extends Controller
 
 
             // Add variants back to validated data
-
             $validated['variants'] = $variants;
+
+            if ($request->filled('subcategory_id')) {
+                $validated['category_id'] = $request->subcategory_id;
+            }
 
 
 
@@ -411,7 +465,7 @@ class AdminController extends Controller
 
                     $validated['seller_reviews_count'] = $seller->reviews_count;
 
-                    
+
 
                     \Log::info('Seller data attached to product:', [
 
@@ -447,10 +501,12 @@ class AdminController extends Controller
 
                 if (!filter_var($validated['image_url'], FILTER_VALIDATE_URL)) {
 
-                    unset($validated['image_url']);
+                    $validated['image_url'] = 'assets/images/default-product.png';
 
                 }
 
+            } else {
+                $validated['image_url'] = 'assets/images/default-product.png';
             }
 
 
@@ -459,13 +515,13 @@ class AdminController extends Controller
 
             $galleryPaths = [];
 
-            
+
 
             // Check for gallery_images files with different naming patterns
 
             $galleryFiles = [];
 
-            
+
 
             // Try to get files as array first
 
@@ -491,7 +547,7 @@ class AdminController extends Controller
 
             }
 
-            
+
 
             // Process all found gallery files
 
@@ -533,9 +589,13 @@ class AdminController extends Controller
 
 
 
+            if (empty($validated['sku'])) {
+                $validated['sku'] = 'SKU-' . strtoupper(\Illuminate\Support\Str::random(8)) . '-' . time();
+            }
+
             $product = \App\Models\Product::create($validated);
 
-            
+
 
             \Log::info('Product created with gallery_images:', [
 
@@ -545,7 +605,7 @@ class AdminController extends Controller
 
             ]);
 
-            
+
 
             return response()->json($product, 201);
 
@@ -566,7 +626,6 @@ class AdminController extends Controller
 
 
     public function updateProduct(Request $request, $id)
-
     {
 
         $product = \App\Models\Product::findOrFail($id);
@@ -620,6 +679,22 @@ class AdminController extends Controller
                 'sku' => 'nullable|string|max:100',
 
                 'category_id' => 'required|exists:categories,id',
+                'subcategory_id' => [
+                    function ($attribute, $value, $fail) use ($request) {
+                        if ($request->filled('category_id')) {
+                            $hasChildren = \App\Models\Category::where('parent_id', $request->category_id)->exists();
+                            if ($hasChildren && empty($value)) {
+                                $fail('الفئة الفرعية مطلوبة لأن الفئة الرئيسية المختارة تحتوي على أقسام فرعية.');
+                            }
+                            if (!empty($value)) {
+                                $validSub = \App\Models\Category::where('id', $value)->where('parent_id', $request->category_id)->exists();
+                                if (!$validSub) {
+                                    $fail('الفئة الفرعية المختارة غير صالحة أو لا تتبع الفئة الرئيسية.');
+                                }
+                            }
+                        }
+                    }
+                ],
 
                 'seller_id' => 'nullable|exists:sellers,id',
 
@@ -642,8 +717,11 @@ class AdminController extends Controller
 
 
             // Add variants back to validated data
-
             $validated['variants'] = $variants;
+
+            if ($request->filled('subcategory_id')) {
+                $validated['category_id'] = $request->subcategory_id;
+            }
 
 
 
@@ -685,7 +763,7 @@ class AdminController extends Controller
 
                         $validated['seller_reviews_count'] = $seller->reviews_count;
 
-                        
+
 
                         \Log::info('Seller data updated for product:', [
 
@@ -747,13 +825,13 @@ class AdminController extends Controller
 
             $galleryPaths = [];
 
-            
+
 
             // Check for gallery_images files with different naming patterns
 
             $galleryFiles = [];
 
-            
+
 
             // Try to get files as array first
 
@@ -779,7 +857,7 @@ class AdminController extends Controller
 
             }
 
-            
+
 
             // Process all found gallery files
 
@@ -827,7 +905,7 @@ class AdminController extends Controller
 
             $product->update($validated);
 
-            
+
 
             \Log::info('Product updated with gallery_images:', [
 
@@ -837,7 +915,7 @@ class AdminController extends Controller
 
             ]);
 
-            
+
 
             return response()->json($product);
 
@@ -858,7 +936,6 @@ class AdminController extends Controller
 
 
     public function deleteProduct($id)
-
     {
 
         $product = \App\Models\Product::findOrFail($id);
@@ -872,7 +949,6 @@ class AdminController extends Controller
 
 
     public function getProduct($id)
-
     {
 
         $product = \App\Models\Product::with('category', 'tax')->findOrFail($id);
@@ -899,7 +975,7 @@ class AdminController extends Controller
             $paymentRequests = \App\Models\PaymentRequest::where('order_id', $order->id)->get();
             $orderArray = $order->toArray();
             $orderArray['payment_requests'] = $paymentRequests;
-            
+
             return response()->json(['data' => $orderArray]);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json(['success' => false, 'message' => 'Order not found'], 404);
@@ -911,19 +987,14 @@ class AdminController extends Controller
 
 
     public function categories()
-
     {
-
-        $categories = \App\Models\Category::orderBy('name')->get();
-
+        $categories = \App\Models\Category::with('parent')->orderBy('name')->get();
         return response()->json($categories);
-
     }
 
 
 
     public function storeCategory(Request $request)
-
     {
 
         try {
@@ -931,6 +1002,8 @@ class AdminController extends Controller
             $validated = $request->validate([
 
                 'name' => 'required|string|max:255|unique:categories,name',
+
+                'type' => 'nullable|string|max:50',
 
                 'description' => 'nullable|string',
 
@@ -941,10 +1014,12 @@ class AdminController extends Controller
                 'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
 
                 'show_on_homepage' => 'sometimes|boolean',
-
-                'sort_order' => 'sometimes|integer|min:0'
+                'sort_order' => 'sometimes|integer|min:0',
+                'parent_id' => 'nullable|exists:categories,id'
 
             ]);
+
+            $validated['type'] = $request->input('type', 'store');
 
 
 
@@ -999,18 +1074,19 @@ class AdminController extends Controller
 
 
     public function updateCategory(Request $request, $id)
-
     {
 
         try {
 
             $category = \App\Models\Category::findOrFail($id);
 
-            
+
 
             $validated = $request->validate([
 
                 'name' => 'required|string|max:255|unique:categories,name,' . $id,
+
+                'type' => 'nullable|string|max:50',
 
                 'description' => 'nullable|string',
 
@@ -1021,10 +1097,14 @@ class AdminController extends Controller
                 'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
 
                 'show_on_homepage' => 'sometimes|boolean',
-
-                'sort_order' => 'sometimes|integer|min:0'
+                'sort_order' => 'sometimes|integer|min:0',
+                'parent_id' => 'nullable|exists:categories,id'
 
             ]);
+
+            if ($request->has('type')) {
+                $validated['type'] = $request->input('type');
+            }
 
 
 
@@ -1093,7 +1173,6 @@ class AdminController extends Controller
 
 
     public function storeUser(Request $request)
-
     {
 
         try {
@@ -1132,7 +1211,7 @@ class AdminController extends Controller
 
             ]);
 
-            
+
 
             return response()->json([
 
@@ -1144,7 +1223,7 @@ class AdminController extends Controller
 
             ], 201);
 
-            
+
 
         } catch (\Illuminate\Validation\ValidationException $e) {
 
@@ -1175,7 +1254,6 @@ class AdminController extends Controller
 
 
     public function getUser($id)
-
     {
 
         $user = \App\Models\User::findOrFail($id);
@@ -1187,14 +1265,13 @@ class AdminController extends Controller
 
 
     public function updateUser(Request $request, $id)
-
     {
 
         try {
 
             $user = \App\Models\User::findOrFail($id);
 
-            
+
 
             // Simple validation with proper length limits
 
@@ -1216,7 +1293,7 @@ class AdminController extends Controller
 
             $validated['role'] = trim($validated['role']);
 
-            
+
 
             // Direct update with explicit field assignment
 
@@ -1230,7 +1307,7 @@ class AdminController extends Controller
 
             $user->save();
 
-            
+
 
             return response()->json([
 
@@ -1242,7 +1319,7 @@ class AdminController extends Controller
 
             ]);
 
-            
+
 
         } catch (\Illuminate\Validation\ValidationException $e) {
 
@@ -1273,14 +1350,13 @@ class AdminController extends Controller
 
 
     public function updateOrder(Request $request, $id)
-
     {
 
         try {
 
             $order = \App\Models\Order::findOrFail($id);
 
-            
+
 
             $validated = $request->validate([
 
@@ -1311,7 +1387,6 @@ class AdminController extends Controller
 
 
     public function deleteOrder($id)
-
     {
 
         $order = \App\Models\Order::findOrFail($id);
@@ -1327,19 +1402,21 @@ class AdminController extends Controller
     // Seller Management Functions
 
     public function getSellers()
-
     {
-
         try {
-
             $sellers = \App\Models\Seller::with('user')->get()->map(function ($seller) {
                 $productsCount = \App\Models\Product::where('seller_id', $seller->id)->count();
+                $ordersCount = \App\Models\Order::whereHas('items.product', function ($q) use ($seller) {
+                    $q->where('seller_id', $seller->id);
+                })->count();
+
                 $seller->products_count = $productsCount;
+                $seller->orders_count = $ordersCount;
+                $seller->type = $seller->type ?: 'store';
                 return $seller;
             });
 
             return response()->json($sellers);
-
         } catch (\Exception $e) {
 
             return response()->json([
@@ -1357,7 +1434,6 @@ class AdminController extends Controller
 
 
     public function getSeller($id)
-
     {
 
         try {
@@ -1422,10 +1498,16 @@ class AdminController extends Controller
 
 
     public function createSeller(Request $request)
-
     {
 
         try {
+
+            if ($request->has('is_open')) {
+                $request->merge(['is_open' => $request->boolean('is_open')]);
+            }
+            if ($request->has('accepting_orders')) {
+                $request->merge(['accepting_orders' => $request->boolean('accepting_orders')]);
+            }
 
             $validated = $request->validate([
 
@@ -1464,8 +1546,15 @@ class AdminController extends Controller
                 'reviews_count' => 'nullable|integer|min:0',
 
                 'status' => 'nullable|in:active,inactive',
-
-                'is_verified' => 'nullable|boolean'
+                'is_verified' => 'nullable|boolean',
+                'type' => 'nullable|string|max:50',
+                'cover_image' => 'nullable|string',
+                'is_open' => 'nullable',
+                'accepting_orders' => 'nullable',
+                'preparation_time' => 'nullable|string',
+                'min_order_amount' => 'nullable|numeric',
+                'cuisine_type' => 'nullable|string',
+                'working_hours' => 'nullable',
 
             ]);
 
@@ -1555,7 +1644,7 @@ class AdminController extends Controller
 
             $seller = \App\Models\Seller::create($validated);
 
-            
+
 
             // Return seller data without avatar_image to avoid JSON issues
 
@@ -1602,7 +1691,6 @@ class AdminController extends Controller
 
 
     public function updateSeller(Request $request, $id)
-
     {
 
         try {
@@ -1619,11 +1707,11 @@ class AdminController extends Controller
 
             ]);
 
-            
+
 
             $seller = \App\Models\Seller::findOrFail($id);
 
-            
+
 
             \Log::info('Seller found', [
 
@@ -1633,19 +1721,26 @@ class AdminController extends Controller
 
             ]);
 
-            
+
 
             // Process FormData correctly - use input() instead of all()
 
             $validated = [];
 
-            
+
 
             // Get all form fields using input() method
 
-            $fields = ['store_name', 'description', 'avatar', 'rating', 'reviews_count', 'status', 'is_verified', 'latitude', 'longitude', 'kuraimi_account_name', 'kuraimi_account_number', 'alt_network_name', 'alt_recipient_name', 'alt_recipient_phone'];
+            $fields = [
+                'store_name', 'description', 'avatar', 'rating', 'reviews_count', 
+                'status', 'is_verified', 'latitude', 'longitude', 
+                'kuraimi_account_name', 'kuraimi_account_number', 'alt_network_name', 
+                'alt_recipient_name', 'alt_recipient_phone',
+                'type', 'cover_image', 'is_open', 'accepting_orders', 
+                'preparation_time', 'min_order_amount', 'cuisine_type', 'working_hours'
+            ];
 
-            
+
 
             foreach ($fields as $field) {
 
@@ -1657,7 +1752,17 @@ class AdminController extends Controller
 
             }
 
-            
+            if ($request->has('is_open')) {
+                $validated['is_open'] = $request->boolean('is_open');
+            }
+            if ($request->has('accepting_orders')) {
+                $validated['accepting_orders'] = $request->boolean('accepting_orders');
+            }
+            if ($request->has('is_verified')) {
+                $validated['is_verified'] = $request->boolean('is_verified');
+            }
+
+
 
             \Log::info('Processing FormData with input():', [
 
@@ -1669,7 +1774,7 @@ class AdminController extends Controller
 
             ]);
 
-            
+
 
             // Handle image and document uploads
 
@@ -1717,7 +1822,7 @@ class AdminController extends Controller
 
             ]);
 
-            
+
 
             // Log before update
 
@@ -1735,7 +1840,7 @@ class AdminController extends Controller
 
             ]);
 
-            
+
 
             // Check if validated data is empty
 
@@ -1755,7 +1860,7 @@ class AdminController extends Controller
 
             }
 
-            
+
 
             \Log::info('Attempting to update seller with:', [
 
@@ -1767,11 +1872,11 @@ class AdminController extends Controller
 
             ]);
 
-            
+
 
             $result = $seller->update($validated);
 
-            
+
 
             \Log::info('Update result:', [
 
@@ -1785,7 +1890,7 @@ class AdminController extends Controller
 
             ]);
 
-            
+
 
             // Refresh and log after update
 
@@ -1801,7 +1906,7 @@ class AdminController extends Controller
 
             ]);
 
-            
+
 
             // Return seller data without avatar_image to avoid JSON issues
 
@@ -1848,7 +1953,6 @@ class AdminController extends Controller
 
 
     public function deleteSeller($id)
-
     {
 
         try {
@@ -1924,7 +2028,7 @@ class AdminController extends Controller
     {
         try {
             $order = \App\Models\Order::with('items.product.seller')->findOrFail($orderId);
-            
+
             // Try to find pickup location (Seller)
             $sellerLat = null;
             $sellerLng = null;
@@ -1936,23 +2040,27 @@ class AdminController extends Controller
             // Fallback to order location if no seller location is found
             $targetLat = $sellerLat ?? $order->latitude;
             $targetLng = $sellerLng ?? $order->longitude;
-            
+
             $drivers = \App\Models\User::where('role', 'driver')
                 ->where('is_active', true)
-                ->withCount(['driverOrders as active_orders_count' => function ($query) {
-                    $query->whereIn('driver_status', ['assigned', 'picked_up_from_seller', 'out_for_delivery']);
-                }])
+                ->withCount([
+                    'driverOrders as active_orders_count' => function ($query) {
+                        $query->whereIn('driver_status', ['assigned', 'picked_up_from_seller', 'out_for_delivery']);
+                    }
+                ])
                 ->get();
-                
+
             $drivers = $drivers->map(function ($driver) use ($targetLat, $targetLng) {
                 $driver->distance_km = null;
                 if ($targetLat && $targetLng && $driver->latitude && $driver->longitude) {
                     $driver->distance_km = \App\Services\DeliveryService::calculateFee(
-                        $targetLat, $targetLng, 
-                        $driver->latitude, $driver->longitude
+                        $targetLat,
+                        $targetLng,
+                        $driver->latitude,
+                        $driver->longitude
                     )['distance_km'];
                 }
-                
+
                 // Categorize
                 if ($driver->is_online && $driver->active_orders_count == 0) {
                     $driver->smart_status = 'available';
@@ -1961,12 +2069,12 @@ class AdminController extends Controller
                 } else {
                     $driver->smart_status = 'offline';
                 }
-                
+
                 return $driver;
             });
-            
+
             // Sort: available first, then busy, then offline, and by distance
-            $drivers = $drivers->sortBy(function($driver) {
+            $drivers = $drivers->sortBy(function ($driver) {
                 $statusScore = $driver->smart_status === 'available' ? 1 : ($driver->smart_status === 'busy' ? 2 : 3);
                 $dist = $driver->distance_km ?? 999999;
                 return sprintf('%d_%08d', $statusScore, $dist * 1000);

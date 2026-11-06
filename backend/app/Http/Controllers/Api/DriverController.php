@@ -42,11 +42,30 @@ class DriverController extends Controller
         try {
             $driverId = $request->user()->id;
             
-            $orders = Order::with(['items.product.seller', 'user'])
-                ->where('driver_id', $driverId)
-                ->whereIn('driver_status', ['assigned', 'picked_up_from_seller', 'out_for_delivery'])
-                ->orderBy('created_at', 'desc')
-                ->get();
+            $query = Order::with(['items.product.seller', 'user']);
+            
+            if ($request->query('status') === 'pending') {
+                // Return UNASSIGNED pending orders OR orders specifically assigned to this driver by admin (waiting for acceptance)
+                $query->where(function($q) use ($driverId) {
+                    $q->where(function($qNull) {
+                        $qNull->whereNull('driver_id')
+                              ->where('status', 'pending');
+                    })
+                    ->orWhere(function($qAssigned) use ($driverId) {
+                        $qAssigned->where('driver_id', $driverId)
+                                  ->where(function($qStatus) {
+                                      $qStatus->whereNull('driver_status')
+                                              ->orWhere('driver_status', 'pending');
+                                  });
+                    });
+                });
+            } else {
+                // Return drivers assigned orders
+                $query->where('driver_id', $driverId)
+                      ->whereIn('driver_status', ['assigned', 'picked_up_from_seller', 'out_for_delivery']);
+            }
+            
+            $orders = $query->orderBy('created_at', 'desc')->get();
                 
             return response()->json([
                 'status' => 'success',
@@ -97,20 +116,64 @@ class DriverController extends Controller
                 'driver_status' => 'required|in:assigned,picked_up_from_seller,out_for_delivery,delivered,rejected'
             ]);
             
-            $order = Order::where('id', $orderId)
-                ->where('driver_id', $driverId)
-                ->firstOrFail();
+            $order = Order::findOrFail($orderId);
+            
+            // If claiming a pending order, assign it to this driver
+            if ($order->status === 'pending' && $order->driver_id === null) {
+                $order->driver_id = $driverId;
+                $order->driver_status = 'assigned'; // Auto-upgrade to assigned
+            } elseif ($order->driver_id !== $driverId) {
+                // Otherwise only the assigned driver can update it
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Order is not assigned to you'
+                ], 403);
+            }
                 
             $order->driver_status = $request->driver_status;
             
-            // If delivered, also update order status
-            if ($request->driver_status === 'delivered') {
-                $order->status = 'delivered';
+            // Check if this is a restaurant order
+            $isRestaurant = false;
+            if ($order->seller && $order->seller->type === 'restaurant') {
+                $isRestaurant = true;
+            } else {
+                $firstItem = $order->items->first();
+                if ($firstItem && $firstItem->product && $firstItem->product->seller && $firstItem->product->seller->type === 'restaurant') {
+                    $isRestaurant = true;
+                }
+            }
+
+            // Sync with global order status so Seller, Admin and Customer see changes live
+            if ($request->driver_status === 'assigned') {
+                $order->status = $isRestaurant ? 'assigned_to_courier' : 'processing';
+            } elseif ($request->driver_status === 'picked_up_from_seller') {
+                $order->status = $isRestaurant ? 'picked_up' : 'shipped';
             } elseif ($request->driver_status === 'out_for_delivery') {
-                $order->status = 'shipped';
+                $order->status = $isRestaurant ? 'on_the_way' : 'shipped';
+            } elseif ($request->driver_status === 'delivered') {
+                $order->status = 'delivered';
             }
             
             $order->save();
+
+            $statusTextMap = [
+                'assigned' => $isRestaurant ? 'تم إسناد الطلب للمندوب' : 'تم تعيين مندوب التوصيل',
+                'picked_up_from_seller' => $isRestaurant ? 'استلم المندوب الوجبة من المطعم' : 'تم استلام الشحنة من المتجر',
+                'out_for_delivery' => $isRestaurant ? 'الطلب في الطريق إليك مع المندوب 🛵' : 'الشحنة في طريقها للتوصيل 🚚',
+                'delivered' => 'تم تسليم الطلب بنجاح ✅',
+                'rejected' => 'تم رفض استلام الطلب من قِبل المندوب',
+            ];
+            $friendlyStatus = $statusTextMap[$request->driver_status] ?? $request->driver_status;
+
+            // إشعار للعميل بتحديث حالة الطلب
+            \App\Models\Notification::create([
+                'user_id' => $order->user_id,
+                'type' => 'info',
+                'title' => 'تحديث حالة توصيل الطلب',
+                'message' => 'تم تحديث حالة طلبك رقم ' . $order->order_number . ' إلى: ' . $friendlyStatus,
+                'link' => '/orders/' . $order->id,
+                'read' => false,
+            ]);
 
             // Intercept rejected status to notify Admin
             if ($request->driver_status === 'rejected') {
@@ -174,6 +237,7 @@ class DriverController extends Controller
     public function getProfile(Request $request)
     {
         $driver = tap($request->user())->makeVisible(['latitude', 'longitude', 'is_online', 'work_zone']);
+        $driver->load('driver');
         return response()->json([
             'status' => 'success',
             'data' => $driver
@@ -220,6 +284,12 @@ class DriverController extends Controller
         $driver->latitude = $request->latitude;
         $driver->longitude = $request->longitude;
         $driver->save();
+        
+        \Illuminate\Support\Facades\Cache::put('driver_loc_'.$driver->id, [
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+            'updated_at' => now()->toDateTimeString()
+        ], 3600);
 
         return response()->json([
             'status' => 'success',
@@ -337,5 +407,17 @@ class DriverController extends Controller
                 'message' => 'Failed to fetch statistics'
             ], 500);
         }
+    }
+
+    /**
+     * Get Driver Location (For Customer/Seller)
+     */
+    public function getLocation($driverId)
+    {
+        $loc = \Illuminate\Support\Facades\Cache::get('driver_loc_'.$driverId);
+        if (!$loc) {
+            return response()->json(['status' => 'error', 'message' => 'Location not found'], 404);
+        }
+        return response()->json(['status' => 'success', 'data' => $loc]);
     }
 }

@@ -1,33 +1,49 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { forgotPassword, selectIsLoading, selectError, clearError } from '../../store/slices/authSlice'
 import { showSuccessNotification, showErrorNotification } from '../../store/slices/uiSlice'
 
-import { useNavigate } from 'react-router-dom'
+const normalizeYemeniPhoneInput = (rawValue) => {
+  if (!rawValue) return ''
+  const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩', '۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹']
+  const englishDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+  let cleaned = String(rawValue)
+  arabicDigits.forEach((d, idx) => {
+    cleaned = cleaned.replaceAll(d, englishDigits[idx])
+  })
+  return cleaned
+}
+
+const isValidYemeniPhone = (rawPhone) => {
+  const cleaned = normalizeYemeniPhoneInput(rawPhone).replace(/\D+/g, '')
+  let digits = cleaned
+  if (digits.startsWith('00967')) digits = digits.slice(5)
+  else if (digits.startsWith('967') && digits.length >= 12) digits = digits.slice(3)
+  if (digits.length === 10 && digits.startsWith('0')) digits = digits.slice(1)
+  return /^7[01378]\d{7}$/.test(digits)
+}
+
 const ForgotPasswordEmail = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  
+
   const isLoading = useSelector(selectIsLoading)
   const error = useSelector(selectError)
-  
+
   const [formData, setFormData] = useState({
-    email: '',
+    phone: '',
   })
-  const [isSubmitted, setIsSubmitted] = useState(false)
   const [validationErrors, setValidationErrors] = useState({})
 
   useEffect(() => {
-    // Clear any previous errors
     dispatch(clearError())
   }, [dispatch])
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-    
-    // Clear validation error for this field
+    setFormData(prev => ({ ...prev, [name]: normalizeYemeniPhoneInput(value) }))
+
     if (validationErrors[name]) {
       setValidationErrors(prev => ({ ...prev, [name]: '' }))
     }
@@ -35,84 +51,85 @@ const ForgotPasswordEmail = () => {
 
   const validateForm = () => {
     const errors = {}
-    
-    if (!formData.email) {
-      errors.email = 'البريد الإلكتروني مطلوب'
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = 'البريد الإلكتروني غير صالح'
+
+    if (!formData.phone?.trim()) {
+      errors.phone = 'رقم الجوال مطلوب'
+    } else if (!isValidYemeniPhone(formData.phone)) {
+      errors.phone = 'يرجى إدخال رقم جوال يمني صحيح يبدأ بـ 77 أو 73 أو 71 أو 70 (9 أرقام)'
     }
-    
+
     setValidationErrors(errors)
     return Object.keys(errors).length === 0
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
+
     if (!validateForm()) {
       return
     }
 
     try {
-      const result = await dispatch(forgotPassword(formData.email))
+      const result = await dispatch(forgotPassword({ phone: formData.phone }))
       if (result.meta.requestStatus === 'fulfilled') {
-        dispatch(showSuccessNotification('تم إرسال رمز استعادة كلمة المرور إلى بريدك الإلكتروني!'))
-        navigate(`/reset-password?email=${encodeURIComponent(formData.email)}`)
+        const targetPhone = result.payload?.phone || formData.phone
+        dispatch(showSuccessNotification('تم إرسال رمز استعادة كلمة المرور في رسالة نصية إلى رقم جوالك!'))
+        navigate(`/reset-password?phone=${encodeURIComponent(targetPhone)}`)
       }
-    } catch (error) {
-      dispatch(showErrorNotification('فشل في إرسال رابط إعادة تعيين كلمة المرور'))
+    } catch (err) {
+      dispatch(showErrorNotification('فشل في إرسال رمز إعادة تعيين كلمة المرور'))
     }
   }
 
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8" dir="rtl">
       <div className="max-w-md w-full space-y-8">
-        {/* Header */}
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            هل نسيت كلمة المرور؟
+            استعادة كلمة المرور
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            أدخل بريدك الإلكتروني وسنرسل لك رمزاً (OTP) لإعادة تعيين كلمة المرور.
+            أدخل رقم جوالك اليمني وسنرسل لك رمز تحقق (OTP) عبر الواتساب لإعادة تعيين كلمة المرور.
           </p>
         </div>
 
-        {/* Forgot Password Form */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {/* Error Message */}
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
               {error}
             </div>
           )}
 
-          {/* Email */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              عنوان البريد الإلكتروني
+            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+              رقم الجوال اليمني
             </label>
-            <div className="mt-1">
+            <div className="relative">
               <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
+                id="phone"
+                name="phone"
+                type="tel"
+                dir="ltr"
+                autoComplete="tel"
                 required
-                value={formData.email}
+                value={formData.phone}
                 onChange={handleChange}
-                className={`input ${validationErrors.email ? 'input-error' : ''}`}
-                placeholder="أدخل بريدك الإلكتروني"
+                className={`input pl-16 text-right ${validationErrors.phone ? 'input-error' : ''}`}
+                placeholder="771234567"
               />
-              {validationErrors.email && (
-                <p className="mt-1 text-sm text-red-600">
-                  {validationErrors.email}
-                </p>
-              )}
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span className="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-1 rounded" dir="ltr">
+                  +967
+                </span>
+              </div>
             </div>
+            {validationErrors.phone && (
+              <p className="mt-1 text-sm text-red-600">
+                {validationErrors.phone}
+              </p>
+            )}
           </div>
 
-          {/* Submit Button */}
           <div>
             <button
               type="submit"
@@ -121,7 +138,7 @@ const ForgotPasswordEmail = () => {
             >
               {isLoading ? (
                 <div className="flex items-center justify-center">
-                  <div className="spinner h-5 w-5 mr-2"></div>
+                  <div className="spinner h-5 w-5 ml-2"></div>
                   جاري الإرسال...
                 </div>
               ) : (
@@ -131,7 +148,6 @@ const ForgotPasswordEmail = () => {
           </div>
         </form>
 
-        {/* Back to Login */}
         <div className="text-center">
           <Link
             to="/forgot-password"

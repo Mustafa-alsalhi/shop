@@ -10,22 +10,46 @@ use Illuminate\Support\Facades\Cache;
 
 class CategoryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $categories = Cache::remember('api_categories_all', 600, function () {
-                return Category::withCount('products')
-                    ->where('is_active', true)
+            $type = $request->query('type', 'store'); // Default to 'store' for backward compatibility
+            $cacheKey = 'api_categories_' . $type;
+            
+            Cache::forget($cacheKey);
+            $categories = Cache::remember($cacheKey, 600, function () use ($type) {
+                $query = Category::withCount('products')
+                    ->with('parent:id,name,slug')
+                    ->where('is_active', true);
+
+                if ($type === 'restaurant') {
+                    $query->where('type', 'restaurant');
+                } elseif ($type === 'all') {
+                    // Return all types
+                } else {
+                    $query->where(function ($q) {
+                        $q->where('type', 'store')->orWhereNull('type');
+                    });
+                }
+
+                return $query->orderBy('sort_order', 'asc')
                     ->orderBy('name', 'asc')
                     ->get()
                     ->map(function ($category) {
                         return [
                             'id' => $category->id,
                             'name' => $category->name,
+                            'type' => $category->type ?? 'store',
                             'slug' => $category->slug,
                             'description' => $category->description,
                             'image' => $category->image,
                             'image_url' => $category->image_url,
+                            'parent_id' => $category->parent_id,
+                            'parent' => $category->parent ? [
+                                'id' => $category->parent->id,
+                                'name' => $category->parent->name,
+                                'slug' => $category->parent->slug,
+                            ] : null,
                             'products_count' => $category->products_count,
                             'is_active' => $category->is_active,
                             'created_at' => $category->created_at,
@@ -38,6 +62,34 @@ class CategoryController extends Controller
         } catch (\Exception $e) {
             \Log::error('Categories fetch error: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to fetch categories'], 500);
+        }
+    }
+
+    public function getRestaurantCategories(\Illuminate\Http\Request $request)
+    {
+        try {
+            $type = $request->query('type', 'restaurant');
+            $categories = Category::where('type', $type)
+                ->where('is_active', true)
+                ->orderBy('sort_order', 'asc')
+                ->get()
+                ->map(function ($cat) {
+                    return [
+                        'id' => $cat->id,
+                        'name' => $cat->name,
+                        'type' => $cat->type,
+                        'slug' => $cat->slug,
+                        'description' => $cat->description,
+                        'image' => $cat->image,
+                        'image_url' => $cat->image_url,
+                        'sort_order' => $cat->sort_order,
+                        'is_active' => $cat->is_active,
+                    ];
+                });
+            return response()->json($categories);
+        } catch (\Exception $e) {
+            \Log::error('Restaurant categories fetch error: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to fetch restaurant categories'], 500);
         }
     }
 

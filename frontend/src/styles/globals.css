@@ -34,31 +34,35 @@ html[dir="rtl"] .space-x-reverse > :not([hidden]) ~ :not([hidden]) {
 }
 
 
+<<<<<<< HEAD
   /* Custom scrollbar with amber theme */
+=======
+  /* Custom scrollbar with teal theme */
+>>>>>>> 2d63415 (feat: add activity-based banners, header activities dropdown, and WhatsApp OTP phone auth)
   ::-webkit-scrollbar {
-    @apply w-3;
+    @apply w-2.5 sm:w-3;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-amber-100;
+    @apply bg-slate-100;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-gradient-to-b from-amber-400 to-amber-600 rounded-full;
+    @apply bg-teal-600 rounded-full border-2 border-slate-100;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-gradient-to-b from-amber-500 to-amber-700;
+    @apply bg-teal-700;
   }
 
   /* Selection color */
   ::selection {
-    @apply bg-amber-200 text-amber-900;
+    @apply bg-teal-200 text-teal-900;
   }
 
   /* Focus styles */
   :focus-visible {
-    @apply outline-2 outline-amber-500 outline-offset-2;
+    @apply outline-2 outline-orange-500 outline-offset-2;
   }
 
 /* Custom component styles */

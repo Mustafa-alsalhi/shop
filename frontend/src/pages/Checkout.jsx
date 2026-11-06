@@ -999,7 +999,33 @@ const Checkout = () => {
                           }}
                         />
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-gray-900 text-sm truncate">{item.product_name}</h4>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <h4 className="font-medium text-gray-900 text-sm truncate">{item.product_name}</h4>
+                            {item.seller_type === 'restaurant' && (
+                              <span className="text-[10px] bg-orange-100 text-orange-700 font-semibold px-1.5 py-0.2 rounded">
+                                🍔 وجبة
+                              </span>
+                            )}
+                          </div>
+                          {(item.selected_options || item.special_instructions) && (() => {
+                            let opts = null;
+                            try {
+                              opts = typeof item.selected_options === 'string' ? JSON.parse(item.selected_options || '{}') : (item.selected_options || {});
+                            } catch (e) {
+                              opts = {};
+                            }
+                            return (
+                              <div className="text-[11px] text-gray-500 my-0.5 space-y-0.5">
+                                {opts.size && <span>الحجم: {opts.size.name} </span>}
+                                {opts.extras && opts.extras.length > 0 && (
+                                  <span>+ {opts.extras.map(e => e.name).join(', ')} </span>
+                                )}
+                                {item.special_instructions && (
+                                  <span className="text-amber-700 block italic">ملاحظة: {item.special_instructions}</span>
+                                )}
+                              </div>
+                            );
+                          })()}
                           <p className="text-xs text-gray-600">الكمية: {item.quantity}</p>
                           <p className="text-xs text-gray-600">{currency} {parseFloat(item.price || 0).toFixed(2)}</p>
                         </div>
@@ -1180,6 +1206,25 @@ const Checkout = () => {
                       />
                       <div className="flex-1">
                         <h4 className="font-medium text-gray-900">{item.product_name}</h4>
+                        {(item.selected_options || item.special_instructions) && (() => {
+                          let opts = null;
+                          try {
+                            opts = typeof item.selected_options === 'string' ? JSON.parse(item.selected_options || '{}') : (item.selected_options || {});
+                          } catch (e) {
+                            opts = {};
+                          }
+                          return (
+                            <div className="text-xs text-gray-600 my-1">
+                              {opts.size && <span className="ml-2 font-medium">الحجم: {opts.size.name}</span>}
+                              {opts.extras && opts.extras.length > 0 && (
+                                <span className="ml-2 text-emerald-700">+ {opts.extras.map(e => e.name).join(', ')}</span>
+                              )}
+                              {item.special_instructions && (
+                                <span className="text-amber-700 block italic">ملاحظة: {item.special_instructions}</span>
+                              )}
+                            </div>
+                          );
+                        })()}
                         <p className="text-sm text-gray-600">الكمية: {item.quantity}</p>
                         <p className="text-sm text-gray-600">السعر: {item.currency || currency} {parseFloat(item.price || 0).toFixed(2)}</p>
                       </div>

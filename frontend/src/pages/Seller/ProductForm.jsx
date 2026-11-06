@@ -28,7 +28,13 @@ const SellerProductForm = () => {
     image_url: '',
     image_file: null,
     gallery_images: [],
-    variants: []
+    variants: [],
+    preparation_time: '',
+    food_options: {
+      sizes: [],
+      extras: [],
+      removals: []
+    }
   })
 
   const [categories, setCategories] = useState([])
@@ -50,7 +56,7 @@ const SellerProductForm = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('/api/categories')
+      const response = await axios.get('/api/categories?type=all')
       setCategories(response.data || [])
     } catch (error) {
       console.error('Error fetching categories:', error)
@@ -96,6 +102,8 @@ const SellerProductForm = () => {
         stock: product.stock || '',
         sku: product.sku || '',
         category_id: product.category_id || '',
+        original_category_id: product.category_id || '', // used to help resolve in useEffect
+        subcategory_id: '',
         seller_category_id: product.seller_category_id || '',
         currency: product.currency || 'SAR',
         tax_id: product.tax_id || '',
@@ -107,11 +115,13 @@ const SellerProductForm = () => {
         image_url: product.image_url || '',
         image_file: null,
         gallery_images: product.gallery_images || [],
-        variants: product.variants || []
+        variants: product.variants || [],
+        preparation_time: product.preparation_time || '',
+        food_options: product.food_options || { sizes: [], extras: [], removals: [] }
       })
       setPreviewImage(product.image_url ? `http://localhost:8000${product.image_url}` : '')
       if (product.gallery_images && Array.isArray(product.gallery_images)) {
-        setGalleryPreviews(product.gallery_images.map(img => 
+        setGalleryPreviews(product.gallery_images.map(img =>
           img.startsWith('http') ? img : `http://localhost:8000${img}`
         ))
       }
@@ -120,6 +130,28 @@ const SellerProductForm = () => {
       setError('فشل في تحميل بيانات المنتج')
     }
   }
+
+  // Parse original category ID into main and subcategory
+  useEffect(() => {
+    if (isEditing && categories.length > 0 && formData.original_category_id) {
+      const cat = categories.find(c => c.id === parseInt(formData.original_category_id));
+      if (cat && cat.parent_id) {
+        setFormData(prev => ({
+          ...prev,
+          category_id: cat.parent_id,
+          subcategory_id: cat.id,
+          original_category_id: '' // Clear to avoid re-running
+        }));
+      } else if (cat) {
+        setFormData(prev => ({
+          ...prev,
+          category_id: cat.id,
+          subcategory_id: '',
+          original_category_id: ''
+        }));
+      }
+    }
+  }, [categories, isEditing, formData.original_category_id]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -147,7 +179,7 @@ const SellerProductForm = () => {
       reader.onloadend = () => {
         newPreviews.push(reader.result)
         newGalleryImages.push(file)
-        
+
         if (newPreviews.length === files.length) {
           setGalleryPreviews(prev => [...prev, ...newPreviews])
           setFormData(prev => ({
@@ -178,7 +210,7 @@ const SellerProductForm = () => {
   const updateVariant = (index, field, value) => {
     setFormData(prev => ({
       ...prev,
-      variants: prev.variants.map((variant, i) => 
+      variants: prev.variants.map((variant, i) =>
         i === index ? { ...variant, [field]: value } : variant
       )
     }))
@@ -191,15 +223,119 @@ const SellerProductForm = () => {
     }))
   }
 
+  // Food options helpers
+  const addFoodSize = () => {
+    setFormData(prev => ({
+      ...prev,
+      food_options: {
+        ...(prev.food_options || {}),
+        sizes: [...(prev.food_options?.sizes || []), { name: '', price: 0 }]
+      }
+    }))
+  }
+
+  const removeFoodSize = (idx) => {
+    setFormData(prev => ({
+      ...prev,
+      food_options: {
+        ...prev.food_options,
+        sizes: (prev.food_options?.sizes || []).filter((_, i) => i !== idx)
+      }
+    }))
+  }
+
+  const updateFoodSize = (idx, field, val) => {
+    setFormData(prev => ({
+      ...prev,
+      food_options: {
+        ...prev.food_options,
+        sizes: (prev.food_options?.sizes || []).map((s, i) => i === idx ? { ...s, [field]: val } : s)
+      }
+    }))
+  }
+
+  const addFoodExtra = () => {
+    setFormData(prev => ({
+      ...prev,
+      food_options: {
+        ...(prev.food_options || {}),
+        extras: [...(prev.food_options?.extras || []), { name: '', price: 0 }]
+      }
+    }))
+  }
+
+  const removeFoodExtra = (idx) => {
+    setFormData(prev => ({
+      ...prev,
+      food_options: {
+        ...prev.food_options,
+        extras: (prev.food_options?.extras || []).filter((_, i) => i !== idx)
+      }
+    }))
+  }
+
+  const updateFoodExtra = (idx, field, val) => {
+    setFormData(prev => ({
+      ...prev,
+      food_options: {
+        ...prev.food_options,
+        extras: (prev.food_options?.extras || []).map((e, i) => i === idx ? { ...e, [field]: val } : e)
+      }
+    }))
+  }
+
+  const addFoodRemoval = () => {
+    setFormData(prev => ({
+      ...prev,
+      food_options: {
+        ...(prev.food_options || {}),
+        removals: [...(prev.food_options?.removals || []), '']
+      }
+    }))
+  }
+
+  const removeFoodRemoval = (idx) => {
+    setFormData(prev => ({
+      ...prev,
+      food_options: {
+        ...prev.food_options,
+        removals: (prev.food_options?.removals || []).filter((_, i) => i !== idx)
+      }
+    }))
+  }
+
+  const updateFoodRemoval = (idx, val) => {
+    setFormData(prev => ({
+      ...prev,
+      food_options: {
+        ...prev.food_options,
+        removals: (prev.food_options?.removals || []).map((r, i) => i === idx ? val : r)
+      }
+    }))
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     setError('')
 
     try {
+      if (!formData.category_id) {
+        throw new Error('Category is required')
+      }
+
+      // Subcategory Validation logic
+      const hasSubCategories = categories.some(c => c.parent_id === parseInt(formData.category_id));
+      if (hasSubCategories && !formData.subcategory_id) {
+        setError('يرجى اختيار القسم الفرعي للفئة المحددة.');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setLoading(false);
+        return;
+      }
+
       const token = localStorage.getItem('token')
       const submitData = new FormData()
-      
+
       submitData.append('name', formData.name)
       submitData.append('description', formData.description)
       submitData.append('detailed_description', formData.detailed_description)
@@ -208,6 +344,7 @@ const SellerProductForm = () => {
       submitData.append('stock', formData.stock)
       if (formData.sku) submitData.append('sku', formData.sku)
       submitData.append('category_id', formData.category_id)
+      if (formData.subcategory_id) submitData.append('subcategory_id', formData.subcategory_id)
       if (formData.seller_category_id) submitData.append('seller_category_id', formData.seller_category_id)
       submitData.append('currency', formData.currency)
       if (formData.tax_id) submitData.append('tax_id', formData.tax_id)
@@ -217,28 +354,36 @@ const SellerProductForm = () => {
       if (formData.sale_start_date) submitData.append('sale_start_date', formData.sale_start_date)
       if (formData.sale_end_date) submitData.append('sale_end_date', formData.sale_end_date)
       if (formData.image_file) {
-        submitData.append('image', formData.image_file)
+        submitData.append('image_url', formData.image_file)
       }
-      
+
       formData.gallery_images.forEach((file, index) => {
         if (file instanceof File) {
           submitData.append(`gallery_images[${index}]`, file)
         }
       })
-      
+
       submitData.append('variants', JSON.stringify(formData.variants))
+
+      if (formData.preparation_time) {
+        submitData.append('preparation_time', formData.preparation_time)
+      }
+
+      if (formData.food_options && (formData.food_options.sizes?.length > 0 || formData.food_options.extras?.length > 0 || formData.food_options.removals?.length > 0)) {
+        submitData.append('food_options', JSON.stringify(formData.food_options))
+      }
 
       if (isEditing) {
         submitData.append('_method', 'PUT')
         await axios.post(`/api/seller/products/${id}`, submitData, {
-          headers: { 
+          headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'multipart/form-data'
           }
         })
       } else {
         await axios.post('/api/seller/products', submitData, {
-          headers: { 
+          headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'multipart/form-data'
           }
@@ -250,7 +395,7 @@ const SellerProductForm = () => {
       console.error('Error saving product:', error)
       console.error('Error response:', error.response?.data)
       console.error('Error status:', error.response?.status)
-      
+
       if (error.response?.data?.error) {
         if (typeof error.response.data.error === 'object') {
           setError(Object.values(error.response.data.error).join(', '))
@@ -301,7 +446,7 @@ const SellerProductForm = () => {
             {/* Basic Info */}
             <div className="space-y-4">
               <h2 className="text-lg font-semibold text-gray-800">المعلومات الأساسية</h2>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">اسم المنتج *</label>
                 <input
@@ -315,17 +460,7 @@ const SellerProductForm = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">SKU</label>
-                <input
-                  type="text"
-                  name="sku"
-                  value={formData.sku}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                  placeholder="SKU-001"
-                />
-              </div>
+
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">الوصف القصير *</label>
@@ -356,7 +491,7 @@ const SellerProductForm = () => {
             {/* Pricing */}
             <div className="space-y-4">
               <h2 className="text-lg font-semibold text-gray-800">التسعير</h2>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">السعر العادي *</label>
@@ -425,21 +560,47 @@ const SellerProductForm = () => {
             {/* Categories */}
             <div className="space-y-4">
               <h2 className="text-lg font-semibold text-gray-800">الفئات</h2>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">فئة المنتج *</label>
-                <select
-                  name="category_id"
-                  value={formData.category_id}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                >
-                  <option value="">اختر الفئة</option>
-                  {categories.map(cat => (
-                    <option key={cat.id} value={cat.id}>{cat.name}</option>
-                  ))}
-                </select>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">فئة المنتج الرئيسية *</label>
+                  <select
+                    name="category_id"
+                    value={formData.category_id}
+                    onChange={(e) => setFormData(prev => ({ ...prev, category_id: e.target.value, subcategory_id: '' }))}
+                    required
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  >
+                    <option value="">اختر الفئة الرئيسية</option>
+                    {categories.filter(c => !c.parent_id).map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Subcategory */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">الفئة الفرعية</label>
+                  <select
+                    name="subcategory_id"
+                    value={formData.subcategory_id}
+                    onChange={handleChange}
+                    disabled={!formData.category_id || !categories.some(c => c.parent_id === parseInt(formData.category_id))}
+                    className={`w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent ${(!formData.category_id || !categories.some(c => c.parent_id === parseInt(formData.category_id))) ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                  >
+                    <option value="">
+                      {!formData.category_id ? 'اختر فئة رئيسية أولاً' :
+                        (!categories.some(c => c.parent_id === parseInt(formData.category_id)) ? 'لا يوجد أقسام فرعية' : 'اختر القسم الفرعي')}
+                    </option>
+                    {formData.category_id && categories.filter(c => c.parent_id === parseInt(formData.category_id)).map((subCat) => (
+                      <option key={subCat.id} value={subCat.id}>
+                        {subCat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               {sellerCategories.length > 0 && (
@@ -463,7 +624,7 @@ const SellerProductForm = () => {
             {/* Tax */}
             <div className="space-y-4">
               <h2 className="text-lg font-semibold text-gray-800">الضريبة</h2>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">الضريبة</label>
                 <select
@@ -485,7 +646,7 @@ const SellerProductForm = () => {
             {/* Settings */}
             <div className="space-y-4">
               <h2 className="text-lg font-semibold text-gray-800">الإعدادات</h2>
-              
+
               <div className="space-y-3">
                 <div className="flex items-center">
                   <input
@@ -566,7 +727,7 @@ const SellerProductForm = () => {
                   <span>إضافة متغير</span>
                 </button>
               </div>
-              
+
               {formData.variants.map((variant, index) => (
                 <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-xl">
                   <div>
@@ -621,6 +782,159 @@ const SellerProductForm = () => {
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Food Meal Customization Options */}
+            <div className="bg-gradient-to-br from-orange-50/60 to-amber-50/60 border border-orange-200/80 rounded-2xl p-6 shadow-sm space-y-6">
+              <div className="flex items-center justify-between border-b border-orange-200/60 pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">🍔</span>
+                  <div>
+                    <h2 className="text-lg font-bold text-gray-900">خيارات الوجبة والمطاعم</h2>
+                    <p className="text-xs text-gray-500">تخصيص الأحجام، الإضافات المدفوعة، والمكونات القابلة للاستبعاد</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Prep time */}
+              <div className="max-w-xs">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  وقت تحضير الوجبة (بالدقائق)
+                </label>
+                <input
+                  type="number"
+                  name="preparation_time"
+                  value={formData.preparation_time}
+                  onChange={handleChange}
+                  min="5"
+                  max="180"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm bg-white"
+                  placeholder="مثال: 25"
+                />
+              </div>
+
+              {/* Sizes */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-bold text-gray-800">الأحجام المتوفرة (اختياري)</span>
+                  <button
+                    type="button"
+                    onClick={addFoodSize}
+                    className="text-xs font-semibold text-orange-600 hover:text-orange-700 flex items-center gap-1"
+                  >
+                    <PlusIcon className="w-4 h-4" />
+                    <span>إضافة حجم</span>
+                  </button>
+                </div>
+                {(formData.food_options?.sizes || []).map((size, idx) => (
+                  <div key={idx} className="flex items-center gap-2 bg-white p-3 rounded-xl border border-orange-100 shadow-sm">
+                    <input
+                      type="text"
+                      placeholder="اسم الحجم (مثال: كبير، وسط)"
+                      value={size.name}
+                      onChange={(e) => updateFoodSize(idx, 'name', e.target.value)}
+                      className="flex-1 px-3 py-1.5 border border-gray-200 rounded-lg text-sm"
+                    />
+                    <div className="flex items-center gap-1 w-32">
+                      <input
+                        type="number"
+                        placeholder="فارق السعر"
+                        value={size.price}
+                        onChange={(e) => updateFoodSize(idx, 'price', parseFloat(e.target.value) || 0)}
+                        step="0.5"
+                        className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-sm"
+                      />
+                      <span className="text-xs text-gray-500">{formData.currency}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeFoodSize(idx)}
+                      className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg"
+                    >
+                      <TrashIcon className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Extras */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-bold text-gray-800">إضافات مدفوعة (مثل: جبنة إضافية، صوص خاص)</span>
+                  <button
+                    type="button"
+                    onClick={addFoodExtra}
+                    className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
+                  >
+                    <PlusIcon className="w-4 h-4" />
+                    <span>إضافة خيار إضافي</span>
+                  </button>
+                </div>
+                {(formData.food_options?.extras || []).map((extra, idx) => (
+                  <div key={idx} className="flex items-center gap-2 bg-white p-3 rounded-xl border border-emerald-100 shadow-sm">
+                    <input
+                      type="text"
+                      placeholder="اسم الإضافة (مثال: جبنة شيدر)"
+                      value={extra.name}
+                      onChange={(e) => updateFoodExtra(idx, 'name', e.target.value)}
+                      className="flex-1 px-3 py-1.5 border border-gray-200 rounded-lg text-sm"
+                    />
+                    <div className="flex items-center gap-1 w-32">
+                      <input
+                        type="number"
+                        placeholder="سعر الإضافة"
+                        value={extra.price}
+                        onChange={(e) => updateFoodExtra(idx, 'price', parseFloat(e.target.value) || 0)}
+                        step="0.5"
+                        className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-sm"
+                      />
+                      <span className="text-xs text-gray-500">{formData.currency}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeFoodExtra(idx)}
+                      className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg"
+                    >
+                      <TrashIcon className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Removals */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-bold text-gray-800">مكونات يمكن للعميل طلب استبعادها (مثل: بصل، مخلل، مايونيز)</span>
+                  <button
+                    type="button"
+                    onClick={addFoodRemoval}
+                    className="text-xs font-semibold text-rose-600 hover:text-rose-700 flex items-center gap-1"
+                  >
+                    <PlusIcon className="w-4 h-4" />
+                    <span>إضافة مكون للاستبعاد</span>
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {(formData.food_options?.removals || []).map((rem, idx) => (
+                    <div key={idx} className="flex items-center gap-1 bg-white px-3 py-1.5 rounded-lg border border-rose-200 shadow-sm">
+                      <input
+                        type="text"
+                        placeholder="اسم المكون (مثل: بصل)"
+                        value={rem}
+                        onChange={(e) => updateFoodRemoval(idx, e.target.value)}
+                        className="w-28 text-sm border-0 focus:ring-0 p-0"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeFoodRemoval(idx)}
+                        className="text-rose-500 hover:text-rose-700"
+                      >
+                        <XMarkIcon className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -681,7 +995,7 @@ const SellerProductForm = () => {
                   />
                 </label>
               </div>
-              
+
               {galleryPreviews.length > 0 && (
                 <div className="grid grid-cols-3 gap-3">
                   {galleryPreviews.map((preview, index) => (

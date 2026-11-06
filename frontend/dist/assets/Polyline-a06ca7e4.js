@@ -1,0 +1,1 @@
+import{e as l,l as s,d as a,f as r}from"./leaflet-564dc183.js";const p=l(function({positions:t,...e},n){const o=new s.Polyline(t,e);return a(o,r(n,{overlayContainer:o}))},function(t,e,n){e.positions!==n.positions&&t.setLatLngs(e.positions)});export{p as P};

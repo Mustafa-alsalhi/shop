@@ -34,10 +34,14 @@ class Cart extends Model
         'variant_name',
         'variant_value',
         'selected_image_index',
+        'selected_options',
+        'special_instructions',
+        'seller_type',
     ];
 
     protected $casts = [
         'quantity' => 'integer',
+        'selected_options' => 'array',
     ];
 
     public function user()
