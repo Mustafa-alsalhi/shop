@@ -60,6 +60,13 @@ class Order extends Model
         return $this->belongsTo(User::class, 'driver_id');
     }
 
+    public function isRestaurantOrder(): bool
+    {
+        return $this->items()->whereHas('product.seller', function ($q) {
+            $q->where('type', 'restaurant');
+        })->exists();
+    }
+
     protected static function booted()
     {
         static::updated(function ($order) {
